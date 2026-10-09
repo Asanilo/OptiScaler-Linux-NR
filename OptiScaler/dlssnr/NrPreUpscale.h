@@ -2,6 +2,25 @@
 
 namespace DlssNr
 {
+// Temporary A/B placement, inspired by Sky's live comparison. Never written to the user's ini.
+enum class PlacementComparison : int
+{
+    Saved = 0,
+    Off,
+    BeforeSr,
+    AfterSr
+};
+
+constexpr bool ComparisonEnabled(bool enabled, PlacementComparison mode)
+{
+    return enabled && mode != PlacementComparison::Off;
+}
+
+constexpr bool ComparisonBeforeSr(bool savedPreUpscale, PlacementComparison mode)
+{
+    return mode == PlacementComparison::BeforeSr || (mode == PlacementComparison::Saved && savedPreUpscale);
+}
+
 // Placement is decided before NR creates its feature. A creation/skip frame must still stay on the
 // pre-upscale path, otherwise the post pass rebuilds the same feature at display resolution.
 constexpr bool UsePreUpscale(bool enabled, bool preUpscale, bool dualFeature, bool superSampling)

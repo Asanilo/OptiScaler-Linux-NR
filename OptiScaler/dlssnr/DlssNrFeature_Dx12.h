@@ -8,6 +8,7 @@
 
 #include <shaders/dlssnr/DlssNr_Common.h>
 #include <nvsdk_ngx.h>
+#include "NrPreUpscale.h"
 
 // DLSS 5 Neural Rendering, run over the upscaler's output.
 //
@@ -76,6 +77,12 @@ void EvaluateBeforeUpscale(ID3D12GraphicsCommandList* cmdList, NVSDK_NGX_Paramet
 
 // The surface EvaluateBeforeUpscale wrote, or null when this frame's pass did not run.
 ID3D12Resource* PreUpscaleResult();
+
+// D3D12 direct-placement comparison. DualFeature and native Vulkan keep their saved arrangement.
+PlacementComparison GetPlacementComparison();
+void SetPlacementComparison(PlacementComparison mode);
+bool EnabledAtD3D12Seam();
+bool BeforeSrAtD3D12Seam();
 
 // The pass as one stage of an upscaler's own pipeline, on two frames the caller already holds.
 //

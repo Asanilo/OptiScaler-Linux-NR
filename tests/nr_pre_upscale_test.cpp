@@ -117,6 +117,16 @@ void ParameterRestoration()
 
 void PlacementAcrossCreationFrames()
 {
+    using Mode = DlssNr::PlacementComparison;
+    for (const auto mode : { Mode::Saved, Mode::Off, Mode::BeforeSr, Mode::AfterSr })
+        assert(!DlssNr::ComparisonEnabled(false, mode)); // master toggle always wins
+    assert(!DlssNr::ComparisonEnabled(true, Mode::Off));
+    assert(DlssNr::ComparisonEnabled(true, Mode::BeforeSr));
+    assert(DlssNr::ComparisonEnabled(true, Mode::AfterSr));
+    assert(DlssNr::ComparisonBeforeSr(true, Mode::Saved));
+    assert(!DlssNr::ComparisonBeforeSr(false, Mode::Saved));
+    assert(DlssNr::ComparisonBeforeSr(false, Mode::BeforeSr));
+    assert(!DlssNr::ComparisonBeforeSr(true, Mode::AfterSr));
     assert(DlssNr::UsePreUpscale(true, true, false, true));
     assert(!DlssNr::UsePreUpscale(false, true, false, true));
     assert(!DlssNr::UsePreUpscale(true, false, false, true));

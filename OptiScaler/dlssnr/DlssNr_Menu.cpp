@@ -141,11 +141,27 @@ void RenderMenu(Config* config, float menuResScale)
         // that is demonstrably running.
         const bool vulkan = DlssNr::IsRunningVk();
 
+        const bool directDx12 = State::Instance().swapchainApi == API::DX12 &&
+                                !config->DlssNrDualFeature.value_or_default();
+        ImGui::BeginDisabled(!directDx12 || !enabled);
+        int comparison = static_cast<int>(DlssNr::GetPlacementComparison());
+        const char* comparisonNames[] = { "Saved placement", "NR off", "NR -> SR", "SR -> NR" };
+        if (ImGui::Combo("Live placement comparison", &comparison, comparisonNames, IM_ARRAYSIZE(comparisonNames)))
+            DlssNr::SetPlacementComparison(static_cast<DlssNr::PlacementComparison>(comparison));
+        ImGui::EndDisabled();
+        HelpMarker("Temporarily compares direct D3D12 placements without changing saved settings."
+                   "\nKeep model resolution, passes and the game's SR quality the same."
+                   "\nAfter switching, wait for the new feature and history to settle before measuring."
+                   "\nOnly for D3D12 SR with DualFeature off. Saved placement restores the ini choice."
+                   "\nRR remains after the upscaler; it does not use the direct pre-SR seam.");
+
+        const bool comparisonOff = directDx12 && !DlssNr::EnabledAtD3D12Seam();
+
         // Turning the pass off does not release the model, so the feature handle stays alive and
         // IsRunning keeps answering yes. Reporting a cost from that was wrong in the way that matters
         // most: the toggle is how anyone A/Bs this, so the one moment the number is read is the one
         // moment it describes the frame before last.
-        if (!enabled)
+        if (!enabled || comparisonOff)
         {
             ImGui::TextDisabled("Off. The model stays loaded, so turning this back on is immediate.");
         }

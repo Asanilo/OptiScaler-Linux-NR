@@ -1154,7 +1154,7 @@ NVSDK_NGX_API NVSDK_NGX_Result NVSDK_NGX_D3D12_EvaluateFeature(ID3D12GraphicsCom
     // Direct NR -> SR, as in Sky's PreSr path. Keep y4m's pass and Proton state envelope;
     // only the SR Color input is substituted. RR and FG do not use this experimental seam.
     const bool preUpscaleRequested = DlssNr::UsePreUpscale(
-        cfg.DlssNrEnabled.value_or_default(), cfg.DlssNrPreUpscale.value_or_default(),
+        DlssNr::EnabledAtD3D12Seam(), DlssNr::BeforeSrAtD3D12Seam(),
         cfg.DlssNrDualFeature.value_or_default(), feature == NVSDK_NGX_Feature_SuperSampling);
 
     using ColorSubstitution =

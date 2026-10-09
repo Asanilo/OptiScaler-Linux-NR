@@ -20,6 +20,7 @@
 #include <gpu_time/GpuTime_Dx12.h>
 
 #include <mutex>
+#include <atomic>
 #include <algorithm>
 #include <array>
 #include <optional>
@@ -2969,6 +2970,36 @@ void DlssNr_Dx12::Dispatch(ID3D12GraphicsCommandList* cmdList, ID3D12Resource* c
 
 namespace DlssNr
 {
+static std::atomic<PlacementComparison> g_placementComparison { PlacementComparison::Saved };
+
+PlacementComparison GetPlacementComparison() { return g_placementComparison.load(); }
+
+void SetPlacementComparison(PlacementComparison mode)
+{
+    if (mode < PlacementComparison::Saved || mode > PlacementComparison::AfterSr)
+        return;
+
+    if (g_placementComparison.exchange(mode) != mode)
+    {
+        static const char* names[] = { "saved", "NR off", "NR -> SR", "SR -> NR" };
+        LOG_INFO("DLSS-NR D3D12 comparison: {} (saved settings unchanged)", names[static_cast<int>(mode)]);
+    }
+}
+
+bool EnabledAtD3D12Seam()
+{
+    const Config& cfg = *Config::Instance();
+    const auto mode = cfg.DlssNrDualFeature.value_or_default() ? PlacementComparison::Saved : GetPlacementComparison();
+    return ComparisonEnabled(cfg.DlssNrEnabled.value_or_default(), mode);
+}
+
+bool BeforeSrAtD3D12Seam()
+{
+    const Config& cfg = *Config::Instance();
+    const auto mode = cfg.DlssNrDualFeature.value_or_default() ? PlacementComparison::Saved : GetPlacementComparison();
+    return ComparisonBeforeSr(cfg.DlssNrPreUpscale.value_or_default(), mode);
+}
+
 void RetryAfterFailure()
 {
     g_nr.failed = false;
@@ -2992,7 +3023,7 @@ void EvaluateAtSeam(ID3D12GraphicsCommandList* cmdList, NVSDK_NGX_Parameter* par
                     bool preUpscale, ID3D12Resource* sourceIn = nullptr, ID3D12Resource* destIn = nullptr,
                     std::optional<D3D12_RESOURCE_STATES> destArrival = std::nullopt)
 {
-    if (!Config::Instance()->DlssNrEnabled.value_or_default())
+    if (!EnabledAtD3D12Seam())
     {
         ReportSkipOnce("it is switched off");
         return;
