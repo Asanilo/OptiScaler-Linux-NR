@@ -100,7 +100,9 @@ MSVC Release 构建 `26aea636` 已通过：
 [构建记录](https://github.com/Asanilo/OptiScaler-Linux-NR/actions/runs/37940214870)。
 已在用户指定的 DS2 目录安装测试代理、forwarder、模型和 ini，启动 GE-Proton11-7。
 初始 NR 关闭，PreUpscale 选中；本机日志确认加载代理、DLSS 文件和 RTX 4060L。
-随后日志确认 pre-NR 和 post-NR 实际 evaluate；用户于 2026-10-09 确认两种顺序画面均正常。
+随后日志确认 pre-NR 和 post-NR 实际 evaluate。用户最初报告两种顺序正常，
+但继续观察后确认 SR→NR 保持模式仍持续闪烁，而 NR→SR 未观察到闪烁。
+因此 SR→NR 画面验收失败；首次反馈只代表当时的初步观察，不代表最终稳定性。
 用户键盘没有 Insert，因此测试安装将菜单键改成 F10 (`0x79`)，并启用 Info 文件日志。
 配置读取发生在启动时，换键后须正常退出并重新启动。
 
@@ -116,6 +118,36 @@ SR 前运行 NR 的处理像素更少，本次 NR pass 耗时中位数约低 54%
 不能将此比例当作整帧性能提升，也未测量 1% low 或完成长时间稳定性验收。
 本机原始日志快照、模式切换记录与测量 JSON 保存在工作区 `testlogs/ds2-f10`，不上传游戏日志。
 日常建议从直接 NR→SR、Passes=1 开始。
+
+## 验收状态与反证检查
+
+第一阶段的代码移植已完成，完整功能整合和 Linux 稳定性验收未完成。
+本机唯一游戏实测为 DS2 / RTX 4060 Laptop / NVIDIA 615.71.09 / GE-Proton11-7 / Wayland；
+不能推广为所有 Linux、Proton、游戏或 GPU 已兼容。
+
+| 检查 | 当前结论 | 证据边界 |
+| --- | --- | --- |
+| MSVC Release | 通过 | 编译和链接，不证明运行正确 |
+| typed/untyped 参数恢复 | 通过 | 生产 helper 与独立类型槽 mock，不是实际 NGX 实现 |
+| 创建/跳过帧顺序 | helper 单测通过 | 测试中的五帧循环模拟调用，未执行真实 NVNGX hook |
+| DS2 NR→SR | 实际执行；本次未报告闪烁 | 未测长时间、动态分辨率和其他游戏 |
+| DS2 SR→NR | 实际执行；画面验收失败 | 用户报告保持模式仍持续闪烁 |
+| 闪烁来源 | 未归因 | 尚未完成未修改基准同条件对照 |
+| GPU 对象回收/descriptor 复用 | 未验收 | 基准仍按 evaluate 次数回收，缺少完整 fence 证明 |
+| 缓存/重投影/Anti-flicker | 未移植 | Sky 有对应功能，不能把存在控件当成修复已成立 |
+
+对 portable helper 做了三个负向控制：临时删除恢复、错误地改用 untyped setter、
+绕过 master toggle，现有测试均失败；原始实现通过。修改仅发生在临时目录，
+没有将错误实现写入生产仓库。这说明单测能够发现这些指定缺陷，不能证明 GPU 同步或闪烁已解决。
+
+未修改基准 `7b7220bb` 已启动独立构建：
+[基准构建记录](https://github.com/Asanilo/OptiScaler-Linux-NR/actions/runs/37946226862)。
+归因对照须使用同一 SF-v2 模型、驱动、Proton、存档、镜头、SR 质量及曝光配置，
+Passes=1、WorkingScale=1、Detail strength=1、FG/动态分辨率关闭。
+每种模式使用新进程或明确记录历史预热，不能把之前 NR→SR 留下的 SR 历史当成无 NR 基线。
+分别记录持续静止、缓慢运动和切换阶段；日志没有错误不等于画面没有闪烁。
+只有基准同条件复现，才能将其记为上游既有问题；基准不复现则优先排查移植回归。
+即使基准也闪烁，仍需修复或明确限定支持范围，不能将 SR→NR 标为通过。
 
 安装清单和原文件备份位于工作区 `backups/ds2-26aea636`。
 回滚工具默认只预览，必须关闭游戏后才使用 `--apply`；遇到安装后变化的文件会保留文件并停止：

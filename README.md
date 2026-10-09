@@ -6,8 +6,9 @@ direct NR → SR parameter handling and temporary NR off / NR → SR / SR → NR
 
 MSVC Release builds and parameter regression tests pass. Initial testing on an
 RTX 4060 Laptop, NVIDIA 615.71.09 and GE-Proton11-7 confirms actual pre/post-SR NR
-execution in Death Stranding 2, with both placements visually confirmed by the user.
-Full performance and long-session stability validation is ongoing.
+execution in Death Stranding 2. Later observation reports persistent flicker after SR;
+the user reports no flicker before SR in this session. Post-SR visual acceptance fails.
+Full performance, baseline regression and long-session stability validation is ongoing.
 The NR runtime is supplied separately and is not included in this repository.
 
 See [Linux integration and testing notes](docs/linux-nr.md) for scope, setup,
