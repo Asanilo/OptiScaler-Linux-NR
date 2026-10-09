@@ -1,6 +1,4 @@
-#ifndef NR_LIFETIME_STANDALONE
 #include "pch.h"
-#endif
 #include "NrGpuLifetime.h"
 
 #ifndef NR_LIFETIME_STANDALONE

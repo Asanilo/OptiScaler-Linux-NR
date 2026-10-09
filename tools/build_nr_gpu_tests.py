@@ -59,7 +59,8 @@ def main():
         ("nr_lifetime_gpu.exe", [gpu], []),
         ("nr_lifetime_runtime_gpu.exe", [gpu, REPO / "tests/nr_lifetime_queue_adapter.cpp",
           REPO / "OptiScaler/dlssnr/NrGpuLifetime.cpp"],
-         ["-DNR_LIFETIME_STANDALONE", "-I" + str(REPO / "OptiScaler/include")] + third_party),
+         ["-DNR_LIFETIME_STANDALONE", "-I" + str(REPO / "tests/standalone"),
+          "-I" + str(REPO / "OptiScaler/include")] + third_party),
         ("nr_stabilizer_gpu.exe", [REPO / "tests/nr_stabilizer_gpu.cpp"], ["-ld3dcompiler_47"]),
     ):
         target = output / name
