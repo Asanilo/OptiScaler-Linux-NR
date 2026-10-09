@@ -250,6 +250,7 @@ struct NrState
     unsigned int preWidth = 0;
     unsigned int preHeight = 0;
     DXGI_FORMAT preFormat = DXGI_FORMAT_UNKNOWN;
+    D3D12_RESOURCE_STATES preState = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
 
     // Whether the last Dispatch reached its composite. Cleared on entry and set after the resolve, so
     // the dozen paths that give up in between are all covered by it. A caller substituting the edited
@@ -1264,29 +1265,50 @@ void Barrier(ID3D12GraphicsCommandList* cmdList, ID3D12Resource* res, D3D12_RESO
 // The buffer the game hands the upscaler is not necessarily a UAV, so the edit cannot be written back
 // over it. Rebuilt when the game changes resolution or format, which a dynamic resolution title does
 // while running.
+DXGI_FORMAT TypedGuideFormat(DXGI_FORMAT f);
+
 ID3D12Resource* EnsurePreUpscaleSurface(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList,
                                         ID3D12Resource* colour, D3D12_RESOURCE_STATES idle)
 {
     const D3D12_RESOURCE_DESC desc = colour->GetDesc();
     const auto width = (unsigned int) desc.Width;
     const auto height = desc.Height;
+    const DXGI_FORMAT format = TypedGuideFormat(desc.Format);
 
-    if (g_nr.preOut != nullptr && g_nr.preWidth == width && g_nr.preHeight == height && g_nr.preFormat == desc.Format)
+    // Match Sky's typed scratch surface without importing its cache/copy pipeline. NR already reads
+    // the original Color and composes to a separate destination in this fork.
+    if (desc.Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE2D || desc.SampleDesc.Count != 1 ||
+        desc.DepthOrArraySize != 1 || width == 0 || height == 0)
+        return nullptr;
+
+    if (g_nr.preOut != nullptr && g_nr.preWidth == width && g_nr.preHeight == height && g_nr.preFormat == format)
+    {
+        // ColorResourceBarrier can change without a resize; our resource still has its old state.
+        Barrier(cmdList, g_nr.preOut, g_nr.preState, idle);
+        g_nr.preState = idle;
         return g_nr.preOut;
+    }
+
+    D3D12_FEATURE_DATA_FORMAT_SUPPORT support { format };
+    if (FAILED(device->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &support, sizeof(support))) ||
+        (support.Support2 & D3D12_FORMAT_SUPPORT2_UAV_TYPED_STORE) == 0)
+        return nullptr;
 
     ParkNrResource(g_nr.preOut);
 
-    g_nr.preOut = CreateScratch(device, desc.Format, width, height);
+    g_nr.preOut = CreateScratch(device, format, width, height);
     g_nr.preWidth = width;
     g_nr.preHeight = height;
-    g_nr.preFormat = desc.Format;
+    g_nr.preFormat = format;
+    g_nr.preState = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
 
     if (g_nr.preOut != nullptr)
     {
         // CreateScratch builds every surface in UNORDERED_ACCESS. This one stands in for the game's
         // colour buffer, so it rests where the pass expects to find it on entry.
         Barrier(cmdList, g_nr.preOut, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, idle);
-        LOG_INFO("DLSS-NR pre-upscale surface {}x{} format {}", width, height, (int) desc.Format);
+        g_nr.preState = idle;
+        LOG_INFO("DLSS-NR pre-upscale surface {}x{} format {}", width, height, (int) format);
     }
 
     return g_nr.preOut;
@@ -1315,6 +1337,8 @@ DXGI_FORMAT TypedGuideFormat(DXGI_FORMAT f)
         return DXGI_FORMAT_R8G8B8A8_UNORM;
     case DXGI_FORMAT_R16G16B16A16_TYPELESS:
         return DXGI_FORMAT_R16G16B16A16_FLOAT;
+    case DXGI_FORMAT_R32G32B32A32_TYPELESS:
+        return DXGI_FORMAT_R32G32B32A32_FLOAT;
     default:
         return f;
     }
@@ -2840,11 +2864,12 @@ void DlssNr_Dx12::Dispatch(ID3D12GraphicsCommandList* cmdList, ID3D12Resource* c
         }
 
         setWork(answer, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
-        DispatchPass(cmdList, resolveParams, modelInput, work[answer], g_nr.hdrCopy, motionIn,
-                            nullptr, target, nullptr);
+        const bool resolved = DispatchPass(cmdList, resolveParams, modelInput, work[answer], g_nr.hdrCopy, motionIn,
+                                          nullptr, target, nullptr);
         setWork(answer, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
-        g_nr.wroteTarget = true;
+        // A failed resolve must not hand an unwritten scratch texture to SR.
+        g_nr.wroteTarget = resolved;
 
         // On-demand capture works in this path too: the staging copy still holds the frame as the
         // upscaler produced it, and the edited frame is the output itself. The write happens a few

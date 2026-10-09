@@ -6,6 +6,7 @@
 #include "NVNGX_Parameter.h"
 #include "proxies/NVNGX_Proxy.h"
 #include "dlssnr/DlssNr.h"
+#include "dlssnr/NrPreUpscale.h"
 #include "dlssnr/DlssNr_ExposureScan.h"
 #include <upscalers/dlss/DLSSFeature_Dx12.h>
 #include <shaders/output_scaling/OS_Dx12.h>
@@ -1150,47 +1151,21 @@ NVSDK_NGX_API NVSDK_NGX_Result NVSDK_NGX_D3D12_EvaluateFeature(ID3D12GraphicsCom
         }
     }
 
-    // Neural Rendering ahead of the upscaler rather than after it.
-    //
-    // The model runs on the game's colour buffer at render resolution and writes a surface of ours,
-    // which stands in for colour across the upscale and is put back straight after. Restoring matters:
-    // the parameter block is the game's and it reuses it.
-    struct PreUpscaleNr
+    // Direct NR -> SR, as in Sky's PreSr path. Keep y4m's pass and Proton state envelope;
+    // only the SR Color input is substituted. RR and FG do not use this experimental seam.
+    const bool preUpscaleRequested = DlssNr::UsePreUpscale(
+        cfg.DlssNrEnabled.value_or_default(), cfg.DlssNrPreUpscale.value_or_default(),
+        cfg.DlssNrDualFeature.value_or_default(), feature == NVSDK_NGX_Feature_SuperSampling);
+
+    using ColorSubstitution =
+        DlssNr::ScopedColorSubstitution<ID3D12Resource, NVSDK_NGX_Parameter, NVSDK_NGX_Result_Success>;
+    auto preparePreUpscale = [&](ColorSubstitution& color)
     {
-        NVSDK_NGX_Parameter* params = nullptr;
-        ID3D12Resource* original = nullptr;
-        bool substituted = false;
+        if (!preUpscaleRequested || color.Original() == nullptr)
+            return;
 
-        void run(ID3D12GraphicsCommandList* cmdList, NVSDK_NGX_Parameter* p, NVSDK_NGX_Feature f)
-        {
-            // The dual-feature arrangement runs the model inside the upscaler's own pipeline instead.
-            // Both would be the same model twice on the same frame.
-            if (!Config::Instance()->DlssNrPreUpscale.value_or_default() ||
-                Config::Instance()->DlssNrDualFeature.value_or_default() ||
-                !Config::Instance()->DlssNrEnabled.value_or_default() || f == NVSDK_NGX_Feature_FrameGeneration ||
-                cmdList == nullptr || p == nullptr)
-                return;
-
-            params = p;
-
-            if (p->Get(NVSDK_NGX_Parameter_Color, (void**) &original) != NVSDK_NGX_Result_Success ||
-                original == nullptr)
-                return;
-
-            DlssNr::EvaluateBeforeUpscale(cmdList, p);
-
-            if (auto* edited = DlssNr::PreUpscaleResult(); edited != nullptr)
-            {
-                p->Set(NVSDK_NGX_Parameter_Color, (void*) edited);
-                substituted = true;
-            }
-        }
-
-        ~PreUpscaleNr()
-        {
-            if (substituted)
-                params->Set(NVSDK_NGX_Parameter_Color, (void*) original);
-        }
+        DlssNr::EvaluateBeforeUpscale(InCmdList, InParameters);
+        color.Replace(DlssNr::PreUpscaleResult());
     };
 
     // Native DLSS passthrough
@@ -1198,13 +1173,14 @@ NVSDK_NGX_API NVSDK_NGX_Result NVSDK_NGX_D3D12_EvaluateFeature(ID3D12GraphicsCom
     {
         if (cfg.DLSSEnabled.value_or_default() && NVNGXProxy::D3D12_EvaluateFeature() != nullptr)
         {
-            PreUpscaleNr preNr;
-            preNr.run(InCmdList, InParameters, feature);
-
             LOG_DEBUG("Passthrough to native DLSS EvaluateFeature for handle {}", handleId);
 
-            NVSDK_NGX_Result result =
-                NVNGXProxy::D3D12_EvaluateFeature()(InCmdList, InFeatureHandle, InParameters, InCallback);
+            NVSDK_NGX_Result result;
+            {
+                ColorSubstitution color(preUpscaleRequested ? InParameters : nullptr, NVSDK_NGX_Parameter_Color);
+                preparePreUpscale(color);
+                result = NVNGXProxy::D3D12_EvaluateFeature()(InCmdList, InFeatureHandle, InParameters, InCallback);
+            } // Restore the game's Color even when the native upscaler failed.
             LOG_DEBUG("Native DLSS EvaluateFeature result: 0x{:X}", (uint32_t) result);
 
             // Neural Rendering runs over what the upscaler just wrote, on the same list, so frame
@@ -1213,10 +1189,10 @@ NVSDK_NGX_API NVSDK_NGX_Result NVSDK_NGX_D3D12_EvaluateFeature(ID3D12GraphicsCom
             // motion vectors too, and its handle can reach here because the branch above does not
             // return, so filtering on the parameter block alone would run the model twice a frame.
             //
-            // Skipped when the pass already ran ahead of the upscaler: the two are the same model and
-            // the same per-frame cost, placed at one seam or the other.
+            // Stay pre-upscale even on create/skip/failure frames. Running post-NR on those frames
+            // would switch the shared NR feature back to display resolution.
             if (result == NVSDK_NGX_Result_Success && feature != NVSDK_NGX_Feature_FrameGeneration &&
-                !preNr.substituted)
+                !preUpscaleRequested)
                 DlssNr::EvaluateAfterUpscale(InCmdList, InParameters);
 
             return result;
@@ -1240,10 +1216,12 @@ NVSDK_NGX_API NVSDK_NGX_Result NVSDK_NGX_D3D12_EvaluateFeature(ID3D12GraphicsCom
         InParameters->Set("DLSSG.CameraFar", lastDlssgCameraFar.value());
 
     // OptiScaler internal handling
-    PreUpscaleNr preNr;
-    preNr.run(InCmdList, InParameters, feature);
-
-    const NVSDK_NGX_Result optiResult = TryEvaluateOptiFeature(InCmdList, InFeatureHandle, InParameters, InCallback);
+    NVSDK_NGX_Result optiResult;
+    {
+        ColorSubstitution color(preUpscaleRequested ? InParameters : nullptr, NVSDK_NGX_Parameter_Color);
+        preparePreUpscale(color);
+        optiResult = TryEvaluateOptiFeature(InCmdList, InFeatureHandle, InParameters, InCallback);
+    } // Restore before any post-upscale processing, on success and failure alike.
 
     // Same pass, for OptiScaler's own upscalers rather than native DLSS.
     //
@@ -1253,7 +1231,7 @@ NVSDK_NGX_API NVSDK_NGX_Result NVSDK_NGX_D3D12_EvaluateFeature(ID3D12GraphicsCom
     //
     // EvaluateAfterUpscale declines by itself on a frame the pipeline stage already handled, so every
     // call site is covered rather than this one.
-    if (optiResult == NVSDK_NGX_Result_Success && feature != NVSDK_NGX_Feature_FrameGeneration && !preNr.substituted)
+    if (optiResult == NVSDK_NGX_Result_Success && feature != NVSDK_NGX_Feature_FrameGeneration && !preUpscaleRequested)
         DlssNr::EvaluateAfterUpscale(InCmdList, InParameters);
 
     return optiResult;

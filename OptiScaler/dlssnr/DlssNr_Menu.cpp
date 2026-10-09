@@ -478,6 +478,8 @@ void RenderMenu(Config* config, float menuResScale)
                        "\n\nUnlike Model resolution this does not soften what the model returns: the model"
                        "\nruns 1:1 on a smaller frame rather than small on a large one, and the upscaler"
                        "\nenlarges its work along with everything else."
+                       "\n\nDirect placement supports D3D12 SuperSampling. NR creation or skipped frames"
+                       "\nkeep the game's original colour; no after-upscaler NR runs on those frames."
                        "\n\nUntested territory. Colour at this point is jittered by a different subpixel"
                        "\noffset every frame and the model is given no way to know that, so its history"
                        "\nmay reproject against an offset it cannot see. Look for shimmer and swimming on"
@@ -1254,4 +1256,3 @@ void RenderMenu(Config* config, float menuResScale)
 }
 
 } // namespace DlssNr
-

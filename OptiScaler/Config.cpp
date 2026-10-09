@@ -336,6 +336,8 @@ bool Config::Reload(std::filesystem::path iniPath)
             DlssNrTagScale.set_from_config(readFloat("DlssNr", "TagScale"));
             DlssNrWorkingScale.set_from_config(readFloat("DlssNr", "WorkingScale"));
             DlssNrPreUpscale.set_from_config(readBool("DlssNr", "PreUpscale"));
+            // Sky's spelling is accepted when the native y4m key is absent/auto.
+            DlssNrPreUpscale.set_from_config(readBool("DlssNr", "PreSr"));
             DlssNrDualFeature.set_from_config(readBool("DlssNr", "DualFeature"));
             DlssNrDualEnlarger.set_from_config(readString("DlssNr", "DualEnlarger", true).transform(CodeToUpscalerFfx));
             DlssNrProxyProbe.set_from_config(readBool("DlssNr", "ProxyProbe"));
