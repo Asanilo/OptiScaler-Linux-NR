@@ -5,6 +5,7 @@
 #include <map>
 
 #include <dlssnr/DlssNr.h>
+#include <dlssnr/GpuTimingWindow.h>
 
 #include <dlssnr/DlssNr_Capture.h>
 #include <dlssnr/DlssNr_Proxy.h>
@@ -407,6 +408,8 @@ struct NrContext
     std::unique_ptr<DlssNrEditCache_Dx12> editCache;
     std::unique_ptr<GpuTime_Dx12> gpuTime, ngxTime, stabilizerTime, cacheTime;
     std::optional<double> lastNgxTime, lastGpuTime, lastStabilizerTime, lastCacheTime;
+    DlssNr::GpuTimingWindow gpuTiming;
+    std::pair<uint32_t, bool> timingCadence { 0, false };
     std::vector<float> cacheRenderKey;
     std::string cachePassOverrides;
     bool cacheWasWanted = false, cacheCachedLastFrame = false, cacheJitterValid = false;
@@ -879,8 +882,18 @@ void ForgetCalibration()
 
 // Every feature in the chain owns a history, and a cut invalidates all of them at once. Only the
 // creation of a single extra feature resets one index on its own.
+void ResetGpuTiming()
+{
+    Context().gpuTiming.Reset();
+    Context().lastGpuTime.reset();
+    Context().lastNgxTime.reset();
+    Context().lastStabilizerTime.reset();
+    Context().lastCacheTime.reset();
+}
+
 void ResetAllHistories()
 {
+    ResetGpuTiming();
     if (Context().stabilizer)
         Context().stabilizer->Invalidate();
     if (Context().editCache)
@@ -2629,7 +2642,7 @@ void DlssNr_Dx12::Dispatch(ID3D12GraphicsCommandList* cmdList, ID3D12Resource* c
         if (motionIn && motionIn == Context().nr.motionClone)
             Barrier(cmdList, motionIn, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_COPY_DEST);
         if (Context().gpuTime)
-            Context().gpuTime->End(cmdList);
+            Context().gpuTime->End(cmdList, Context().frames);
         Barrier(cmdList, target, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, outputArrival);
         device->Release();
         return;
@@ -2671,7 +2684,15 @@ void DlssNr_Dx12::Dispatch(ID3D12GraphicsCommandList* cmdList, ID3D12Resource* c
 
         if (Context().gpuTime != nullptr)
         {
-            Context().gpuTime->End(cmdList);
+            const auto cadence =
+                std::make_pair(cfg.DlssNrCacheInterval.value_or_default(), cfg.DlssNrCacheAdaptive.value_or_default());
+            if (cadence != Context().timingCadence)
+            {
+                ResetGpuTiming();
+                Context().timingCadence = cadence;
+            }
+            Context().gpuTiming.Record(Context().frames, Context().cacheCachedLastFrame);
+            Context().gpuTime->End(cmdList, Context().frames);
 
             // This path records into the game's own list, so there is no queue of ours to read from.
             // A caller that knows which queue the list goes to says so; otherwise the one the upscaler was
@@ -2683,14 +2704,14 @@ void DlssNr_Dx12::Dispatch(ID3D12GraphicsCommandList* cmdList, ID3D12Resource* c
 
             if (queue != nullptr)
             {
-                if (auto ms = Context().gpuTime->ReadGpuTime(queue); ms.has_value())
-                    Context().lastGpuTime = ms;
-
+                for (const auto& sample : Context().gpuTime->ReadCompletedGpuTimes())
+                    Context().gpuTiming.AddTotal(sample.tag, sample.ms);
                 if (Context().ngxTime != nullptr)
-                {
-                    if (auto ngx = Context().ngxTime->ReadGpuTime(queue); ngx.has_value())
-                        Context().lastNgxTime = ngx;
-                }
+                    for (const auto& sample : Context().ngxTime->ReadCompletedGpuTimes())
+                        Context().gpuTiming.AddModel(sample.tag, sample.ms);
+                const auto timing = Context().gpuTiming.Get();
+                Context().lastGpuTime = timing.mean;
+                Context().lastNgxTime = timing.modelMean;
                 if (!cacheActive && cfg.DlssNrStabilizationEnabled.value_or_default() && Context().stabilizerTime)
                 {
                     if (auto ms = Context().stabilizerTime->ReadGpuTime(queue); ms.has_value())
@@ -2712,18 +2733,22 @@ void DlssNr_Dx12::Dispatch(ID3D12GraphicsCommandList* cmdList, ID3D12Resource* c
                     if (Context().lastCacheTime)
                         LOG_INFO("DLSS-NR Sky cache composition cost: {:.3f} ms (last completed GPU sample; not FPS)",
                                  *Context().lastCacheTime);
+                    if (timing.mean)
+                        LOG_INFO("DLSS-NR GPU sampled mean: {:.3f} ms, refresh {:.3f} ms ({} samples), cached {:.3f} "
+                                 "ms ({} samples), coverage {}/{} recent input frames; not input latency or FPS",
+                                 *timing.mean, timing.refreshMean.value_or(0), timing.refreshSamples,
+                                 timing.cachedMean.value_or(0), timing.cachedSamples, timing.samples, timing.frames);
                 }
 
-                // The split, once every few hundred frames. What is worth reading is not the total but the
-                // remainder: the model's cost is NVIDIA's to set, and everything else is ours.
-                if (!cacheActive && Context().lastGpuTime.has_value() && Context().lastNgxTime.has_value() &&
-                    Context().frames - Context().lastSplitLog > 600)
+                // Pair total/model queries by the same input frame. Never subtract
+                // a model refresh from an older cached-frame total after a toggle.
+                if (!cacheActive && timing.pairedSamples && Context().frames - Context().lastSplitLog > 600)
                 {
                     Context().lastSplitLog = Context().frames;
-                    const double total = Context().lastGpuTime.value();
-                    const double ngx = Context().lastNgxTime.value();
-                    LOG_INFO("DLSS-NR cost: {:.2f} ms total = {:.2f} ms model + {:.2f} ms ours ({:.0f}% ours)", total,
-                             ngx, total - ngx, total > 0.0 ? 100.0 * (total - ngx) / total : 0.0);
+                    LOG_INFO("DLSS-NR matched GPU mean: {:.2f} ms total = {:.2f} ms model + {:.2f} ms ours "
+                             "({} paired samples; coverage {}/{} recent input frames)",
+                             *timing.pairedTotalMean, *timing.modelMean, *timing.otherMean, timing.pairedSamples,
+                             timing.samples, timing.frames);
                     if (Context().lastStabilizerTime)
                         LOG_INFO("DLSS-NR stabilization cost: {:.3f} ms (last completed GPU sample; not frame time)",
                                  *Context().lastStabilizerTime);
@@ -2838,6 +2863,7 @@ void DlssNr_Dx12::Dispatch(ID3D12GraphicsCommandList* cmdList, ID3D12Resource* c
         if (renderKey != Context().cacheRenderKey || overrides != Context().cachePassOverrides)
         {
             Context().editCache->Invalidate();
+            ResetGpuTiming();
             Context().cacheJitterValid = false;
             Context().cacheRenderKey = std::move(renderKey);
             Context().cachePassOverrides = overrides;
@@ -3091,7 +3117,7 @@ void DlssNr_Dx12::Dispatch(ID3D12GraphicsCommandList* cmdList, ID3D12Resource* c
     }
 
     if (Context().ngxTime != nullptr)
-        Context().ngxTime->End(cmdList);
+        Context().ngxTime->End(cmdList, Context().frames);
 
     Context().nr.reset = false;
 
@@ -3353,6 +3379,9 @@ void EvaluateAtSeam(ID3D12GraphicsCommandList* cmdList, NVSDK_NGX_Parameter* par
             if (!g_srIdentity || entry.first.second == g_srIdentity)
             {
                 entry.second->nr.reset = true;
+                entry.second->gpuTiming.Reset();
+                entry.second->lastGpuTime.reset();
+                entry.second->lastNgxTime.reset();
                 if (entry.second->stabilizer)
                     entry.second->stabilizer->Invalidate();
                 if (entry.second->editCache)
@@ -3924,6 +3953,11 @@ std::optional<double> LastGpuTime()
     std::lock_guard<std::recursive_mutex> lock(g_nrMutex);
     return Context().lastGpuTime;
 }
+GpuTimingStatus GetGpuTimingStatus()
+{
+    std::lock_guard<std::recursive_mutex> lock(g_nrMutex);
+    return Context().gpuTiming.Get();
+}
 std::optional<double> LastStabilizerGpuTime()
 {
     std::lock_guard<std::recursive_mutex> lock(g_nrMutex);
@@ -4092,6 +4126,8 @@ void ShutdownContext()
     Context().nr.lastRecording.reset();
     Context().capture.release();
     Context().gpuTime.reset();
+    Context().gpuTiming.Reset();
+    Context().timingCadence = { 0, false };
     Context().ngxTime.reset();
     Context().stabilizerTime.reset();
     Context().lastStabilizerTime.reset();

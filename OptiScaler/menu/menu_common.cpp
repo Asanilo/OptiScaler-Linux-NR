@@ -7264,7 +7264,7 @@ void MenuCommon::RenderMainMenuGraphs(RenderMenuContext& ctx)
                         if (nrTime.has_value())
                         {
                             ImGui::TableNextColumn();
-                            ImGui::Text("Neural Rendering");
+                            ImGui::Text("Neural Rendering (GPU sample mean)");
                             ImGui::TableNextColumn();
                             ImGui::Text(StrFmt("%.2f ms", nrTime.value()).c_str());
                         }

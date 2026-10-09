@@ -310,33 +310,43 @@ void RenderMenu(Config* config, float menuResScale)
             // nothing in it to hang this off.
             // Either backend's timer. They measure the same thing by different means, and only one
             // of them is running.
-            const auto ms = vulkan ? DlssNr::LastGpuTimeVk() : DlssNr::LastGpuTime();
-
+            const auto timing = vulkan ? DlssNr::GpuTimingStatus {} : DlssNr::GetGpuTimingStatus();
+            const auto ms = vulkan ? DlssNr::LastGpuTimeVk() : timing.mean;
             if (ms.has_value())
             {
-                if (!vulkan && config->DlssNrCacheEnabled.value_or_default())
-                    ImGui::TextColored(ImVec4(0.4f, 0.9f, 0.5f, 1.0f), "Running - %.2f ms (last completed NR pass)",
+                if (!vulkan)
+                    ImGui::TextColored(ImVec4(0.4f, 0.9f, 0.5f, 1.0f), "Running - %.2f ms GPU sampled mean",
                                        ms.value());
                 else
-                    ImGui::TextColored(ImVec4(0.4f, 0.9f, 0.5f, 1.0f), "Running%s - %.2f ms per frame",
-                                       vulkan ? " natively on Vulkan" : "", ms.value());
+                    ImGui::TextColored(ImVec4(0.4f, 0.9f, 0.5f, 1.0f), "Running natively on Vulkan - %.2f ms per frame",
+                                       ms.value());
             }
             else if (vulkan)
-                // Measured but not yet read: the first few frames are still in the query ring.
                 ImGui::TextColored(ImVec4(0.4f, 0.9f, 0.5f, 1.0f), "Running natively on Vulkan - %llu frames",
                                    DlssNr::FramesVk());
             else
-                ImGui::TextColored(ImVec4(0.4f, 0.9f, 0.5f, 1.0f), "Running.");
+                ImGui::TextColored(ImVec4(0.4f, 0.9f, 0.5f, 1.0f), "Running - waiting for GPU timing samples");
 
             ImGui::SameLine();
             ImGui::TextDisabled("(?)");
             if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-                ImGui::SetTooltip("The whole pass: the staging copies and the resolve as well as the"
-                                  "\nmodel. Timing only the model would flatter the number."
-                                  "\nWith Sky caching, refresh and cached frames cost different amounts."
-                                  "\nThe last completed sample is not an average, median or FPS measurement."
-                                  "\n\nCompare it against the frame time at the bottom of this window to"
-                                  "\nsee what it is costing you.");
+                ImGui::SetTooltip("GPU work between NR timestamps: staging, model and composition."
+                                  "\nD3D12: arithmetic mean of completed samples in the last 120 NR input frames."
+                                  "\nRefresh and cached frames are counted using their actual execution."
+                                  "\nPending, dropped or discarded queries are excluded; coverage is shown below."
+                                  "\nThis is neither input latency nor whole-game frame time/FPS.");
+            if (!vulkan && timing.frames)
+            {
+                ImGui::TextDisabled("GPU samples: %u / %u recent NR input frames",
+                                    static_cast<unsigned int>(timing.samples),
+                                    static_cast<unsigned int>(timing.frames));
+                if (timing.refreshMean)
+                    ImGui::TextDisabled("Refresh: %.2f ms (%u samples)", *timing.refreshMean,
+                                        static_cast<unsigned int>(timing.refreshSamples));
+                if (timing.cachedMean)
+                    ImGui::TextDisabled("Cached: %.2f ms (%u samples)", *timing.cachedMean,
+                                        static_cast<unsigned int>(timing.cachedSamples));
+            }
         }
 
         ImGui::Spacing();

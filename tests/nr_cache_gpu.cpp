@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include <functional>
 #include "../OptiScaler/shaders/dlssnr/DlssNr_EditCache_Dx12.h"
+#include "../OptiScaler/gpu_time/GpuTime_Dx12.h"
 
 namespace
 {
@@ -155,6 +156,61 @@ DlssNrCacheInputs Inputs(float mv = 0.0f, float z = 0.5f)
     in.passthrough = true;
     return in;
 }
+void TimingCases()
+{
+    GpuTime_Dx12 timer(device, true);
+    // More recordings than the old three-slot ring, without reading anything.
+    // Every completed-but-unread query must remain available, independent of phase.
+    for (uint64_t frame = 1; frame <= 8; ++frame)
+    {
+        timer.Start(list);
+        timer.End(list, frame);
+        Submit();
+    }
+    const auto complete = timer.ReadCompletedGpuTimes();
+    Require(complete.size() == 8, "timer retains all completed unread refresh/cache phases");
+    for (size_t i = 0; i < complete.size(); ++i)
+        Require(complete[i].tag == i + 1 && std::isfinite(complete[i].ms) && complete[i].ms >= 0,
+                "timer returns actual queue timestamps with exact frame identity");
+    Require(timer.ReadCompletedGpuTimes().empty(), "timer query consumed exactly once");
+    // One still-executable recording: no query may be read or overwritten early.
+    for (uint64_t frame = 9; frame <= 40; ++frame)
+    {
+        timer.Start(list);
+        timer.End(list, frame);
+    }
+    Require(timer.ReadCompletedGpuTimes().empty(), "unsubmitted query cannot be read");
+    Submit();
+    const auto bounded = timer.ReadCompletedGpuTimes();
+    Require(bounded.size() == 16, "full query ring drops telemetry without overwriting GPU work");
+    for (size_t i = 0; i < bounded.size(); ++i)
+        Require(bounded[i].tag == i + 9, "pending query identities survive ring exhaustion");
+    timer.Start(list);
+    timer.End(list, 41);
+    Submit();
+    const auto recovered = timer.ReadCompletedGpuTimes();
+    Require(recovered.size() == 1 && recovered[0].tag == 41, "timer recovers after real GPU completion");
+    timer.Start(list);
+    timer.End(list, 42);
+    Check(list->Close(), "timing discard close");
+    Check(allocator->Reset(), "timing discard allocator reset");
+    Check(list->Reset(allocator, nullptr), "timing discard list reset");
+    Require(timer.ReadCompletedGpuTimes().empty(), "discarded timestamps are never reported");
+    timer.Start(list);
+    timer.End(list, 43);
+    Submit();
+    Require(timer.ReadCompletedGpuTimes().size() == 1, "timer recovers after discard");
+    GpuTime_Dx12 legacy(device);
+    for (int frame = 0; frame < 4; ++frame)
+    {
+        legacy.Start(list);
+        legacy.End(list);
+        Submit();
+    }
+    Require(legacy.ReadGpuTime(queue).has_value(), "non-NR three-slot timer remains usable");
+    std::puts(
+        "PASS: production GPU timer drains both phases, exact identities, bounded slots, discard and legacy path");
+}
 void AllocateFrames()
 {
     original = Texture(DXGI_FORMAT_R32G32B32A32_FLOAT, kSrv);
@@ -245,6 +301,8 @@ int main(int argc, char** argv)
         Check(device->CreateCommandAllocator(q.Type, IID_PPV_ARGS(&allocator)), "allocator");
         Check(device->CreateCommandList(0, q.Type, allocator, nullptr, IID_PPV_ARGS(&list)), "list");
         Check(device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence)), "fence");
+        if (!breakFresh && !breakRegional && !breakJitter)
+            TimingCases();
         AllocateFrames();
         Config cfg;
         cfg.DlssNrCacheInterval = 2;

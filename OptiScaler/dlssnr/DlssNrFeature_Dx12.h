@@ -1,4 +1,5 @@
 #pragma once
+#include <dlssnr/GpuTimingWindow.h>
 
 #include <d3d12.h>
 
@@ -183,8 +184,9 @@ ExposureStatus GameExposureStatus();
 // The white point the exposure meter has settled on, or 0 if it has not taken a reading yet. For the
 // overlay, so the number in use is visible rather than inferred.
 
-// What the pass last cost on the GPU, in milliseconds, or nothing if it has not been measured yet.
+// Recent completed GPU sample mean, in milliseconds; not input latency or frame time.
 std::optional<double> LastGpuTime();
+GpuTimingStatus GetGpuTimingStatus();
 std::optional<double> LastStabilizerGpuTime();
 std::optional<double> LastEditCacheGpuTime();
 struct EditCacheStatus
