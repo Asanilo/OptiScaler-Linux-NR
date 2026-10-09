@@ -160,7 +160,10 @@ void RenderMenu(Config* config, float menuResScale)
         {
             bool stabilization = config->DlssNrStabilizationEnabled.value_or_default();
             if (ImGui::Checkbox("Edit stabilization (experimental)", &stabilization))
+            {
                 config->DlssNrStabilizationEnabled = stabilization;
+                LOG_INFO("DLSS-NR edit stabilization {}", stabilization ? "enabled" : "disabled");
+            }
             HelpMarker("Reprojects the model's edit using depth and motion, then limits its luminance step."
                        "\nThe model runs every frame. Default is off."
                        "\nPre-SR reprojection includes camera jitter. Reset/disocclusion uses this frame's result.");
@@ -172,6 +175,11 @@ void RenderMenu(Config* config, float menuResScale)
             if (ImGui::Checkbox("Despeckle edit", &despeckle))
                 config->DlssNrStabilizationDespeckle = despeckle;
             ImGui::EndDisabled();
+            if (stabilization)
+            {
+                if (auto ms = DlssNr::LastStabilizerGpuTime(); ms.has_value())
+                    ImGui::TextDisabled("Stabilization: %.3f ms (last completed GPU sample)", *ms);
+            }
         }
 
         // Turning the pass off does not release the model, so the feature handle stays alive and

@@ -1,9 +1,22 @@
+#ifndef NR_LIFETIME_STANDALONE
 #include "pch.h"
+#endif
 #include "NrGpuLifetime.h"
 
-#include <Util.h>
+#ifndef NR_LIFETIME_STANDALONE
 #include <resource_tracking/ResTrack_dx12.h>
+#else
+#include <cstdio>
+// The harness supplies a minimal ExecuteCommandLists adapter, exercising the
+// same production Begin/Reset/Release/Signal code without the game's FG system.
+bool NrTestEnsureQueueHook(ID3D12Device* device);
+#define LOG_ERROR(...) std::fprintf(stderr, "NR completion signal failed\n")
+#endif
+#ifdef NR_LIFETIME_STANDALONE
+#include "../../tests/nr_detours_compat.h"
+#else
 #include <detours/detours.h>
+#endif
 #include <mutex>
 #include <unordered_map>
 #include <algorithm>
@@ -56,14 +69,15 @@ void* Real(IUnknown* object)
     return object;
 }
 
-void Close(void* list)
+bool Close(void* list)
 {
     const auto found = recordings.find(list);
     if (found == recordings.end())
-        return;
+        return false;
     found->second->active = false;
     closed.push_back(std::move(found->second));
     recordings.erase(found);
+    return true;
 }
 
 HRESULT STDMETHODCALLTYPE ResetHook(ID3D12GraphicsCommandList* list,
@@ -73,7 +87,7 @@ HRESULT STDMETHODCALLTYPE ResetHook(ID3D12GraphicsCommandList* list,
     if (SUCCEEDED(result))
     {
         std::lock_guard<std::recursive_mutex> lock(mutex);
-        Close(list);
+        if (Close(list)) Poll();
     }
     return result;
 }
@@ -85,7 +99,7 @@ ULONG STDMETHODCALLTYPE ReleaseHook(IUnknown* list)
     if (count == 0)
     {
         std::lock_guard<std::recursive_mutex> lock(mutex);
-        Close(list);
+        if (Close(list)) Poll();
     }
     return count;
 }
@@ -101,8 +115,8 @@ bool Install(ID3D12GraphicsCommandList* list)
     originalRelease = reinterpret_cast<ReleaseFn>(releaseAddress);
     DetourTransactionBegin();
     DetourUpdateThread(GetCurrentThread());
-    DetourAttach(reinterpret_cast<PVOID*>(&originalReset), ResetHook);
-    DetourAttach(reinterpret_cast<PVOID*>(&originalRelease), ReleaseHook);
+    DetourAttach(reinterpret_cast<PVOID*>(&originalReset), reinterpret_cast<PVOID>(ResetHook));
+    DetourAttach(reinterpret_cast<PVOID*>(&originalRelease), reinterpret_cast<PVOID>(ReleaseHook));
     if (DetourTransactionCommit() != NO_ERROR)
     {
         originalReset = nullptr;
@@ -117,15 +131,82 @@ bool Install(ID3D12GraphicsCommandList* list)
 void Poll()
 {
     std::lock_guard<std::recursive_mutex> lock(mutex);
+    static bool polling = false;
+    if (polling) return;
+    polling = true;
+    struct PollGuard { bool& flag; ~PollGuard() { flag = false; } } guard { polling };
+    std::vector<Token> ready;
     for (auto it = closed.begin(); it != closed.end();)
     {
         if ((*it)->Reusable())
         {
-            (*it)->ReleaseCompleted();
+            ready.push_back(std::move(*it));
             it = closed.erase(it);
         }
         else
             ++it;
+    }
+    // COM/model deleters can reenter ReleaseHook and append to closed. Drop
+    // references only after the vector iteration has ended, and suppress Poll
+    // reentry while those callbacks run.
+    for (const auto& token : ready) token->ReleaseCompleted();
+}
+
+bool DrainForShutdown(unsigned int timeoutMs)
+{
+    const auto deadline = GetTickCount64() + timeoutMs;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex);
+        for (auto& entry : recordings)
+        {
+            entry.second->active = false;
+            closed.push_back(std::move(entry.second));
+        }
+        recordings.clear();
+        features.clear();
+    }
+    for (;;)
+    {
+        std::shared_ptr<Fence> waiting;
+        uint64_t value = 0;
+        {
+            std::lock_guard<std::recursive_mutex> lock(mutex);
+            Poll();
+            if (closed.empty())
+            {
+                fences.clear();
+                return true;
+            }
+            for (const auto& token : closed)
+            {
+                if (token->poisoned) return false;
+                for (const auto& submission : token->submissions)
+                {
+                    const auto completed = submission.fence->Value();
+                    if (completed == UINT64_MAX) return false;
+                    if (completed < submission.value && !waiting)
+                    {
+                        waiting = std::static_pointer_cast<Fence>(submission.fence);
+                        value = submission.value;
+                    }
+                }
+            }
+        }
+        const auto now = GetTickCount64();
+        if (now >= deadline) return false;
+        if (!waiting)
+        {
+            // Execute is still returning to its Signal hook; do not hold mutex.
+            Sleep(1);
+            continue;
+        }
+        HANDLE event = CreateEventW(nullptr, FALSE, FALSE, nullptr);
+        if (!event) return false;
+        const auto result = waiting->fence->SetEventOnCompletion(value, event);
+        const auto status = SUCCEEDED(result)
+            ? WaitForSingleObject(event, static_cast<DWORD>(deadline - now)) : WAIT_FAILED;
+        CloseHandle(event);
+        if (status != WAIT_OBJECT_0) return false;
     }
 }
 
@@ -151,7 +232,12 @@ Token Begin(ID3D12GraphicsCommandList* list)
         failure = "could not obtain the command-list device";
         return nullptr;
     }
-    const bool hooked = ResTrack_Dx12::EnsureQueueSubmissionHook(device);
+    const bool hooked =
+#ifndef NR_LIFETIME_STANDALONE
+        ResTrack_Dx12::EnsureQueueSubmissionHook(device);
+#else
+        NrTestEnsureQueueHook(device);
+#endif
     device->Release();
     if (!hooked)
     {
@@ -349,6 +435,7 @@ void Submitted(ID3D12CommandQueue* queue, const std::vector<Token>& used)
         token->Submit(fence, value);
         --token->pendingSubmissions;
     }
+    Poll();
 }
 
 const char* FailureReason()

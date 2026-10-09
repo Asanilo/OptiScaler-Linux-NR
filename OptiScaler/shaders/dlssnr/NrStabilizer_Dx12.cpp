@@ -45,6 +45,9 @@ NrStabilizer_Dx12::~NrStabilizer_Dx12()
 bool NrStabilizer_Dx12::EnsureResources(ID3D12Resource* target)
 {
     const auto desc = target->GetDesc();
+    if (desc.Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE2D || !desc.Width || !desc.Height ||
+        desc.DepthOrArraySize != 1 || desc.MipLevels != 1 || desc.SampleDesc.Count != 1)
+        return false;
     if (fresh_ && width_ == desc.Width && height_ == desc.Height && format_ == desc.Format) return true;
     ReleaseResources();
     width_ = static_cast<unsigned int>(desc.Width); height_ = desc.Height; format_ = desc.Format;
@@ -54,7 +57,9 @@ bool NrStabilizer_Dx12::EnsureResources(ID3D12Resource* target)
                                                    D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS);
         return SUCCEEDED(_device->CreateCommittedResource(&heap, D3D12_HEAP_FLAG_NONE, &texture, kUav, nullptr, IID_PPV_ARGS(resource)));
     };
-    if (!make(TranslateTypelessFormats(format_), &fresh_) ||
+    const auto freshFormat = format_ == DXGI_FORMAT_R10G10B10A2_TYPELESS
+        ? DXGI_FORMAT_R10G10B10A2_UNORM : TranslateTypelessFormats(format_);
+    if (!make(freshFormat, &fresh_) ||
         !make(DXGI_FORMAT_R16G16B16A16_FLOAT, &edit_[0]) || !make(DXGI_FORMAT_R16G16B16A16_FLOAT, &edit_[1]) ||
         !make(DXGI_FORMAT_R32G32_FLOAT, &guide_[0]) || !make(DXGI_FORMAT_R32G32_FLOAT, &guide_[1]))
     { ReleaseResources(); return false; }

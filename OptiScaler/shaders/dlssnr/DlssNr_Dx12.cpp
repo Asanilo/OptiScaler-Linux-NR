@@ -387,11 +387,12 @@ struct NrContext
     NrState nr;
     std::unique_ptr<DlssNr_Dx12> compose;
     std::unique_ptr<NrStabilizer_Dx12> stabilizer;
-    std::unique_ptr<GpuTime_Dx12> gpuTime, ngxTime;
-    std::optional<double> lastNgxTime, lastGpuTime;
+    std::unique_ptr<GpuTime_Dx12> gpuTime, ngxTime, stabilizerTime;
+    std::optional<double> lastNgxTime, lastGpuTime, lastStabilizerTime;
     capture::FrameCapture capture;
     bool autoCaptureDone = false;
     unsigned long long frames = 0, lastPresent = 0, captureWriteAtFrame = 0;
+    unsigned long long lastSplitLog = 0;
     bool presentMoves = false, saidMemoryTight = false;
     IDXGIAdapter3* adapter = nullptr;
     ID3D12Device* device = nullptr;
@@ -403,14 +404,14 @@ using ContextKey = std::pair<ID3D12Device*, uint64_t>;
 std::map<ContextKey, std::shared_ptr<NrContext>> g_contexts;
 std::shared_ptr<NrContext> g_lastContext = std::make_shared<NrContext>();
 thread_local std::shared_ptr<NrContext> g_threadContext;
-thread_local uint64_t g_srIdentity = 0;
+thread_local std::optional<uint64_t> g_srIdentity;
 
 NrContext& Context() { return *(g_threadContext ? g_threadContext : g_lastContext); }
 
 bool SelectContext(ID3D12Device* device)
 {
-    uint64_t identity = g_srIdentity;
-    if (!identity && State::Instance().currentFeature)
+    uint64_t identity = g_srIdentity.value_or(0);
+    if (!g_srIdentity.has_value() && State::Instance().currentFeature)
         identity = reinterpret_cast<uintptr_t>(State::Instance().currentFeature);
     const ContextKey key { device, identity };
     if (!g_contexts.count(key) && g_contexts.size() >= 32)
@@ -2965,6 +2966,9 @@ void DlssNr_Dx12::Dispatch(ID3D12GraphicsCommandList* cmdList, ID3D12Resource* c
         {
             if (!Context().stabilizer)
                 Context().stabilizer = std::make_unique<NrStabilizer_Dx12>(device);
+            if (!Context().stabilizerTime)
+                Context().stabilizerTime = std::make_unique<GpuTime_Dx12>(device, true);
+            ScopedGpuTime_Dx12 stabilizerTimer(Context().stabilizerTime.get(), cmdList);
             if (!Context().stabilizer->Run(cmdList, target, Context().nr.hdrCopy, depthIn, motionIn, frame,
                                            whitePoint, cfg.DlssNrStabilizationStep.value_or_default(),
                                            cfg.DlssNrStabilizationDepthTolerance.value_or_default(),
@@ -2973,13 +2977,15 @@ void DlssNr_Dx12::Dispatch(ID3D12GraphicsCommandList* cmdList, ID3D12Resource* c
                 ReportSkipOnce("edit stabilisation unavailable this frame; using the fresh NR resolve");
         }
         else if (Context().stabilizer)
+        {
             Context().stabilizer->Invalidate();
+            Context().lastStabilizerTime.reset();
+        }
 
 
         // On-demand capture works in this path too: the staging copy still holds the frame as the
         // upscaler produced it, and the edited frame is the output itself. The write happens a few
-        // frames later, once the GPU is certainly past these copies -- this path has no fence of its
-        // own.
+        // recordings later, after all actual queue submissions and Reset have completed.
         if (Context().capture.isActive())
         {
             Context().capture.record(cmdList, device, Context().nr.colorCopy,
@@ -3028,18 +3034,24 @@ void DlssNr_Dx12::Dispatch(ID3D12GraphicsCommandList* cmdList, ID3D12Resource* c
                 if (auto ngx = Context().ngxTime->ReadGpuTime(queue); ngx.has_value())
                     Context().lastNgxTime = ngx;
             }
+            if (cfg.DlssNrStabilizationEnabled.value_or_default() && Context().stabilizerTime)
+            {
+                if (auto ms = Context().stabilizerTime->ReadGpuTime(queue); ms.has_value())
+                    Context().lastStabilizerTime = ms;
+            }
 
             // The split, once every few hundred frames. What is worth reading is not the total but the
             // remainder: the model's cost is NVIDIA's to set, and everything else is ours.
-            static unsigned long long lastSplitLog = 0;
-
-            if (Context().lastGpuTime.has_value() && Context().lastNgxTime.has_value() && Context().frames - lastSplitLog > 600)
+            if (Context().lastGpuTime.has_value() && Context().lastNgxTime.has_value() && Context().frames - Context().lastSplitLog > 600)
             {
-                lastSplitLog = Context().frames;
+                Context().lastSplitLog = Context().frames;
                 const double total = Context().lastGpuTime.value();
                 const double ngx = Context().lastNgxTime.value();
                 LOG_INFO("DLSS-NR cost: {:.2f} ms total = {:.2f} ms model + {:.2f} ms ours ({:.0f}% ours)",
                          total, ngx, total - ngx, total > 0.0 ? 100.0 * (total - ngx) / total : 0.0);
+                if (Context().lastStabilizerTime)
+                    LOG_INFO("DLSS-NR stabilization cost: {:.3f} ms (last completed GPU sample; not frame time)",
+                             *Context().lastStabilizerTime);
             }
         }
     }
@@ -3685,6 +3697,8 @@ ExposureStatus GameExposureStatus()
 
 std::optional<double> LastGpuTime() {
     std::lock_guard<std::recursive_mutex> lock(g_nrMutex); return Context().lastGpuTime; }
+std::optional<double> LastStabilizerGpuTime() {
+    std::lock_guard<std::recursive_mutex> lock(g_nrMutex); return Context().lastStabilizerTime; }
 
 
 
@@ -3825,6 +3839,8 @@ void ShutdownContext()
     Context().capture.release();
     Context().gpuTime.reset();
     Context().ngxTime.reset();
+    Context().stabilizerTime.reset();
+    Context().lastStabilizerTime.reset();
     Context().lastNgxTime.reset();
     Context().lastGpuTime.reset();
 

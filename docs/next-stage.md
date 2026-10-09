@@ -1,102 +1,107 @@
 # NR→SR stability stage
 
-Primary delivery is direct NR→SR on DS2 / RTX 4060 Laptop / NVIDIA 615.71.09 /
-GE-Proton11-7 / Wayland. SR→NR is an experimental path with a reported sustained
-flicker failure. It remains visible and separately reported; it does not block
-an independently accepted NR→SR delivery.
+Primary target: DS2 / RTX 4060 Laptop / NVIDIA 615.71.09 / GE-Proton11-7 /
+Wayland. The previous SR→NR build has a sustained flicker failure. The new build
+is a candidate for testing; neither its appearance nor Linux acceptance is granted.
 
-## Ordered gates
+## Diagnosis and completed implementation
 
-1. Attribution diagnosis: post-SR flicker has now also been reported on the
-   frozen unmodified y4m baseline `7b7220bb`, with the same SF-v2 model and
-   Detail/Intensity=1. Its completed log is retained in
-   `../testlogs/nr-comparison/baseline-post-sr-round-01`. This demonstrates that
-   the symptom is not exclusive to the port; it does not identify the root cause
-   or rule out additional port regressions. Stop the remaining diagnostic matrix
-   at the operator's request and proceed with source investigation. The prepared
-   baseline/off round 2 has not been played and is not a completed control.
+The frozen, unmodified y4m `7b7220bb` also reproduced post-SR flicker with the same
+SF-v2 runtime and Detail/Intensity=1. Evidence remains in
+`../testlogs/nr-comparison/baseline-post-sr-round-01`. This shows that the symptom
+is not exclusive to the port, but does not establish its cause or exclude other
+port regressions. The operator stopped the remaining six-condition matrix.
+Baseline/off round 2 was prepared but never played; do not mark it completed.
 
-   The full controlled matrix below remains a validation protocol, not a blocker
-   to beginning the fix investigation. Compare the frozen baseline with `26aea636`, each
-   with NR off, NR→SR and SR→NR. Keep the same SF-v2 model, save, camera, SR quality
-   and exposure. Passes=1, WorkingScale=1, Detail/Intensity=1. FG, dynamic resolution,
-   vsync and frame caps off. Each condition starts a fresh process, warms up for
-   10 seconds, observes a stationary camera for 60 seconds, then the same slow
-   movement for 30 seconds. Repeat three rounds. Do not change the renderer to
-   make this attribution experiment pass.
-2. After attribution, implement queue-submission/fence based ownership for model
-   handles, textures, descriptors and constants. Recording generations retain
-   references until Reset/destruction; each submission retains them until its
-   queue completes. No reuse based on evaluate counts. Isolate per-device/SR
-   feature state; tracking failures skip NR with an explicit reason.
-3. Port Sky's necessary edit-history/reprojection/stabilisation code without
-   skipped model frames. Independent stabiliser switch defaults off; initial
-   step limit 0.5 stops, despeckle and additional temporal/low-temporal mixing
-   off. Pre-SR reprojection includes jitter delta. Reset on game Reset, rebuild,
-   size/format or placement change. Invalid history uses this frame's result.
-4. Complete real GPU tests and the game acceptance below before delivery.
+- Actual command-list recording generations now retain model owners, COM
+  resources, descriptor heaps and constants. Reset/final Release closes a
+  generation; every actual queue submission must finish before retirement or
+  slot reuse. Replay, concurrent Execute→Signal gaps and cross-queue dependencies
+  are tracked. Tracking failure skips NR with a reason and retains unsafe objects.
+- Internal contexts are isolated by device and actual SR handle, including handle
+  zero. SR Release tears down its context. SDK shutdown drains submissions before
+  forwarding core shutdown; a timeout/device loss keeps the core alive. The
+  external, undocumented runtime's multi-device behaviour remains unvalidated.
+- Meter/calibration/capture and NR timestamp readbacks use those completion
+  tokens. Timestamp frequency comes from the actual submission queue. CPU frame
+  counts are not a completion proof.
+- A minimal every-frame Sky edit-history port reprojects with depth/motion and
+  pre-SR jitter delta, rejects invalid history and bounds luminance edit change.
+  Game Reset, rebuild, size/format/placement change invalidate history. Invalid
+  history uses the fresh current NR result, preserving alpha. No skipped model
+  frames, adaptive cache, extra temporal mix or low-temporal mix were added.
+- Stabilisation defaults **off**, step limit **0.5 stops**, despeckle **off**.
+  Detail/Intensity remain **1**. Its independent fenced GPU timer reports the
+  last completed sample; this is neither a median nor whole-frame time.
 
-Further renderer changes can proceed after this attribution evidence. They must
-be reviewed and compared against the retained failing control before acceptance.
-Cache skip/adaptive acceleration, FG/RR/DualFeature, video and native Vulkan are
-later stages. A baseline failure is attribution evidence, never an acceptance pass.
+Implementation commits: `c6542adf` (lifetime/context isolation), `37267926`
+(stabiliser), followed by the reviewed drain/runtime-test correction. Final
+source and artifact hashes are recorded in the delivered build manifest.
 
-## Implemented preparation
+## Verification and limits
 
-- Native and internal SR hook paths now both call production `EvaluateWithNr`.
-  The five-frame contract test calls that same function rather than reproducing
-  the production branch in the test. Cases cover typed/untyped restoration,
-  create/skip frames, failed SR, exceptions, post ordering, and independent blocks.
-- Five intentional mutations must compile and then fail the tests: no restoration,
-  wrong setter, ignored master switch, post NR after requested pre NR, and post
-  NR after failed SR. This tests the orchestration contract, not the actual vendor
-  NGX implementation or the surrounding exported hook's handle routing.
-- `tools/game_nr_compare.py` verifies build/model/installation hashes and previews
-  replacements by default. It refuses a running game or changed installation,
-  backs up each case and restores changed files on a partial failure. Only the
-  proxy, forwarder and configuration are replaced; the model remains constant.
-  Collection preserves new per-case log evidence and a user observation without
-  automatically granting visual/performance acceptance.
+CPU orchestration tests call the same production `EvaluateWithNr` used by both
+SR hook paths. ASan/UBSan passes; five intentional contract mutations fail.
+The portable lifetime test covers every-queue completion, repeated submissions,
+Execute→Signal pending state, discarded recordings and device removal.
 
-From the development repository:
+Real NVIDIA D3D12 fixtures run through an independent GE-Proton prefix, not the
+game prefix. The runtime fixture compiles production `NrGpuLifetime.cpp` with a
+minimal real Execute hook adapter instead of the game's FG system. It verifies
+actual Reset/Release/Execute/Signal hooks, delayed queues, bounded slot exhaustion,
+replay on two queues, automatic cross-queue waiting, readback/model-owner
+retirement and SDK drain. Early upload overwrite and owner retirement controls
+must fail. This does not exercise vendor NGX, game-export handle routing or FG.
+
+The shader fixture executes the exact production DXBC on NVIDIA hardware:
+current-frame fallback, 0.5-stop bound, reset, depth/colour/out-of-frame rejection,
+jitter checker and alpha. Reversed-depth reset is covered; complete reversed-Z
+reprojection, production wrapper integration, appearance and motion trails still
+need game evidence. The numerical tolerance includes FP16 history quantisation.
+
+Local raw evidence: `../testlogs/nr-lifetime`, `../testlogs/nr-stabilizer`.
+GPU fixture binaries, source hashes, compiler and Detours compatibility edits
+are recorded in `../build/nr-gpu-final/gpu-build-manifest.json`.
+Windows Release is built by the existing `Build (Fast)` workflow on `linux-nr`.
+Models, game logs and downloaded toolchains are not uploaded to GitHub.
+
+Rebuild isolated fixtures with the official LLVM-MinGW toolchain and unmodified
+Microsoft Detours v4.0.1 (`e4bfd6b03e50de46b47abfbd1e46b384f0c5f833`):
 
 ```sh
-g++ -std=c++17 -Wall -Wextra -Werror -fsanitize=address,undefined -g \
-  tests/nr_pre_upscale_test.cpp -o /tmp/nr-orchestration-test
-ASAN_OPTIONS=detect_leaks=0 /tmp/nr-orchestration-test
-python3 tests/check_nr_negative_controls.py
-python3 -m unittest discover -s tests -p '*_test.py' -v
-
-# Preview a frozen baseline post-SR case. --apply requires a normally closed game.
-python3 tools/game_nr_compare.py prepare --version baseline --mode post-sr --round 1
-python3 tools/game_nr_compare.py prepare --version baseline --mode post-sr --round 1 --apply
-# Launch with the same documented Proton/PRIME/dxgi override, then save and exit.
-python3 tools/game_nr_compare.py collect \
-  ../testlogs/nr-comparison/baseline-post-sr-round-01 --observation flicker
+python3 tools/build_nr_gpu_tests.py \
+  --toolchain ../build/toolchain/llvm-mingw-20261006-ucrt-ubuntu-22.04-x86_64 \
+  --detours ../build/toolchain/detours-v4.0.1-original \
+  --output ../build/nr-gpu-final
 ```
 
-Use modes `off`, `pre-sr`, `post-sr`, versions `baseline`, `ported`, rounds 1–3.
-For operator-controlled Steam runs, use this launch option instead of manually
-preparing and collecting every case (replace the case arguments as needed):
+## Ordinary Steam operation
+
+The user starts and operates DS2. The assistant installs only a verified proxy,
+forwarder and configuration while the game is closed, preserves the same SF-v2
+model, and records hashes/previous files in a separate rollback snapshot.
+`tools/install_nr_iteration.py` previews by default and refuses running games,
+changed installation/build files, duplicate backups or failed build provenance.
+The old Python Steam wrapper is retained as historical tooling and is no longer
+the recommended launch path. Do not repeat the frozen matrix to begin this A/B.
+
+Keep GE-Proton11-7 selected. Steam Properties → Launch Options:
 
 ```text
-python3 /home/arinp/Code/dlss5_linux/OptiScaler-Linux-NR/tools/game_nr_steam.py baseline pre-sr 1 -- %command%
+WINEDLLOVERRIDES="dxgi=n,b" __NV_PRIME_RENDER_OFFLOAD=1 __VK_LAYER_NV_optimus=NVIDIA_only PROTON_LOG=1 PROTON_LOG_DIR="/home/arinp/Code/dlss5_linux/testlogs/nr-comparison/manual" %command%
 ```
 
-Keep GE-Proton11-7 selected in Steam. The wrapper preserves Steam's actual command,
-sets the documented PRIME/dxgi/Proton logging environment, applies the same frozen
-comparison files, and waits for that command to return. It then attempts guarded
-collection with observation `uncertain`; the operator reports visual results
-separately. Each case has its own Proton log directory and launcher transcript.
-Duplicate sessions, a running game, or changed installation files stop launch.
-If Steam returns before DS2 exits, collection is refused and the error is retained
-for review. No process is killed and no visual/performance pass is inferred.
+`%command%` is expanded by Steam only. Start with Steam's Play button; from a
+terminal the ordinary command is `steam -applaunch 3280350`.
 
-Installed configuration must stay unchanged; if it is saved/modified, collection
-stops for review instead of silently treating different settings as comparable.
-Game SR/vsync/frame-cap settings and camera operations still require an operator.
-Capture metrics, controls, start/duration confirmation and raw results must be
-reviewed before acceptance. A collected log is not proof that a full run occurred.
+For the new candidate, first check NR→SR with stabilisation off. In F10 →
+DLSS Neural Rendering, select SR→NR in **Live placement comparison**, then toggle
+**Edit stabilization (experimental)** off/on in the same saved scene. Wait after
+each toggle and record stationary flicker and the same slow camera motion.
+Preselect clothing/person, highlight boundaries and vegetation regions. Leave
+Passes=1, WorkingScale=1, Detail/Intensity=1 and step=0.5; FG/dynamic resolution off.
+Compare both appearance and trails. Return to NR→SR and repeat the switch as a
+regression check. A surviving failure stays a failure in the record.
 
 ## Acceptance fixed before implementation
 
@@ -112,16 +117,14 @@ reviewed before acceptance. A collected log is not proof that a full run occurre
 - Three controlled performance repetitions: added stabiliser GPU median ≤0.5 ms,
   and whole-frame Present p95 deterioration ≤5%. Present intervals are explicitly
   distinguished from NR GPU cost. FG is off. Above limits: optimise further and
-  leave the stabiliser default-off.
+  leave the stabiliser default-off. Sparse last-sample logs cannot satisfy this.
 - Report only DS2 local acceptance without another game's evidence. Every build
   carries source/hash/config provenance and a rollback record; each renderer
   change is separately reviewable and revertible.
 
-## Current outstanding work
+## Outstanding gates
 
-The full six-condition experiment was curtailed after baseline post-SR reproduced
-the symptom. Remaining cases must not be reported as completed or passed.
-Actual GPU lifetime changes/tests, stabiliser
-port and long-session/performance gates are **not completed**. No success is
-inferred from the new contract/tool tests. Preparation can proceed while awaiting
-the user's normal game exit and participation in the controlled camera experiment.
+New DLL game launch, targeted stabiliser A/B, extended NR→SR stress/memory test
+and controlled performance repetitions are **pending**. The source/Windows/GPU
+checks cannot establish that flicker is fixed. Native Vulkan, RR/FG/DualFeature,
+video and adaptive cache acceleration remain later stages.

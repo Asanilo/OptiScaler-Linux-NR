@@ -7,6 +7,7 @@
 #include "proxies/NVNGX_Proxy.h"
 #include "dlssnr/DlssNr.h"
 #include "dlssnr/NrPreUpscale.h"
+#include "dlssnr/NrGpuLifetime.h"
 #include "dlssnr/DlssNr_ExposureScan.h"
 #include <upscalers/dlss/DLSSFeature_Dx12.h>
 #include <shaders/output_scaling/OS_Dx12.h>
@@ -374,6 +375,9 @@ NVSDK_NGX_API NVSDK_NGX_Result NVSDK_NGX_D3D12_Init_with_ProjectID(
 NVSDK_NGX_API NVSDK_NGX_Result NVSDK_NGX_D3D12_Shutdown(void)
 {
     DlssNr::Shutdown();
+    const bool nrDrained = DlssNr::GpuLifetime::DrainForShutdown();
+    if (!nrDrained)
+        LOG_ERROR("DLSS-NR submissions did not drain; preserving NGX core for retained model handles");
     shutdown = true;
     State::Instance().nvngxDx12Inited = false;
 
@@ -388,7 +392,7 @@ NVSDK_NGX_API NVSDK_NGX_Result NVSDK_NGX_D3D12_Shutdown(void)
 
     // Added `&& !State::Instance().isShuttingDown` hack for crash on exit
     if (Config::Instance()->DLSSEnabled.value_or_default() && NVNGXProxy::IsDx12Inited() &&
-        NVNGXProxy::D3D12_Shutdown() != nullptr && !State::Instance().isShuttingDown)
+        NVNGXProxy::D3D12_Shutdown() != nullptr && !State::Instance().isShuttingDown && nrDrained)
     {
         auto result = NVNGXProxy::D3D12_Shutdown()();
         NVNGXProxy::SetDx12Inited(false);
@@ -423,6 +427,10 @@ NVSDK_NGX_API NVSDK_NGX_Result NVSDK_NGX_D3D12_Shutdown(void)
 
 NVSDK_NGX_API NVSDK_NGX_Result NVSDK_NGX_D3D12_Shutdown1(ID3D12Device* InDevice)
 {
+    DlssNr::Shutdown();
+    const bool nrDrained = DlssNr::GpuLifetime::DrainForShutdown();
+    if (!nrDrained)
+        LOG_ERROR("DLSS-NR submissions did not drain; preserving NGX core for retained model handles");
     shutdown = true;
     State::Instance().nvngxDx12Inited = false;
 
@@ -433,7 +441,7 @@ NVSDK_NGX_API NVSDK_NGX_Result NVSDK_NGX_D3D12_Shutdown1(ID3D12Device* InDevice)
 
     // Added `&& !State::Instance().isShuttingDown` hack for crash on exit
     if (Config::Instance()->DLSSEnabled.value_or_default() && NVNGXProxy::IsDx12Inited() &&
-        NVNGXProxy::D3D12_Shutdown1() != nullptr && !State::Instance().isShuttingDown)
+        NVNGXProxy::D3D12_Shutdown1() != nullptr && !State::Instance().isShuttingDown && nrDrained)
     {
         auto result = NVNGXProxy::D3D12_Shutdown1()(InDevice);
         NVNGXProxy::SetDx12Inited(false);

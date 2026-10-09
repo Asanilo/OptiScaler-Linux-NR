@@ -27,7 +27,7 @@ namespace DlssNr
 // The actual SR handle, not a reusable parameter block, owns its model history.
 class SrContextScope
 {
-    uint64_t previous_;
+    std::optional<uint64_t> previous_;
   public:
     explicit SrContextScope(uint64_t identity);
     ~SrContextScope();
@@ -188,6 +188,7 @@ ExposureStatus GameExposureStatus();
 
 // What the pass last cost on the GPU, in milliseconds, or nothing if it has not been measured yet.
 std::optional<double> LastGpuTime();
+std::optional<double> LastStabilizerGpuTime();
 
 // What the white point meter last settled on, or 0 when it is not running. For the menu.
 

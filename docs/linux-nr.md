@@ -20,9 +20,9 @@
 RR、FG、原生 Vulkan 和 D3D11 bridge 不在本轮 pre-SR 验收范围。
 临时 placement comparison 只对直接 D3D12 路径有效；开启 DualFeature 时使用保存的配置。
 
-尚未移植 edit cache、重投影、抗闪烁、截图 benchmark 或自动采样。
-上游的资源延迟回收和 descriptor ring 仍没有完整 GPU fence 证明，不能宣称长期稳定。
-本轮也未修复同一帧多个 SR feature 共享全局 NR 状态的所有问题。
+后续稳定性阶段已实现真实队列 fence 回收、每个设备/SR 句柄独立状态，以及默认关闭的每帧 edit 重投影稳定器。
+没有移植跳帧缓存、额外 temporal mixing、截图 benchmark 或自动性能验收。
+独立 Proton GPU 测试通过，新的游戏画面、长期稳定性与性能门槛仍待验收，详见 [next-stage.md](next-stage.md)。
 
 ## 配置和比较
 
@@ -35,6 +35,9 @@ PreUpscale=true
 DualFeature=false
 Passes=1
 WorkingScale=1.0
+StabilizationEnabled=false
+StabilizationStep=0.5
+StabilizationDespeckle=false
 
 [FrameGen]
 Enabled=false
@@ -54,7 +57,8 @@ F10 打开 overlay；`Live placement comparison` 可在同一场景切换三条�
 切换前后保持 SR 质量、WorkingScale、Passes 和色彩设置一致；等待创建和历史稳定后测量。
 比较是临时状态，重启回到保存配置，选择 Saved placement 也恢复保存配置。
 
-`LastGpuTime` 是上游计时器给出的 NR pass 读数，包含准备/模型/resolve。
+`LastGpuTime` 现使用实际队列完成的计时读数，包含准备/模型/resolve/可选稳定器。
+稳定器另有独立的最后一个已完成 GPU 样本；这些读数不等于受控性能统计。
 它不是整帧时间，也不是对 4060L 的性能承诺。测量真正渲染 FPS 时保持 FG 关闭。
 本轮没有把 CPU dispatch 次数伪装成渲染帧数。
 
@@ -133,21 +137,22 @@ SR 前运行 NR 的处理像素更少，本次 NR pass 耗时中位数约低 54%
 | 创建/跳过帧顺序 | 生产编排函数单测通过 | 五帧测试调用 hook 复用的 EvaluateWithNr；未执行实际 vendor NGX 或 GPU |
 | DS2 NR→SR | 实际执行；本次未报告闪烁 | 未测长时间、动态分辨率和其他游戏 |
 | DS2 SR→NR | 实际执行；画面验收失败 | 用户报告保持模式仍持续闪烁 |
-| 闪烁来源 | 未归因 | 尚未完成未修改基准同条件对照 |
-| GPU 对象回收/descriptor 复用 | 未验收 | 基准仍按 evaluate 次数回收，缺少完整 fence 证明 |
-| 缓存/重投影/Anti-flicker | 未移植 | Sky 有对应功能，不能把存在控件当成修复已成立 |
+| 闪烁来源 | 基准也复现；根因未知 | 同一 SF-v2、强度 1；仅排除“移植独有”，不证明新版本已修复 |
+| GPU 对象回收/descriptor 复用 | 已实现并通过真实 Proton GPU 检查 | 生产 Reset/Release/Execute/Signal 与负对照；实际 NGX/游戏长期验收待测 |
+| edit 重投影/稳定器 | 最小每帧移植完成；默认关闭 | 生产 DXBC 合成测试通过；闪烁、拖影和开销待游戏 A/B |
+| 跳帧缓存/额外 temporal mix | 未移植 | 保持模型每帧运行 |
 
 对 portable helper 做了三个负向控制：临时删除恢复、错误地改用 untyped setter、
 绕过 master toggle，现有测试均失败；原始实现通过。修改仅发生在临时目录，
 没有将错误实现写入生产仓库。这说明单测能够发现这些指定缺陷，不能证明 GPU 同步或闪烁已解决。
 
-未修改基准 `7b7220bb` 已启动独立构建：
+未修改基准 `7b7220bb` 已完成独立构建并在 post-SR 复现闪烁：
 [基准构建记录](https://github.com/Asanilo/OptiScaler-Linux-NR/actions/runs/37946226862)。
 归因对照须使用同一 SF-v2 模型、驱动、Proton、存档、镜头、SR 质量及曝光配置，
 Passes=1、WorkingScale=1、Detail strength=1、FG/动态分辨率关闭。
 每种模式使用新进程或明确记录历史预热，不能把之前 NR→SR 留下的 SR 历史当成无 NR 基线。
 分别记录持续静止、缓慢运动和切换阶段；日志没有错误不等于画面没有闪烁。
-只有基准同条件复现，才能将其记为上游既有问题；基准不复现则优先排查移植回归。
+本次基准已复现相同症状，说明并非移植独有；仍不能区分上游集成、共同运行时或模型导致的具体原因。
 即使基准也闪烁，仍需修复或明确限定支持范围，不能将 SR→NR 标为通过。
 
 安装清单和原文件备份位于工作区 `backups/ds2-26aea636`。
@@ -158,8 +163,7 @@ python3 tools/rollback_test_install.py ../backups/ds2-26aea636
 python3 tools/rollback_test_install.py ../backups/ds2-26aea636 --apply
 ```
 
-本次通过临时环境变量 `WINEDLLOVERRIDES=dxgi=n,b` 启动，没有持久修改 Steam 启动项。
-以后通过 Steam 启动时需要在游戏属性中设置该 override。
+使用普通 Steam 启动项；不再要求 Python 包装 Steam 命令。具体启动项和 F10 稳定器 A/B 操作见 [next-stage.md](next-stage.md)。
 
 已确认 NR off 启动、pre-NR 首次创建/后续 evaluate、post-NR 和临时比较切换。
 仍需验证 Alt-Tab、改变 SR 质量或窗口尺寸，以及连续游戏帧时间/显存。
