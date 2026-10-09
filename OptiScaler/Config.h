@@ -359,6 +359,27 @@ class Config
     CustomOptional<float> DlssNrStabilizationColourTolerance { 0.5f };
     CustomOptional<bool> DlssNrStabilizationDespeckle { false };
 
+    // Sky temporal edit cache and anti-flicker. D3D12 direct seams only; off by default.
+    // Interval 1 runs NR every frame with anti-flicker; 2 skips alternate NR evaluations.
+    CustomOptional<bool> DlssNrCacheEnabled { false };
+    CustomOptional<uint32_t> DlssNrCacheInterval { 2 };
+    CustomOptional<bool> DlssNrCacheAdaptive { false };
+    CustomOptional<float> DlssNrCacheAdaptiveThreshold { 0.10f };
+    CustomOptional<float> DlssNrCacheDepthTolerance { 0.10f };
+    CustomOptional<float> DlssNrCacheColourTolerance { 0.50f };
+    CustomOptional<float> DlssNrCacheHighDecay { 0.97f };
+    CustomOptional<float> DlssNrCacheRefreshBlend { 1.0f };
+    CustomOptional<float> DlssNrCacheLowGain { 1.0f };
+    CustomOptional<float> DlssNrCacheHighGain { 1.0f };
+    CustomOptional<bool> DlssNrCacheBilateral { true };
+    CustomOptional<float> DlssNrCacheStabilize { 0.5f };
+    CustomOptional<bool> DlssNrCacheDespeckle { true };
+    CustomOptional<bool> DlssNrCacheCrossfade { true };
+    CustomOptional<float> DlssNrCacheTemporal { 0.5f };
+    CustomOptional<float> DlssNrCacheLowTemporal { 0.95f };
+    CustomOptional<uint32_t> DlssNrCacheModelHistory { 1 };
+    CustomOptional<uint32_t> DlssNrCacheDebugView { 0 };
+
     // Split the upscaler in two and put the model between the halves.
     //
     // The upscaler is built to write at render resolution instead of display resolution, which for

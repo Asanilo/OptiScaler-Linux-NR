@@ -186,6 +186,17 @@ ExposureStatus GameExposureStatus();
 // What the pass last cost on the GPU, in milliseconds, or nothing if it has not been measured yet.
 std::optional<double> LastGpuTime();
 std::optional<double> LastStabilizerGpuTime();
+std::optional<double> LastEditCacheGpuTime();
+struct EditCacheStatus
+{
+    bool requested = false, active = false, cachedLastFrame = false;
+    unsigned long long refreshes = 0, cached = 0;
+    unsigned int interval = 1;
+    float lastRejected = 0.0f;
+    const char* lastRefreshReason = "";
+    const char* suspendedReason = "disabled";
+};
+EditCacheStatus GetEditCacheStatus();
 
 // What the white point meter last settled on, or 0 when it is not running. For the menu.
 

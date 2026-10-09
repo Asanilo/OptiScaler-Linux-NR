@@ -1,0 +1,43 @@
+{
+  "source_repository": "https://github.com/Skynizz/optiscaler-dlss5",
+  "source_commit": "591fd305a2a8e1eca92eee8ccd584925ac2791ae",
+  "integration_base": "502c41409797f460a9828e0a6c66dcc61f311eac",
+  "files": [
+    {
+      "path": "OptiScaler/shaders/dlssnr/DlssNr_EditCache_Dx12.cpp",
+      "source_sha256": "076bfd51144bca6ce48d15c67222ad47b2a5fc9f3e9a1d46d62e5fc1d5b71fba",
+      "source_size": 44993
+    },
+    {
+      "path": "OptiScaler/shaders/dlssnr/DlssNr_EditCache_Dx12.h",
+      "source_sha256": "d07ecb25e84c946a3df5127a092dbf84fa2a845693d69a90074c23e94d79b49f",
+      "source_size": 12215
+    },
+    {
+      "path": "OptiScaler/shaders/dlssnr/DlssNr_CacheCommon.h",
+      "source_sha256": "f1c6511acd4b94a674dfc84a07430482937deceeee61f6191de89a09367559bb",
+      "source_size": 5378
+    },
+    {
+      "path": "OptiScaler/shaders/dlssnr/precompile/dlssnr_cache.hlsl",
+      "source_sha256": "085c7b719642f9c5b74ce99589c30424d3dcd27efd4cc1d9d46971055c64e4f3",
+      "source_size": 38553
+    },
+    {
+      "path": "OptiScaler/shaders/dlssnr/precompile/DlssNr_Cache_Shader.h",
+      "source_sha256": "5a61def1f695e4268b0075b300bae1fd12465dc3e23dc5c9bf7309b5cac4b5c1",
+      "source_size": 458149
+    }
+  ],
+  "shader_compilation": {
+    "api": "D3DCompile through GE-Proton11-7 d3dcompiler_47",
+    "entry": "CSMain",
+    "target": "cs_5_0",
+    "flags": "D3DCOMPILE_OPTIMIZATION_LEVEL3",
+    "generator": "tools/compile_nr_shader.cpp",
+    "hlsl_sha256": "0efdd31f1976435b0b956b94814c96a70e68310b838f916aecc289375af02b4f",
+    "dxbc_size": 106152,
+    "dxbc_sha256": "37b922c51f85ba3570a82946bb61e5ef34f212849b5939684d50f22671d0f9c4",
+    "semantic_change": "Apply writes temporal intermediate if Temporal > 0 OR LowTemporal > 0"
+  }
+}

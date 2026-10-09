@@ -155,6 +155,96 @@ void RenderMenu(Config* config, float menuResScale)
         const bool comparisonOff = directDx12 && !DlssNr::EnabledAtD3D12Seam();
         if (directDx12)
         {
+            bool skyCache = config->DlssNrCacheEnabled.value_or_default();
+            ImGui::BeginDisabled(!enabled || comparisonOff);
+            if (ImGui::Checkbox("Sky anti-flicker + temporal cache (experimental)", &skyCache))
+            {
+                config->DlssNrCacheEnabled = skyCache;
+                LOG_INFO("DLSS-NR Sky anti-flicker/cache {}", skyCache ? "enabled" : "disabled");
+            }
+            HelpMarker(
+                "Reprojects only the NR edit onto every fresh game frame using depth and motion."
+                "\nIncludes refresh step limiting, despeckle, keyframe crossfade, detail and regional temporal "
+                "smoothing."
+                "\nInterval 1: NR every frame with anti-flicker. Interval 2: skip alternate NR model evaluations."
+                "\nThis changes NR frequency, not DLSS frame generation. Default is off."
+                "\nDirect D3D12 seams only. Debug/compare views and captures suspend it."
+                "\nIts effect on flicker and FPS must be checked in the game.");
+            if (skyCache)
+            {
+                if (ImGui::Button("Every-frame NR + anti-flicker"))
+                {
+                    config->DlssNrCacheInterval = 1u;
+                    config->DlssNrCacheAdaptive = false;
+                }
+                ImGui::SameLine();
+                if (ImGui::Button("Alternate-frame NR + anti-flicker"))
+                {
+                    config->DlssNrCacheInterval = 2u;
+                    config->DlssNrCacheAdaptive = false;
+                }
+                int interval = static_cast<int>(config->DlssNrCacheInterval.value_or_default());
+                if (ImGui::SliderInt("NR refresh interval", &interval, 1, 16, "%d input frames"))
+                    config->DlssNrCacheInterval = static_cast<uint32_t>(interval);
+                bool adaptive = config->DlssNrCacheAdaptive.value_or_default();
+                if (ImGui::Checkbox("Adapt interval to revealed pixels", &adaptive))
+                    config->DlssNrCacheAdaptive = adaptive;
+                HelpMarker("Optional Sky motion regimes. Fast motion refreshes more often; still scenes less often."
+                           "\nThe effective interval and actual refresh/cache counts are reported below.");
+                if (ImGui::CollapsingHeader("Sky anti-flicker settings"))
+                {
+                    const auto slider = [&](const char* label, auto& setting, float low, float high)
+                    {
+                        float value = setting.value_or_default();
+                        if (ImGui::SliderFloat(label, &value, low, high, "%.3f"))
+                            setting = value;
+                    };
+                    const auto toggle = [&](const char* label, auto& setting)
+                    {
+                        bool value = setting.value_or_default();
+                        if (ImGui::Checkbox(label, &value))
+                            setting = value;
+                    };
+                    slider("Sky maximum refresh step (stops)", config->DlssNrCacheStabilize, 0.0f, 4.0f);
+                    slider("Sky detail temporal weight", config->DlssNrCacheTemporal, 0.0f, 0.9f);
+                    HelpMarker("Fine-detail temporal blending and crossfade apply after SR."
+                               "\nBefore SR, camera jitter is reprojected and SR handles detail accumulation."
+                               "\nRegional luminance smoothing remains active in both placements.");
+                    slider("Sky regional luminance weight", config->DlssNrCacheLowTemporal, 0.0f, 0.95f);
+                    toggle("Sky despeckle", config->DlssNrCacheDespeckle);
+                    toggle("Sky refresh crossfade", config->DlssNrCacheCrossfade);
+                    slider("Sky refresh blend", config->DlssNrCacheRefreshBlend, 0.05f, 1.0f);
+                    slider("Sky depth tolerance", config->DlssNrCacheDepthTolerance, 0.005f, 1.0f);
+                    slider("Sky colour tolerance (stops)", config->DlssNrCacheColourTolerance, 0.05f, 8.0f);
+                    slider("Sky cached detail survival", config->DlssNrCacheHighDecay, 0.0f, 1.0f);
+                    slider("Sky low-band gain", config->DlssNrCacheLowGain, 0.0f, 4.0f);
+                    slider("Sky high-band gain", config->DlssNrCacheHighGain, 0.0f, 4.0f);
+                    toggle("Sky depth-aware reconstruction", config->DlssNrCacheBilateral);
+                    slider("Sky adaptive rejection threshold", config->DlssNrCacheAdaptiveThreshold, 0.001f, 1.0f);
+                    int policy = static_cast<int>(config->DlssNrCacheModelHistory.value_or_default());
+                    const char* policies[] = { "Game vectors (advanced)", "Accumulate skipped-frame motion",
+                                               "Reset model every refresh" };
+                    if (ImGui::Combo("NR model history", &policy, policies, IM_ARRAYSIZE(policies)))
+                        config->DlssNrCacheModelHistory = static_cast<uint32_t>(policy);
+                    HelpMarker("Accumulation carries motion across skipped model frames."
+                               "\nReset is the fallback if accumulation fails."
+                               "\nGame vectors describe one input frame and can misalign model history when skipping.");
+                    int view = static_cast<int>(config->DlssNrCacheDebugView.value_or_default());
+                    const char* views[] = { "Normal", "History confidence", "Low band", "High band" };
+                    if (ImGui::Combo("Sky cache view", &view, views, IM_ARRAYSIZE(views)))
+                        config->DlssNrCacheDebugView = static_cast<uint32_t>(view);
+                }
+                const auto status = DlssNr::GetEditCacheStatus();
+                if (status.active)
+                    ImGui::TextDisabled("Sky: effective interval %u; cache refreshes %llu; cached frames %llu",
+                                        status.interval, status.refreshes, status.cached);
+                else
+                    ImGui::TextDisabled("Sky: waiting/suspended (%s)", status.suspendedReason);
+                if (auto ms = DlssNr::LastEditCacheGpuTime(); ms.has_value())
+                    ImGui::TextDisabled("Sky composition: %.3f ms (last completed GPU sample)", *ms);
+            }
+            ImGui::EndDisabled();
+            ImGui::BeginDisabled(skyCache);
             bool stabilization = config->DlssNrStabilizationEnabled.value_or_default();
             if (ImGui::Checkbox("Edit stabilization (experimental)", &stabilization))
             {
@@ -177,6 +267,7 @@ void RenderMenu(Config* config, float menuResScale)
                 if (auto ms = DlssNr::LastStabilizerGpuTime(); ms.has_value())
                     ImGui::TextDisabled("Stabilization: %.3f ms (last completed GPU sample)", *ms);
             }
+            ImGui::EndDisabled();
         }
 
         // Turning the pass off does not release the model, so the feature handle stays alive and
@@ -222,8 +313,14 @@ void RenderMenu(Config* config, float menuResScale)
             const auto ms = vulkan ? DlssNr::LastGpuTimeVk() : DlssNr::LastGpuTime();
 
             if (ms.has_value())
-                ImGui::TextColored(ImVec4(0.4f, 0.9f, 0.5f, 1.0f), "Running%s - %.2f ms per frame",
-                                   vulkan ? " natively on Vulkan" : "", ms.value());
+            {
+                if (!vulkan && config->DlssNrCacheEnabled.value_or_default())
+                    ImGui::TextColored(ImVec4(0.4f, 0.9f, 0.5f, 1.0f), "Running - %.2f ms (last completed NR pass)",
+                                       ms.value());
+                else
+                    ImGui::TextColored(ImVec4(0.4f, 0.9f, 0.5f, 1.0f), "Running%s - %.2f ms per frame",
+                                       vulkan ? " natively on Vulkan" : "", ms.value());
+            }
             else if (vulkan)
                 // Measured but not yet read: the first few frames are still in the query ring.
                 ImGui::TextColored(ImVec4(0.4f, 0.9f, 0.5f, 1.0f), "Running natively on Vulkan - %llu frames",
@@ -236,6 +333,8 @@ void RenderMenu(Config* config, float menuResScale)
             if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
                 ImGui::SetTooltip("The whole pass: the staging copies and the resolve as well as the"
                                   "\nmodel. Timing only the model would flatter the number."
+                                  "\nWith Sky caching, refresh and cached frames cost different amounts."
+                                  "\nThe last completed sample is not an average, median or FPS measurement."
                                   "\n\nCompare it against the frame time at the bottom of this window to"
                                   "\nsee what it is costing you.");
         }

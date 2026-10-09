@@ -341,6 +341,24 @@ bool Config::Reload(std::filesystem::path iniPath)
             DlssNrStabilizationDepthTolerance.set_from_config(readFloat("DlssNr", "StabilizationDepthTolerance"));
             DlssNrStabilizationColourTolerance.set_from_config(readFloat("DlssNr", "StabilizationColourTolerance"));
             DlssNrStabilizationDespeckle.set_from_config(readBool("DlssNr", "StabilizationDespeckle"));
+            DlssNrCacheEnabled.set_from_config(readBool("DlssNr", "CacheEnabled"));
+            DlssNrCacheInterval.set_from_config(readUInt("DlssNr", "CacheInterval"));
+            DlssNrCacheAdaptive.set_from_config(readBool("DlssNr", "CacheAdaptive"));
+            DlssNrCacheAdaptiveThreshold.set_from_config(readFloat("DlssNr", "CacheAdaptiveThreshold"));
+            DlssNrCacheDepthTolerance.set_from_config(readFloat("DlssNr", "CacheDepthTolerance"));
+            DlssNrCacheColourTolerance.set_from_config(readFloat("DlssNr", "CacheColourTolerance"));
+            DlssNrCacheHighDecay.set_from_config(readFloat("DlssNr", "CacheHighDecay"));
+            DlssNrCacheRefreshBlend.set_from_config(readFloat("DlssNr", "CacheRefreshBlend"));
+            DlssNrCacheLowGain.set_from_config(readFloat("DlssNr", "CacheLowGain"));
+            DlssNrCacheHighGain.set_from_config(readFloat("DlssNr", "CacheHighGain"));
+            DlssNrCacheBilateral.set_from_config(readBool("DlssNr", "CacheBilateral"));
+            DlssNrCacheStabilize.set_from_config(readFloat("DlssNr", "CacheStabilize"));
+            DlssNrCacheDespeckle.set_from_config(readBool("DlssNr", "CacheDespeckle"));
+            DlssNrCacheCrossfade.set_from_config(readBool("DlssNr", "CacheCrossfade"));
+            DlssNrCacheTemporal.set_from_config(readFloat("DlssNr", "CacheTemporal"));
+            DlssNrCacheLowTemporal.set_from_config(readFloat("DlssNr", "CacheLowTemporal"));
+            DlssNrCacheModelHistory.set_from_config(readUInt("DlssNr", "CacheModelHistory"));
+            DlssNrCacheDebugView.set_from_config(readUInt("DlssNr", "CacheDebugView"));
             // Sky's spelling is accepted when the native y4m key is absent/auto.
             DlssNrPreUpscale.set_from_config(readBool("DlssNr", "PreSr"));
             DlssNrDualFeature.set_from_config(readBool("DlssNr", "DualFeature"));
@@ -1243,6 +1261,41 @@ bool Config::SaveIni()
                      GetFloatValue(Instance()->DlssNrStabilizationColourTolerance.value_for_config()).c_str());
         ini.SetValue("DlssNr", "StabilizationDespeckle",
                      GetBoolValue(Instance()->DlssNrStabilizationDespeckle.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "CacheEnabled", GetBoolValue(Instance()->DlssNrCacheEnabled.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "CacheInterval",
+                     GetIntValue(Instance()->DlssNrCacheInterval.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "CacheAdaptive",
+                     GetBoolValue(Instance()->DlssNrCacheAdaptive.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "CacheAdaptiveThreshold",
+                     GetFloatValue(Instance()->DlssNrCacheAdaptiveThreshold.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "CacheDepthTolerance",
+                     GetFloatValue(Instance()->DlssNrCacheDepthTolerance.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "CacheColourTolerance",
+                     GetFloatValue(Instance()->DlssNrCacheColourTolerance.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "CacheHighDecay",
+                     GetFloatValue(Instance()->DlssNrCacheHighDecay.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "CacheRefreshBlend",
+                     GetFloatValue(Instance()->DlssNrCacheRefreshBlend.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "CacheLowGain",
+                     GetFloatValue(Instance()->DlssNrCacheLowGain.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "CacheHighGain",
+                     GetFloatValue(Instance()->DlssNrCacheHighGain.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "CacheBilateral",
+                     GetBoolValue(Instance()->DlssNrCacheBilateral.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "CacheStabilize",
+                     GetFloatValue(Instance()->DlssNrCacheStabilize.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "CacheDespeckle",
+                     GetBoolValue(Instance()->DlssNrCacheDespeckle.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "CacheCrossfade",
+                     GetBoolValue(Instance()->DlssNrCacheCrossfade.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "CacheTemporal",
+                     GetFloatValue(Instance()->DlssNrCacheTemporal.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "CacheLowTemporal",
+                     GetFloatValue(Instance()->DlssNrCacheLowTemporal.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "CacheModelHistory",
+                     GetIntValue(Instance()->DlssNrCacheModelHistory.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "CacheDebugView",
+                     GetIntValue(Instance()->DlssNrCacheDebugView.value_for_config()).c_str());
         ini.SetValue("DlssNr", "DualFeature", GetBoolValue(Instance()->DlssNrDualFeature.value_for_config()).c_str());
         ini.SetValue(
             "DlssNr", "DualEnlarger",

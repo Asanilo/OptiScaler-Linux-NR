@@ -1,0 +1,957 @@
+// The temporal edit cache for Neural Rendering. See DlssNr_CacheCommon.h for what it is and why.
+//
+// The edit is stored as log2((edited + eps) / (original + eps)) per channel. A ratio rather than a
+// difference because a ratio survives the lighting changing underneath it -- a torch flickering, the
+// exposure adapting -- and log so that averaging it (the pyramid, the bilinear taps) is a geometric
+// mean of ratios rather than an arithmetic one, which would favour brightening.
+//
+// Compiled with fxc cs_5_0 like the composition shader beside it; see README.md, "Editing the shader".
+
+cbuffer Params : register(b0)
+{
+    uint  gMode;
+    uint  gWidth;
+    uint  gHeight;
+    uint  gDepthW;
+    uint  gDepthH;
+    uint  gMotionW;
+    uint  gMotionH;
+    float gMvScaleX;
+    float gMvScaleY;
+    uint  gDepthInverted;
+    float gEpsilon;
+    float gDepthTol;
+    float gColourTol;
+    float gHighDecay;
+    float gRefreshBlend;
+    uint  gHistValid;
+    float gLowGain;
+    float gHighGain;
+    uint  gBilateral;
+    uint  gDebugView;
+    uint  gStatsSlot;
+    uint  gAccReset;
+    uint  gPassthrough;
+    float gJbuSigma;
+    uint  gSrcW;
+    uint  gSrcH;
+    uint  gFrameIndex;
+    uint  gUseGameExposure; // the game's live exposure is bound at t10: white = gExposurePreMul / exposure
+    float gExposurePreMul;
+    float gMaxLumaEdit;     // the most, in stops, the composition can move a pixel's luminance
+    float gStabilize;       // anti-flicker: the most a refresh may move a still-valid pixel's edit, in stops (0 off)
+    uint  gDespeckle;       // bound each fresh edit by its eight neighbours' (isolated dark specks)
+    uint  gCrossfadeOn;     // keyframe crossfade: the shown edit walks toward the model's latest answer
+    float gCrossfade;       // this frame's step: 1 / (frames left until the model runs again)
+    float gTemporal;        // temporal stabiliser: weight of the reprojected, clamped previous edit (0 off)
+    uint  gTemporalValid;   // the previous stabilised edit exists and belongs to this raster
+    float gLowTemporal;     // luminance stability: weight of the reprojected regional (low band) edit (0 off)
+    float gJitterDeltaX;    // pre-SR: this frame's change of camera jitter, in uv, added to every reprojection
+    float gJitterDeltaY;
+};
+
+Texture2D<float4>   gHistEdit  : register(t0); // rgb: log2 edit, a: high-band confidence
+Texture2D<float4>   gHistGuide : register(t1); // r: pseudo-linear depth, g: log2 luma of the frame
+Texture2D<float4>   gColour    : register(t2); // the frame as the upscaler wrote it (or the full proxy)
+Texture2D<float4>   gDepth     : register(t3);
+Texture2D<float4>   gMotion    : register(t4);
+Texture2D<float4>   gAux0      : register(t5); // per mode: NR result / L1 / small proxy / previous acc
+Texture2D<float4>   gAux1      : register(t6); // per mode: L1 guide / small model answer
+Texture2D<float4>   gAux2      : register(t7); // L2
+Texture2D<float4>   gAux3      : register(t8); // L3
+// t9 is bound to a stand-in and read by nothing.
+Texture2D<float4>   gExposure  : register(t10); // the game's 1x1 exposure, when it supplies one
+Texture2D<float4>   gHistTarget : register(t11); // keyframe crossfade: the model's latest answer, carried
+
+RWTexture2D<float4> gOut0  : register(u0);
+RWTexture2D<float4> gOut1  : register(u1);
+RWTexture2D<float4> gOut2  : register(u2);
+RWTexture2D<float4> gOut3  : register(u3);
+RWTexture2D<float4> gOut4  : register(u4);
+RWTexture2D<uint>   gStats : register(u5);
+RWTexture2D<float4> gOut6  : register(u6); // keyframe crossfade: the carried target, written
+
+SamplerState gLinear : register(s0);
+
+static const float3 kLuma = float3(0.2126, 0.7152, 0.0722);
+
+// Every stored edit is clamped to 16x either way. The composition's own guard is far tighter on
+// luminance, so this binds only on chroma outliers -- a near-black channel against a lit one -- and
+// keeps one bad texel from becoming a firefly that the pyramid then spreads.
+static const float kMaxEdit = 4.0;
+
+float LinDepth(float d)
+{
+    // Proportional to view depth for either convention, without the projection: reversed-Z stores
+    // near/z, a forward buffer stores roughly 1 - near/z. Only ratios of this are ever taken.
+    return gDepthInverted != 0 ? 1.0 / max(d, 1e-7) : 1.0 / max(1.0 - d, 1e-7);
+}
+
+// The ratio floor, from the same white point the composition used on this very frame.
+//
+// It was paper white / 512 from the CPU's white point, which in a game that supplies its exposure is
+// read back three frames late -- and Control's exposure swings by three orders of magnitude within a
+// second after a cut. A floor a thousand times too small makes every ratio in the shadows explode:
+// near-black pixels become black or bright, and with bands refreshing in turn they pop on and off.
+// Reading the live exposure here, exactly as dlssnr.hlsl does, keeps the floor where the composition's
+// own guard put it.
+float WhitePoint()
+{
+    float white = max(gEpsilon * 512.0, 1e-4);
+
+    if (gUseGameExposure != 0)
+    {
+        const float e = gExposure.Load(int3(0, 0, 0)).r;
+
+        if (e > 1e-6 && e < 1e6)
+            white = clamp(gExposurePreMul / e, 0.01, 4096.0);
+    }
+
+    return white;
+}
+
+float Eps() { return WhitePoint() / 512.0; }
+
+float LogLuma(float3 c) { return log2(dot(max(c, 0.0), kLuma) + Eps()); }
+
+// An edit bounded to what the composition can actually produce: its luminance within the highlight
+// guard (plus a little for the soft knee), its colour within a stop of its luminance. Anything beyond
+// is not a model verdict but a ratio against a near-black pixel, and carrying it is what flickers.
+float3 ClampEdit(float3 e, float scale)
+{
+    const float limit = gMaxLumaEdit * max(scale, 1.0);
+    const float l = dot(e, kLuma);
+    const float lc = clamp(l, -limit, limit);
+    e += lc - l;
+    return clamp(e, lc - 1.0, lc + 1.0);
+}
+
+// Anti-flicker. Where the carried edit still belongs to this surface, a refresh may move its luminance
+// by at most gStabilize stops. The model re-decides small things every run -- that is detail, and it
+// passes -- but now and then it re-decides a dark patch by a stop or more and back again, which is
+// the black popping. A limit on the step lets the first through and holds the second.
+float3 Stabilize(float3 fresh, float3 carried, float trust)
+{
+    if (gStabilize <= 0.0 || trust < 0.5)
+        return fresh;
+
+    const float lf = dot(fresh, kLuma);
+    const float lc = dot(carried, kLuma);
+    const float l = lc + clamp(lf - lc, -gStabilize, gStabilize);
+    return fresh + (l - lf);
+}
+
+// The model's edit for one pixel, and whether to believe it. A model answer that is black where the
+// frame is not is a failed evaluate (a band's first frame, a reset), not a verdict to carry for N frames.
+float3 FreshEdit(float3 nr, float3 orig, out float ok)
+{
+    const float eps = Eps();
+    nr = max(nr, 0.0);
+    orig = max(orig, 0.0);
+
+    const float lo = dot(orig, kLuma);
+    const float ln = dot(nr, kLuma);
+    ok = (lo > 8.0 * eps && ln < 0.05 * lo) ? 0.0 : 1.0;
+
+    return ClampEdit(log2((nr + eps) / (orig + eps)), 1.0);
+}
+
+// The model's fresh edit at a pixel, with its eight neighbours' edits bounding its luminance.
+//
+// The model's characteristic failure in shadows is a speck: a few pixels it suddenly darkens by a stop
+// or more while everything around them stays put, and next run they are back. An edit that is darker
+// (or brighter) than every one of its neighbours is that speck, not structure -- a real edge has
+// neighbours on its own side that agree with it -- so it is brought back to the range they span.
+//
+// nr is read from gAux0 at nrPos (band-local or frame coordinates), the frame from gColour at framePos.
+float3 FreshEditAt(int2 framePos, int2 nrPos, int2 nrSize, out float ok)
+{
+    const float3 e = FreshEdit(gAux0.Load(int3(nrPos, 0)).rgb, gColour.Load(int3(framePos, 0)).rgb, ok);
+
+    if (gDespeckle == 0)
+        return e;
+
+    float lo = 1e9, hi = -1e9;
+
+    [unroll] for (int k = 0; k < 9; ++k)
+    {
+        if (k == 4)
+            continue;
+
+        const int2 o = int2(k % 3 - 1, k / 3 - 1);
+        const int2 pn = clamp(nrPos + o, int2(0, 0), nrSize - 1);
+        const int2 pf = clamp(framePos + o, int2(0, 0), int2(gWidth, gHeight) - 1);
+
+        float okn;
+        const float3 en = FreshEdit(gAux0.Load(int3(pn, 0)).rgb, gColour.Load(int3(pf, 0)).rgb, okn);
+
+        if (okn > 0.5)
+        {
+            const float l = dot(en, kLuma);
+            lo = min(lo, l);
+            hi = max(hi, l);
+        }
+    }
+
+    if (hi < lo)
+        return e;
+
+    const float l = dot(e, kLuma);
+    const float lc = clamp(l, lo - 0.1, hi + 0.1);
+    return e + (lc - l);
+}
+
+
+float RelDepthDiff(float a, float b) { return abs(a - b) / max(min(a, b), 1e-7); }
+
+int2 DepthTexel(float2 uv)
+{
+    return clamp(int2(uv * float2(gDepthW, gDepthH)), int2(0, 0), int2(gDepthW, gDepthH) - 1);
+}
+
+int2 MotionTexel(float2 uv)
+{
+    return clamp(int2(uv * float2(gMotionW, gMotionH)), int2(0, 0), int2(gMotionW, gMotionH) - 1);
+}
+
+// Where this pixel was last frame, as an offset in uv.
+//
+// The vector is taken from the nearest surface in a 3x3 neighbourhood rather than the pixel itself,
+// as every TAA does: at a silhouette the render-resolution vector under a display pixel can belong to
+// the background while the pixel shows the foreground, and the foreground is the one that moved.
+float2 MotionUvOffset(float2 uv)
+{
+    const int2 c = DepthTexel(uv);
+    int2 best = c;
+    float bestLin = 3.4e38;
+
+    [unroll] for (int dy = -1; dy <= 1; ++dy)
+    {
+        [unroll] for (int dx = -1; dx <= 1; ++dx)
+        {
+            const int2 t = clamp(c + int2(dx, dy), int2(0, 0), int2(gDepthW, gDepthH) - 1);
+            const float l = LinDepth(gDepth.Load(int3(t, 0)).r);
+
+            if (l < bestLin)
+            {
+                bestLin = l;
+                best = t;
+            }
+        }
+    }
+
+    const float2 bestUv = (float2(best) + 0.5) / float2(gDepthW, gDepthH);
+    const float2 mv = gMotion.Load(int3(MotionTexel(bestUv), 0)).xy * float2(gMvScaleX, gMvScaleY);
+
+    // Pre-SR works on the game's jittered render: each frame samples the scene a fraction of a pixel
+    // elsewhere and the motion vectors leave that out, so the change of jitter is added here (0 after
+    // the upscaler, where the frame is not jittered).
+    return mv / float2(gMotionW, gMotionH) + float2(gJitterDeltaX, gJitterDeltaY);
+}
+
+// The history at q, with each of the four bilinear taps admitted only if its depth agrees with this
+// pixel's. Taps on another surface are dropped and the rest renormalised, so an edit never bleeds
+// across a silhouette -- the foreground's verdict stays on the foreground.
+struct History
+{
+    float3 edit;
+    float confidence;
+    float3 target;     // keyframe crossfade: the model's latest answer, reprojected like the shown edit
+    float targetConfidence;
+    float logLuma;
+    float valid; // the fraction of the bilinear weight that passed, 0..1
+};
+
+// A history texture at uv q, Catmull-Rom filtered in five bilinear taps (the usual TAA arrangement).
+float3 CatmullRom(Texture2D<float4> tex, float2 q)
+{
+    const float2 size = float2(gWidth, gHeight);
+    const float2 samplePos = q * size;
+    const float2 texPos1 = floor(samplePos - 0.5) + 0.5;
+    const float2 f = samplePos - texPos1;
+
+    const float2 w0 = f * (-0.5 + f * (1.0 - 0.5 * f));
+    const float2 w1 = 1.0 + f * f * (-2.5 + 1.5 * f);
+    const float2 w2 = f * (0.5 + f * (2.0 - 1.5 * f));
+    const float2 w3 = f * f * (-0.5 + 0.5 * f);
+
+    const float2 w12 = w1 + w2;
+    const float2 offset12 = w2 / max(w12, 1e-6);
+
+    const float2 tc0 = (texPos1 - 1.0) / size;
+    const float2 tc3 = (texPos1 + 2.0) / size;
+    const float2 tc12 = (texPos1 + offset12) / size;
+
+    float3 r = 0.0;
+    r += tex.SampleLevel(gLinear, float2(tc12.x, tc0.y), 0).rgb * (w12.x * w0.y);
+    r += tex.SampleLevel(gLinear, float2(tc0.x, tc12.y), 0).rgb * (w0.x * w12.y);
+    r += tex.SampleLevel(gLinear, float2(tc12.x, tc12.y), 0).rgb * (w12.x * w12.y);
+    r += tex.SampleLevel(gLinear, float2(tc3.x, tc12.y), 0).rgb * (w3.x * w12.y);
+    r += tex.SampleLevel(gLinear, float2(tc12.x, tc3.y), 0).rgb * (w12.x * w3.y);
+
+    const float wsum = w12.x * w0.y + w0.x * w12.y + w12.x * w12.y + w3.x * w12.y + w12.x * w3.y;
+    return r / max(wsum, 1e-6);
+}
+
+History ReadHistory(float2 q, float linC, float tol)
+{
+    History h;
+    h.edit = 0.0;
+    h.confidence = 0.0;
+    h.target = 0.0;
+    h.targetConfidence = 0.0;
+    h.logLuma = 0.0;
+    h.valid = 0.0;
+
+    const float2 pos = q * float2(gWidth, gHeight) - 0.5;
+    const int2 i0 = (int2) floor(pos);
+    const float2 f = pos - floor(pos);
+
+    float wsum = 0.0;
+    float allValid = 1.0;
+    float3 lo = 1e9, hi = -1e9;
+    float3 tlo = 1e9, thi = -1e9;
+
+    [unroll] for (int k = 0; k < 4; ++k)
+    {
+        const int2 o = int2(k & 1, k >> 1);
+        const int2 t = clamp(i0 + o, int2(0, 0), int2(gWidth, gHeight) - 1);
+        const float wb = (o.x ? f.x : 1.0 - f.x) * (o.y ? f.y : 1.0 - f.y);
+
+        const float2 g = gHistGuide.Load(int3(t, 0)).xy;
+        const float rel = RelDepthDiff(g.x, linC);
+
+        // Full weight inside the tolerance, fading to none at twice it, so the decision does not
+        // flicker for a surface sitting right on the threshold.
+        const float wd = saturate((2.0 * tol - rel) / max(tol, 1e-6));
+        const float w = wb * wd;
+        allValid = min(allValid, wd);
+
+        const float4 e = gHistEdit.Load(int3(t, 0));
+        h.edit += e.rgb * w;
+        h.confidence += e.a * w;
+        h.logLuma += g.y * w;
+        wsum += w;
+        lo = min(lo, e.rgb);
+        hi = max(hi, e.rgb);
+
+        if (gCrossfadeOn != 0)
+        {
+            const float4 g4 = gHistTarget.Load(int3(t, 0));
+            h.target += g4.rgb * w;
+            h.targetConfidence += g4.a * w;
+            tlo = min(tlo, g4.rgb);
+            thi = max(thi, g4.rgb);
+        }
+    }
+
+    if (wsum > 1e-4)
+    {
+        h.edit /= wsum;
+        h.confidence /= wsum;
+        h.logLuma /= wsum;
+        h.target /= wsum;
+        h.targetConfidence /= wsum;
+    }
+
+    // Where all four taps are the same surface, the edit is read with Catmull-Rom instead of bilinear.
+    // A bilinear read is a small blur, and one blur per carried frame adds up: the detail softened a
+    // little more each frame and came back sharp when the model ran -- distant, fine things visibly
+    // breathed at the refresh rate. Catmull-Rom keeps the detail; clamping it to the four taps' range
+    // keeps its overshoot from inventing any.
+    //
+    // Blended in by how surely all four are that surface, not switched at a threshold: on a thin, distant
+    // thing that surety flickers from frame to frame, and a hard switch made its sharpness flicker with it.
+    if (allValid > 0.0)
+    {
+        h.edit = lerp(h.edit, clamp(CatmullRom(gHistEdit, q), lo, hi), allValid);
+
+        if (gCrossfadeOn != 0)
+            h.target = lerp(h.target, clamp(CatmullRom(gHistTarget, q), tlo, thi), allValid);
+    }
+
+    h.valid = saturate(wsum);
+    return h;
+}
+
+float3 SrgbToLinear(float3 v)
+{
+    v = saturate(v);
+    return lerp(v / 12.92, pow((v + 0.055) / 1.055, 2.4), step(0.04045, v));
+}
+
+float3 LinearToSrgb(float3 v)
+{
+    v = saturate(v);
+    return lerp(v * 12.92, 1.055 * pow(max(v, 1e-8), 1.0 / 2.4) - 0.055, step(0.0031308, v));
+}
+
+// Scale a residual so the result cannot leave the unit cube, without changing its direction -- the
+// same as the composition shader's, for the same reason.
+float3 CubeScaleResidual(float3 P, float3 T)
+{
+    float3 d = T - P;
+    float alpha = 1.0;
+
+    [unroll] for (int c = 0; c < 3; ++c)
+    {
+        if (d[c] > 1e-6)
+            alpha = min(alpha, (1.0 - P[c]) / d[c]);
+        else if (d[c] < -1e-6)
+            alpha = min(alpha, (0.0 - P[c]) / d[c]);
+    }
+
+    return P + saturate(alpha) * d;
+}
+
+// A coverage-weighted bilinear read of one pyramid level (rgb mean, a coverage). Plain bilinear
+// would blend toward the zeros stored where nothing was valid.
+float4 FetchLevel(Texture2D<float4> tex, uint2 size, float2 uv)
+{
+    const float2 pos = uv * float2(size) - 0.5;
+    const int2 i0 = (int2) floor(pos);
+    const float2 f = pos - floor(pos);
+
+    float3 acc = 0.0;
+    float wsum = 0.0;
+
+    [unroll] for (int k = 0; k < 4; ++k)
+    {
+        const int2 o = int2(k & 1, k >> 1);
+        const int2 t = clamp(i0 + o, int2(0, 0), int2(size) - 1);
+        const float wb = (o.x ? f.x : 1.0 - f.x) * (o.y ? f.y : 1.0 - f.y);
+        const float4 s = tex.Load(int3(t, 0));
+        const float w = wb * s.a;
+        acc += s.rgb * w;
+        wsum += w;
+    }
+
+    return float4(wsum > 1e-6 ? acc / wsum : 0.0, wsum);
+}
+
+uint2 LevelSize(uint level)
+{
+    uint2 s = uint2(gWidth, gHeight);
+
+    for (uint i = 0; i <= level; ++i)
+        s = (s + 3u) / 4u;
+
+    return s;
+}
+
+// --- The first pyramid level, built in the same pass that writes the history ---------------------
+//
+// An 8x8 group covers exactly 2x2 texels of a quarter-size level, so the reduction never leaves the
+// group: each thread parks its weighted edit and guide in shared memory, and one thread per 4x4
+// block sums them. That saves a full-resolution read of the history it just wrote.
+
+groupshared float4 sEdit[64];  // rgb: w * edit, a: w
+groupshared float2 sGuide[64]; // w * log2 depth, w * log2 luma
+groupshared uint sRejected;
+
+void ReduceToFirstLevel(uint3 gtid, uint3 id, float w, float3 edit, float linC, float logLuma)
+{
+    const uint li = gtid.y * 8 + gtid.x;
+    sEdit[li] = float4(edit * w, w);
+    sGuide[li] = float2(log2(linC) * w, logLuma * w);
+
+    GroupMemoryBarrierWithGroupSync();
+
+    if ((gtid.x & 3u) == 0 && (gtid.y & 3u) == 0)
+    {
+        float4 e = 0.0;
+        float2 g = 0.0;
+
+        [unroll] for (uint y = 0; y < 4; ++y)
+        {
+            [unroll] for (uint x = 0; x < 4; ++x)
+            {
+                const uint j = (gtid.y + y) * 8 + gtid.x + x;
+                e += sEdit[j];
+                g += sGuide[j];
+            }
+        }
+
+        const uint2 l1 = id.xy / 4u;
+        const uint2 l1Size = LevelSize(0);
+
+        if (l1.x < l1Size.x && l1.y < l1Size.y)
+        {
+            // Coverage is the fraction of the 16 pixels that carried weight, so a block half on a
+            // disocclusion counts for half when the levels are combined.
+            gOut3[l1] = float4(e.a > 1e-6 ? e.rgb / e.a : 0.0, e.a / 16.0);
+            gOut4[l1] = float4(e.a > 1e-6 ? g / e.a : 0.0, 0.0, 0.0);
+        }
+    }
+}
+
+[numthreads(8, 8, 1)]
+void CSMain(uint3 id : SV_DispatchThreadID, uint3 gtid : SV_GroupThreadID)
+{
+    const bool inside = id.x < gWidth && id.y < gHeight;
+    const float2 uv = (float2(id.xy) + 0.5) / float2(max(gWidth, 1u), max(gHeight, 1u));
+
+    if (gMode == 11)
+    {
+        // Pre-SR: the game's render-resolution colour, read where DLSS would read it, into the texture
+        // the pass rewrites and DLSS is then handed instead. Nothing of the game's own is written.
+        if (inside)
+            gOut0[id.xy] = gColour.Load(int3(id.xy, 0));
+
+        return;
+    }
+
+    if (gMode == 0)
+    {
+        if (id.x == 0 && id.y == 0)
+            gStats[uint2(gStatsSlot, 0)] = 0u;
+
+        return;
+    }
+
+    // Reproject (1) and capture (2) share the history read and the shared-memory reduction, so no
+    // thread may leave before the barrier inside it -- out-of-range threads contribute zero weight.
+    if (gMode == 1 || gMode == 2)
+    {
+        if (gtid.x == 0 && gtid.y == 0)
+            sRejected = 0u;
+
+        GroupMemoryBarrierWithGroupSync();
+
+        float w = 0.0;
+        float3 edit = 0.0;
+        float linC = 1.0;
+        float logLuma = 0.0;
+
+        if (inside)
+        {
+            const float4 colour = gColour.Load(int3(id.xy, 0));
+            linC = LinDepth(gDepth.Load(int3(DepthTexel(uv), 0)).r);
+            logLuma = LogLuma(colour.rgb);
+
+            const float depthTol = gDepthTol;
+            const float colourTol = max(gColourTol, 1e-3);
+
+            const float2 q = uv + MotionUvOffset(uv);
+            const bool onScreen = all(q >= 0.0) && all(q <= 1.0);
+
+            History h = (History) 0;
+
+            if (gHistValid != 0 && onScreen)
+                h = ReadHistory(q, linC, depthTol);
+
+            // Colour: the same surface should look roughly the same. A leaf that swayed, a particle,
+            // water: the frame under the edit is no longer the frame it was computed for. This
+            // rejects only the high band -- the low band is a property of the region, and survives.
+            const float colourDiff = abs(logLuma - h.logLuma);
+            const float vColour = saturate((2.0 * colourTol - colourDiff) / colourTol);
+
+            if (gMode == 1)
+            {
+                gOut2[id.xy] = colour; // the untouched frame, kept for the apply
+
+                // Keyframe crossfade: the shown edit takes this frame's share of the way to the model's
+                // latest answer, so that it arrives exactly when the model runs again -- the change spread
+                // evenly over the frames between runs instead of landing on one of them as a step.
+                float3 shownEdit = h.edit;
+                float shownConfidence = h.confidence;
+
+                if (gCrossfadeOn != 0)
+                {
+                    shownEdit = lerp(h.edit, h.target, saturate(gCrossfade));
+                    shownConfidence = lerp(h.confidence, h.targetConfidence, saturate(gCrossfade));
+                }
+
+                edit = shownEdit;
+                w = h.valid;
+
+                // Confidence decays with age and with every doubt -- depth or colour -- and only
+                // ever comes back on a refresh.
+                // A colour failure costs confidence rather than all of it. Fine distant things alias a
+                // little from frame to frame and passed or failed the colour test at random, so their
+                // detail switched on and off; now a single failure dims it and only a run of them --
+                // a surface that really changed, like grass in the wind -- takes it away.
+                const float doubt = lerp(0.6, 1.0, vColour) * saturate(2.0 * h.valid - 1.0) * gHighDecay;
+                float confidence = shownConfidence * doubt;
+
+                if (gCrossfadeOn != 0)
+                    gOut6[id.xy] = float4(h.target, saturate(h.targetConfidence * doubt));
+
+                gOut0[id.xy] = float4(edit, saturate(confidence));
+
+                if (h.valid < 0.5)
+                    InterlockedAdd(sRejected, 1u);
+            }
+            else
+            {
+                float ok;
+                const float3 fresh = Stabilize(FreshEditAt(int2(id.xy), int2(id.xy), int2(gWidth, gHeight), ok),
+                                               h.edit, gHistValid != 0 ? h.valid * vColour : 0.0);
+
+                // Optional temporal smoothing of the refresh: where the carried edit is still valid,
+                // move only part of the way to the new one. 1 takes the new answer whole. A pixel the
+                // model returned black for keeps what was carried.
+                float keep = (gHistValid != 0) ? (1.0 - gRefreshBlend) * h.valid * vColour : 0.0;
+
+                if (ok < 0.5)
+                    keep = (gHistValid != 0 && h.valid > 0.5) ? 1.0 : 0.0;
+
+                edit = lerp(fresh, h.edit, saturate(keep));
+                w = 1.0;
+
+                if (gCrossfadeOn != 0)
+                {
+                    // The model's answer becomes the target, whole. What is shown takes the first step of
+                    // the walk toward it, from what was shown before -- where that is still the same
+                    // surface; elsewhere there is nothing to walk from, and the answer is shown at once.
+                    const bool carry = gHistValid != 0 && h.valid > 0.5 && ok > 0.5;
+                    const float a = carry ? saturate(gCrossfade) : 1.0;
+                    gOut6[id.xy] = float4(edit, 1.0);
+                    edit = lerp(h.edit, edit, a);
+                    gOut0[id.xy] = float4(edit, carry ? lerp(h.confidence, 1.0, a) : 1.0);
+                }
+                else
+                {
+                    gOut0[id.xy] = float4(edit, 1.0);
+                }
+            }
+
+            gOut1[id.xy] = float4(linC, logLuma, 0.0, 0.0);
+        }
+
+        ReduceToFirstLevel(gtid, id, w, edit, linC, logLuma);
+
+        if (gMode == 1)
+        {
+            GroupMemoryBarrierWithGroupSync();
+
+            if (gtid.x == 0 && gtid.y == 0 && sRejected > 0u)
+                InterlockedAdd(gStats[uint2(gStatsSlot, 0)], sRejected);
+        }
+
+        return;
+    }
+
+    if (!inside)
+        return;
+
+    if (gMode == 3)
+    {
+        // One level from the one above it: each texel is the coverage-weighted mean of a 4x4 block.
+        float3 acc = 0.0;
+        float wsum = 0.0;
+
+        [unroll] for (uint y = 0; y < 4; ++y)
+        {
+            [unroll] for (uint x = 0; x < 4; ++x)
+            {
+                const uint2 s = id.xy * 4u + uint2(x, y);
+
+                if (s.x < gSrcW && s.y < gSrcH)
+                {
+                    const float4 v = gAux0.Load(int3(s, 0));
+                    acc += v.rgb * v.a;
+                    wsum += v.a;
+                }
+            }
+        }
+
+        gOut0[id.xy] = float4(wsum > 1e-6 ? acc / wsum : 0.0, wsum / 16.0);
+        return;
+    }
+
+    if (gMode == 4)
+    {
+        const float4 original = gColour.Load(int3(id.xy, 0));
+        const float4 hist = gHistEdit.Load(int3(id.xy, 0));
+        const float2 guide = gHistGuide.Load(int3(id.xy, 0)).xy;
+
+        // The low band: the history pulled from the pyramid, finest level that has something to say.
+        //
+        // The first level is read jointly-bilaterally -- each tap weighted by how much its depth and
+        // luma resemble this pixel's -- so the borrowed edit comes from the same surface rather than
+        // from whatever is nearest. Coarser levels only fill what the finer ones could not, which is
+        // the push-pull reconstruction: a hole the size of a character still gets its region's edit.
+        const uint2 l1Size = LevelSize(0);
+        const float2 pos = uv * float2(l1Size) - 0.5;
+        const int2 i0 = (int2) floor(pos);
+        const float2 f = pos - floor(pos);
+        const float logD = log2(max(guide.x, 1e-7));
+
+        float3 acc1 = 0.0;
+        float w1 = 0.0;
+
+        [unroll] for (int k = 0; k < 4; ++k)
+        {
+            const int2 o = int2(k & 1, k >> 1);
+            const int2 t = clamp(i0 + o, int2(0, 0), int2(l1Size) - 1);
+            const float wb = (o.x ? f.x : 1.0 - f.x) * (o.y ? f.y : 1.0 - f.y);
+            const float4 s = gAux0.Load(int3(t, 0));
+            float w = wb * s.a;
+
+            if (gBilateral != 0)
+            {
+                const float2 g = gAux1.Load(int3(t, 0)).xy;
+                const float dd = (g.x - logD) / 0.15; // ~11% in depth
+                const float dl = (g.y - guide.y) / 1.0; // one stop of luma
+                w *= exp(-(dd * dd + dl * dl));
+            }
+
+            acc1 += s.rgb * w;
+            w1 += w;
+        }
+
+        const float4 l2 = FetchLevel(gAux2, LevelSize(1), uv);
+        const float4 l3 = FetchLevel(gAux3, LevelSize(2), uv);
+
+        float3 low = l3.a > 1e-6 ? l3.rgb : 0.0;
+        low = lerp(low, l2.rgb, saturate(l2.a * 4.0));
+        low = lerp(low, w1 > 1e-6 ? acc1 / w1 : low, saturate(w1 * 4.0));
+
+        // The high band is what the pixel's own history says beyond its region, and it is only as
+        // good as its confidence. Where the history was rejected the pixel takes the low band alone.
+        const float3 high = hist.rgb - low;
+        const float3 edit = ClampEdit(gLowGain * low + gHighGain * hist.a * high, max(gLowGain, gHighGain));
+
+        const float eps = Eps();
+        float3 result = max((max(original.rgb, 0.0) + eps) * exp2(edit) - eps, 0.0);
+
+        // With the temporal stabiliser on, this pass only hands its edit on; mode 10 writes the frame.
+        if ((gTemporal > 0.0 || gLowTemporal > 0.0) && gDebugView == 0)
+        {
+            gOut3[id.xy] = float4(edit, 1.0);
+            return;
+        }
+
+        // Debug views, in the frame's own units.
+        const float white = WhitePoint();
+
+        if (gDebugView == 1)
+        {
+            // Green: the pixel's own history is trusted. Red: it was rejected and the low band stands in.
+            const float c = hist.a;
+            result = float3(1.0 - c, c, 0.15) * white * 0.5;
+        }
+        else if (gDebugView == 2)
+        {
+            result = saturate(0.5 + dot(low, kLuma) * 2.0).xxx * white * 0.5;
+        }
+        else if (gDebugView == 3)
+        {
+            result = saturate(0.5 + dot(hist.a * high, kLuma) * 8.0).xxx * white * 0.5;
+        }
+
+        gOut0[id.xy] = float4(result, original.a);
+        return;
+    }
+
+    if (gMode == 5)
+    {
+        // The motion since the model last ran, chained frame to frame at the motion texture's own
+        // resolution and in the game's own units, so the model's scale still applies. Without this the
+        // model, run one frame in N, is told only one frame of motion and reprojects its history to the
+        // wrong place.
+        const float2 mv = gMotion.Load(int3(id.xy, 0)).xy;
+        float2 acc = mv;
+
+        if (gAccReset == 0)
+        {
+            const float2 prevPos = float2(id.xy) + 0.5 + mv * float2(gMvScaleX, gMvScaleY);
+
+            if (all(prevPos >= 0.0) && prevPos.x <= (float) gWidth && prevPos.y <= (float) gHeight)
+                acc += gAux0.SampleLevel(gLinear, prevPos / float2(gSrcW, gSrcH), 0).xy;
+        }
+
+        gOut0[id.xy] = float4(acc, 0.0, 0.0);
+        return;
+    }
+
+    if (gMode == 6)
+    {
+        // Joint bilateral upsampling of the model's residual, for a model that ran below the frame.
+        //
+        // The bilinear enlargement the resolve does reads the four nearest small texels whatever is in
+        // them, so the edit smears across every edge the small raster could not resolve. Here each tap
+        // is weighted by how much the small proxy under it resembles the full proxy at this pixel --
+        // guided by the native image -- so the edit lands on the surface it was computed for.
+        const float4 full = gColour.Load(int3(id.xy, 0));
+        const float3 P = gPassthrough != 0 ? full.rgb : SrgbToLinear(full.rgb);
+        const float lFull = dot(full.rgb, kLuma);
+
+        const float2 pos = uv * float2(gSrcW, gSrcH) - 0.5;
+        const int2 i0 = (int2) floor(pos);
+        const float2 f = pos - floor(pos);
+        const float inv = 1.0 / max(gJbuSigma, 1e-4);
+
+        float3 acc = 0.0, accB = 0.0;
+        float wsum = 0.0;
+
+        [unroll] for (int k = 0; k < 4; ++k)
+        {
+            const int2 o = int2(k & 1, k >> 1);
+            const int2 t = clamp(i0 + o, int2(0, 0), int2(gSrcW, gSrcH) - 1);
+            const float wb = (o.x ? f.x : 1.0 - f.x) * (o.y ? f.y : 1.0 - f.y);
+
+            const float3 ps = gAux0.Load(int3(t, 0)).rgb;
+            const float3 ms = gAux1.Load(int3(t, 0)).rgb;
+            const float3 e = gPassthrough != 0 ? ms - ps : SrgbToLinear(ms) - SrgbToLinear(ps);
+
+            const float dl = (lFull - dot(ps, kLuma)) * inv;
+            const float w = wb * exp(-dl * dl);
+
+            acc += e * w;
+            accB += e * wb;
+            wsum += w;
+        }
+
+        // Nothing resembles this pixel (a sub-texel highlight): fall back to plain bilinear.
+        const float3 e = wsum > 1e-4 ? acc / wsum : accB;
+
+        float3 M;
+
+        if (gPassthrough != 0)
+            M = max(P + e, 0.0);
+        else
+            M = LinearToSrgb(CubeScaleResidual(saturate(P), saturate(P) + e));
+
+        gOut0[id.xy] = float4(M, full.a);
+        return;
+    }
+
+    if (gMode == 10)
+    {
+        // The edit's regional light at uv: a 3x3 tent of bilinear taps a dozen pixels apart, which is
+        // the region a few dozen pixels across that a shift of overall brightness covers.
+        // The temporal stabiliser: the shown edit, blended with last frame's shown edit reprojected --
+        // with that history clamped to the range this frame's own 3x3 neighbourhood spans (variance
+        // clipping, as every TAA does). Whatever the model re-decides from frame to frame within that
+        // range -- the flicker, the specks, the swimming of synthesised detail -- is averaged out; a
+        // history that no longer fits (a surface revealed, a light switched on) is pulled back to the
+        // present instead of trailing. The edit then moves with the motion vectors, which is also what
+        // frame generation assumes when it builds the frames in between.
+        const float4 original = gColour.Load(int3(id.xy, 0));
+        const float3 e = gAux0.Load(int3(id.xy, 0)).rgb;
+
+        float m1 = 0.0, m2 = 0.0;
+
+        [unroll] for (int k = 0; k < 9; ++k)
+        {
+            const int2 t = clamp(int2(id.xy) + int2(k % 3 - 1, k / 3 - 1), int2(0, 0), int2(gWidth, gHeight) - 1);
+            const float l = dot(gAux0.Load(int3(t, 0)).rgb, kLuma);
+            m1 += l;
+            m2 += l * l;
+        }
+
+        const float mu = m1 / 9.0;
+        const float sigma = sqrt(max(m2 / 9.0 - mu * mu, 0.0));
+
+        float3 outEdit = e;
+
+        // The regional light of this frame's edit, for the luminance stability below.
+        const float2 texel = 12.0 / float2(gWidth, gHeight);
+        float3 lowNow = 0.0;
+
+        if (gLowTemporal > 0.0)
+        {
+            [unroll] for (int r = 0; r < 9; ++r)
+            {
+                const float2 o = float2(r % 3 - 1, r / 3 - 1);
+                const float wt = (o.x == 0 ? 2.0 : 1.0) * (o.y == 0 ? 2.0 : 1.0) / 16.0;
+                lowNow += gAux0.SampleLevel(gLinear, uv + o * texel, 0).rgb * wt;
+            }
+        }
+
+        if (gTemporalValid != 0)
+        {
+            const float linC = gHistGuide.Load(int3(id.xy, 0)).x;
+            const float2 q = uv + MotionUvOffset(uv);
+
+            if (all(q >= 0.0) && all(q <= 1.0))
+            {
+                const float2 pos = q * float2(gWidth, gHeight) - 0.5;
+                const int2 i0 = (int2) floor(pos);
+                const float2 f = pos - floor(pos);
+
+                float3 hist = 0.0;
+                float wsum = 0.0;
+
+                [unroll] for (int j = 0; j < 4; ++j)
+                {
+                    const int2 o = int2(j & 1, j >> 1);
+                    const int2 t = clamp(i0 + o, int2(0, 0), int2(gWidth, gHeight) - 1);
+                    const float wb = (o.x ? f.x : 1.0 - f.x) * (o.y ? f.y : 1.0 - f.y);
+                    const float rel = RelDepthDiff(gAux2.Load(int3(t, 0)).x, linC);
+                    const float w = wb * saturate((2.0 * gDepthTol - rel) / max(gDepthTol, 1e-6));
+                    hist += gAux1.Load(int3(t, 0)).rgb * w;
+                    wsum += w;
+                }
+
+                if (wsum > 0.25)
+                {
+                    hist /= wsum;
+                    const float lh = dot(hist, kLuma);
+                    const float lc = clamp(lh, mu - sigma - 0.02, mu + sigma + 0.02);
+                    const float valid = saturate(2.0 * wsum - 1.0);
+
+                    if (gLowTemporal <= 0.0)
+                    {
+                        hist += lc - lh;
+                        outEdit = lerp(e, hist, gTemporal * valid);
+                    }
+                    else
+                    {
+                        // Luminance stability. The variance clip above holds a pixel to what its eight
+                        // neighbours span -- and when a whole region of the model's answer brightens and
+                        // darkens together, the neighbours move with it, so the clip lets it through.
+                        // That regional breathing is what an OLED, black around it, shows most.
+                        //
+                        // So the edit is split: its regional light (the tent above) is eased in time on
+                        // its own, strongly, while the detail on top keeps the clipped blend. A real change
+                        // of the edit's light -- a step of a third of a stop or more -- loosens the easing at
+                        // once, so the light follows the scene and only the trembling is held.
+                        float3 lowHist = 0.0;
+
+                        [unroll] for (int r = 0; r < 9; ++r)
+                        {
+                            const float2 o = float2(r % 3 - 1, r / 3 - 1);
+                            const float wt = (o.x == 0 ? 2.0 : 1.0) * (o.y == 0 ? 2.0 : 1.0) / 16.0;
+                            lowHist += gAux1.SampleLevel(gLinear, q + o * texel, 0).rgb * wt;
+                        }
+
+                        const float step = dot(lowHist - lowNow, kLuma) / 0.35;
+
+                        // Full strength standing still and in slow motion, where the breathing shows; let
+                        // go as the view moves faster, where new content legitimately changes the light and
+                        // holding it would only make it trail (measured: +15% change in a pan without this).
+                        const float motionPx = length((q - uv) * float2(gWidth, gHeight)) / 6.0;
+                        const float lowW = gLowTemporal * valid * exp(-step * step) * exp(-motionPx * motionPx);
+                        const float3 lowOut = lerp(lowNow, lowHist, lowW);
+
+                        hist += lc - lh;
+                        const float3 detail = lerp(e - lowNow, hist - lowHist, gTemporal * valid);
+                        outEdit = lowOut + detail;
+                    }
+                }
+            }
+        }
+
+        const float eps = Eps();
+        gOut0[id.xy] = float4(max((max(original.rgb, 0.0) + eps) * exp2(outEdit) - eps, 0.0), original.a);
+        gOut3[id.xy] = float4(outEdit, 1.0);
+        return;
+    }
+
+    if (gMode == 7)
+    {
+        // The measurement dump: the frame, the model's frame, and the geometry the offline script
+        // needs to reproject -- motion as a uv offset to the previous frame, pseudo-linear depth, and
+        // the frame's log luma -- all at display resolution and in fixed formats.
+        const float4 colour = gColour.Load(int3(id.xy, 0));
+        gOut0[id.xy] = float4(max(colour.rgb, 0.0), 1.0);
+        gOut3[id.xy] = float4(max(gAux0.Load(int3(id.xy, 0)).rgb, 0.0), 1.0);
+
+        const float linC = LinDepth(gDepth.Load(int3(DepthTexel(uv), 0)).r);
+        gOut1[id.xy] = float4(MotionUvOffset(uv), linC, LogLuma(colour.rgb));
+        return;
+    }
+}

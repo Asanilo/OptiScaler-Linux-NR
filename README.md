@@ -12,8 +12,10 @@ Full performance, baseline regression and long-session stability validation is o
 The NR runtime is supplied separately and is not included in this repository.
 
 See [Linux integration and testing notes](docs/linux-nr.md) for scope, setup,
-build provenance and rollback. Edit cache, reprojection, anti-flicker and GPU fence
-retirement remain later integration stages.
+build provenance and rollback. Fenced GPU ownership, per-SR contexts and the
+[Sky temporal edit cache / anti-flicker port](docs/sky-cache.md) are implemented.
+Cache/anti-flicker defaults off; DS2 appearance, FPS and long-session acceptance
+for the new port are pending.
 
 ---
 

@@ -364,6 +364,12 @@ bool ReadbackReady(const Token& token)
     return token && token->ReadbackReady();
 }
 
+bool Discarded(const Token& token)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex);
+    return token && !token->active && !token->submitted && !token->pendingSubmissions && !token->poisoned;
+}
+
 uint64_t TimestampFrequency(const Token& token)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex);

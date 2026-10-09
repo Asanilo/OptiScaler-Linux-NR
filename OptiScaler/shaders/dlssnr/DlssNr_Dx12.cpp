@@ -1,6 +1,7 @@
 #include "pch.h"
 
 #include <set>
+#include <vector>
 #include <map>
 
 #include <dlssnr/DlssNr.h>
@@ -11,6 +12,7 @@
 
 #include "DlssNr_Dx12.h"
 #include "NrStabilizer_Dx12.h"
+#include "DlssNr_EditCache_Dx12.h"
 
 #include <Config.h>
 #include <State.h>
@@ -402,8 +404,15 @@ struct NrContext
     NrState nr;
     std::unique_ptr<DlssNr_Dx12> compose;
     std::unique_ptr<NrStabilizer_Dx12> stabilizer;
-    std::unique_ptr<GpuTime_Dx12> gpuTime, ngxTime, stabilizerTime;
-    std::optional<double> lastNgxTime, lastGpuTime, lastStabilizerTime;
+    std::unique_ptr<DlssNrEditCache_Dx12> editCache;
+    std::unique_ptr<GpuTime_Dx12> gpuTime, ngxTime, stabilizerTime, cacheTime;
+    std::optional<double> lastNgxTime, lastGpuTime, lastStabilizerTime, lastCacheTime;
+    std::vector<float> cacheRenderKey;
+    std::string cachePassOverrides;
+    bool cacheWasWanted = false, cacheCachedLastFrame = false, cacheJitterValid = false;
+    float cacheJitterX = 0.0f, cacheJitterY = 0.0f;
+    unsigned long long lastCacheLog = 0;
+    const char* cachePauseReason = "disabled";
     capture::FrameCapture capture;
     bool autoCaptureDone = false;
     unsigned long long frames = 0, lastPresent = 0, captureWriteAtFrame = 0;
@@ -874,6 +883,9 @@ void ResetAllHistories()
 {
     if (Context().stabilizer)
         Context().stabilizer->Invalidate();
+    if (Context().editCache)
+        Context().editCache->Invalidate();
+    Context().cacheJitterValid = false;
     Context().nr.reset = true;
 
     for (bool& r : Context().nr.passReset)
@@ -1303,7 +1315,7 @@ ID3D12Resource* EnsurePreUpscaleSurface(ID3D12Device* device, ID3D12GraphicsComm
     const auto height = desc.Height;
     const DXGI_FORMAT format = TypedGuideFormat(desc.Format);
 
-    // Match Sky's typed scratch surface without importing its cache/copy pipeline. NR already reads
+    // Match Sky's typed scratch surface. A cached pre-SR frame copies fresh colour here; NR refresh reads
     // the original Color and composes to a separate destination in this fork.
     if (desc.Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE2D || desc.SampleDesc.Count != 1 ||
         desc.DepthOrArraySize != 1 || width == 0 || height == 0)
@@ -2593,6 +2605,312 @@ void DlssNr_Dx12::Dispatch(ID3D12GraphicsCommandList* cmdList, ID3D12Resource* c
 
     const float whitePoint = ResolveWhitePoint(cfg, isHdrBuffer);
 
+    // The state the game left its guides in, read the same way the output's is at the top of this
+    // function and the same way every upscaler in this tree reads it. Unset means the NGX contract
+    // holds and they arrive shader-readable, which is what this pass assumed unconditionally before.
+    const D3D12_RESOURCE_STATES depthArrival = cfg.DepthResourceBarrier.has_value()
+                                                   ? (D3D12_RESOURCE_STATES) cfg.DepthResourceBarrier.value()
+                                                   : D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE;
+
+    const D3D12_RESOURCE_STATES motionArrival = cfg.MVResourceBarrier.has_value()
+                                                    ? (D3D12_RESOURCE_STATES) cfg.MVResourceBarrier.value()
+                                                    : D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE;
+
+    ID3D12Resource* depthIn = ReadableGuide(device, cmdList, depth, &Context().nr.depthClone, depthArrival);
+    ID3D12Resource* motionIn = ReadableGuide(device, cmdList, motion, &Context().nr.motionClone, motionArrival);
+
+    if (depthIn == nullptr || motionIn == nullptr)
+    {
+        Context().nr.failed = true;
+        Context().nr.reason = "the game's depth or motion vectors could not be made readable";
+        LOG_ERROR("DLSS-NR unavailable: {}", Context().nr.reason);
+        if (depthIn && depthIn == Context().nr.depthClone)
+            Barrier(cmdList, depthIn, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_COPY_DEST);
+        if (motionIn && motionIn == Context().nr.motionClone)
+            Barrier(cmdList, motionIn, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_COPY_DEST);
+        if (Context().gpuTime)
+            Context().gpuTime->End(cmdList);
+        Barrier(cmdList, target, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, outputArrival);
+        device->Release();
+        return;
+    }
+
+    // A typed guide is handed to the model as it stands -- no clone, so ReadableGuide issued no
+    // barriers and it is still in the state the game left it. The model reads it, so it has to be
+    // shader-readable for that read, and is put back before this function returns. Both transitions
+    // are no-ops Barrier() skips when the arrival state already is NON_PIXEL_SHADER_RESOURCE.
+    const bool depthPassedThrough = depthIn == depth;
+    const bool motionPassedThrough = motionIn == motion;
+    ID3D12Resource* const cacheInMotionForCleanup = motionIn;
+
+    if (depthPassedThrough)
+        Barrier(cmdList, depth, depthArrival, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+
+    if (motionPassedThrough)
+        Barrier(cmdList, motion, motionArrival, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+
+    const auto restoreGuides = [&]()
+    {
+        if (depthPassedThrough)
+            Barrier(cmdList, depth, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, depthArrival);
+
+        if (motionPassedThrough)
+            Barrier(cmdList, motion, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, motionArrival);
+    };
+
+    bool encodedResources = false, smallReadable = false;
+    bool cacheActive = false, cacheRefresh = true, cacheBegan = false;
+    Context().cacheCachedLastFrame = false;
+    const auto finishFrame = [&]()
+    {
+        if (cacheBegan && Context().editCache)
+            Context().editCache->EndFrame(cmdList);
+        if (encodedResources)
+            Barrier(cmdList, Context().nr.hdrCopy, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE,
+                    D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+
+        if (Context().gpuTime != nullptr)
+        {
+            Context().gpuTime->End(cmdList);
+
+            // This path records into the game's own list, so there is no queue of ours to read from.
+            // A caller that knows which queue the list goes to says so; otherwise the one the upscaler was
+            // invoked on serves. The bridges have to say, because they run on a queue of their own that
+            // State never learns about -- a Vulkan game creates no D3D12 swapchain, so nothing ever sets
+            // currentCommandQueue and the cost went unreported.
+            auto* queue =
+                timingQueue != nullptr ? timingQueue : (ID3D12CommandQueue*) State::Instance().currentCommandQueue;
+
+            if (queue != nullptr)
+            {
+                if (auto ms = Context().gpuTime->ReadGpuTime(queue); ms.has_value())
+                    Context().lastGpuTime = ms;
+
+                if (Context().ngxTime != nullptr)
+                {
+                    if (auto ngx = Context().ngxTime->ReadGpuTime(queue); ngx.has_value())
+                        Context().lastNgxTime = ngx;
+                }
+                if (!cacheActive && cfg.DlssNrStabilizationEnabled.value_or_default() && Context().stabilizerTime)
+                {
+                    if (auto ms = Context().stabilizerTime->ReadGpuTime(queue); ms.has_value())
+                        Context().lastStabilizerTime = ms;
+                }
+
+                if (cacheActive && Context().cacheTime)
+                    if (auto ms = Context().cacheTime->ReadGpuTime(queue); ms.has_value())
+                        Context().lastCacheTime = ms;
+                if (cacheActive && Context().editCache &&
+                    (Context().lastCacheLog == 0 || Context().frames - Context().lastCacheLog >= 600))
+                {
+                    Context().lastCacheLog = Context().frames;
+                    const auto status = Context().editCache->GetStatus();
+                    LOG_INFO("DLSS-NR Sky cache: interval {}, refreshes {}, cached {}, last rejected {:.3f}, "
+                             "refresh reason {}, placement {}",
+                             status.interval, status.refreshes, status.cached, status.lastRejected,
+                             status.lastRefreshReason, frame.PreUpscale ? "NR->SR" : "SR->NR");
+                    if (Context().lastCacheTime)
+                        LOG_INFO("DLSS-NR Sky cache composition cost: {:.3f} ms (last completed GPU sample; not FPS)",
+                                 *Context().lastCacheTime);
+                }
+
+                // The split, once every few hundred frames. What is worth reading is not the total but the
+                // remainder: the model's cost is NVIDIA's to set, and everything else is ours.
+                if (!cacheActive && Context().lastGpuTime.has_value() && Context().lastNgxTime.has_value() &&
+                    Context().frames - Context().lastSplitLog > 600)
+                {
+                    Context().lastSplitLog = Context().frames;
+                    const double total = Context().lastGpuTime.value();
+                    const double ngx = Context().lastNgxTime.value();
+                    LOG_INFO("DLSS-NR cost: {:.2f} ms total = {:.2f} ms model + {:.2f} ms ours ({:.0f}% ours)", total,
+                             ngx, total - ngx, total > 0.0 ? 100.0 * (total - ngx) / total : 0.0);
+                    if (Context().lastStabilizerTime)
+                        LOG_INFO("DLSS-NR stabilization cost: {:.3f} ms (last completed GPU sample; not frame time)",
+                                 *Context().lastStabilizerTime);
+                }
+            }
+        }
+
+        // Put any guide clones back where the next frame's copy expects to find them.
+        // A clone left in NON_PIXEL_SHADER_RESOURCE by a frozen frame was never transitioned back to
+        // COPY_DEST, because a frozen frame does not copy. Putting it back unconditionally would be a
+        // barrier from a state it is not in, so the frozen case is skipped here and picked up by the
+        // first live frame after the toggle goes off -- which is a copy, and copies transition it.
+        if (depthIn == Context().nr.depthClone && !depthPassedThrough)
+            Barrier(cmdList, Context().nr.depthClone, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE,
+                    D3D12_RESOURCE_STATE_COPY_DEST);
+
+        if (cacheInMotionForCleanup == Context().nr.motionClone && !motionPassedThrough)
+            Barrier(cmdList, Context().nr.motionClone, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE,
+                    D3D12_RESOURCE_STATE_COPY_DEST);
+
+        if (smallReadable)
+            Barrier(cmdList, Context().nr.colorSmall, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE,
+                    D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+
+        // Leave the staging copy as the next frame expects to find it.
+        if (encodedResources)
+            Barrier(cmdList, Context().nr.colorCopy, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE,
+                    D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+
+        // Hand the guides and the output back in the states the upscaler and the game expect.
+        restoreGuides();
+        Barrier(cmdList, target, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, outputArrival);
+
+        device->Release();
+    };
+
+    // Cache only at the direct D3D12 seam. Diagnostic captures/comparisons keep
+    // their fresh model output, and the original Vulkan/bridge paths are unchanged.
+    const bool cacheWanted = cfg.DlssNrCacheEnabled.value_or_default() && State::Instance().swapchainApi == API::DX12 &&
+                             !cfg.DlssNrDualFeature.value_or_default() && cfg.DlssNrCompare.value_or_default() == 0 &&
+                             cfg.DlssNrDebugView.value_or_default() == 0 && !cfg.DlssNrUseProxy.value_or_default() &&
+                             !Context().capture.isActive() && !callerOutputArrival.has_value();
+    if (cacheWanted != Context().cacheWasWanted)
+    {
+        ResetAllHistories(); // The model may have missed input frames before the switch.
+        Context().cacheWasWanted = cacheWanted;
+        Context().lastCacheTime.reset();
+        Context().lastCacheLog = 0;
+        LOG_INFO("DLSS-NR Sky cache {}: interval {}, adaptive {}", cacheWanted ? "enabled" : "suspended",
+                 cfg.DlssNrCacheInterval.value_or_default(), cfg.DlssNrCacheAdaptive.value_or_default());
+    }
+    Context().cachePauseReason =
+        cfg.DlssNrCacheEnabled.value_or_default() ? "diagnostic or non-direct seam" : "disabled";
+    DlssNrCacheInputs cacheIn {};
+    cacheIn.depth = depthIn;
+    cacheIn.motion = motionIn;
+    cacheIn.depthWidth = guideWidth;
+    cacheIn.depthHeight = guideHeight;
+    const auto motionDesc = motion->GetDesc();
+    cacheIn.motionWidth = (unsigned int) motionDesc.Width;
+    cacheIn.motionHeight = motionDesc.Height;
+    if (motionDesc.Width == guideDesc.Width && motionDesc.Height == guideDesc.Height)
+    {
+        cacheIn.motionWidth = guideWidth;
+        cacheIn.motionHeight = guideHeight;
+    }
+    cacheIn.mvScaleX = frame.MvScaleX;
+    cacheIn.mvScaleY = frame.MvScaleY;
+    cacheIn.depthInverted = frame.DepthInverted;
+    cacheIn.whitePoint = whitePoint;
+    cacheIn.passthrough = !isHdrBuffer;
+    // The existing resolve uses the CPU-held white point, not a live exposure SRV.
+    cacheIn.maxRatio = cfg.DlssNrMaxRatio.value_or_default();
+
+    unsigned int passes = 1;
+    if (Context().nr.passScratch)
+        while (passes < livePasses && Context().nr.passFeature[passes] && PassWasSubmitted(passes, cmdList))
+            ++passes;
+    if (cacheWanted)
+    {
+        if (!Context().editCache)
+            Context().editCache = std::make_unique<DlssNrEditCache_Dx12>(device);
+        std::vector<float> renderKey { float(guideWidth),
+                                       float(guideHeight),
+                                       float(cacheIn.motionWidth),
+                                       float(cacheIn.motionHeight),
+                                       frame.MvScaleX,
+                                       frame.MvScaleY,
+                                       float(frame.DepthInverted),
+                                       float(frame.PreUpscale),
+                                       float(isHdrBuffer),
+                                       float(guideDesc.Format),
+                                       float(motionDesc.Format),
+                                       float(workWidth),
+                                       float(workHeight),
+                                       float(passes),
+                                       cfg.DlssNrTransferStrength.value_or_default(),
+                                       cfg.DlssNrColourStrength.value_or_default(),
+                                       cfg.DlssNrMaxRatio.value_or_default(),
+                                       float(cfg.DlssNrTransfer.value_or_default()),
+                                       cfg.DlssNrWhitePointScale.value_or_default(),
+                                       float(cfg.DlssNrWhitePointSource.value_or_default()),
+                                       cfg.DlssNrWhitePointTrim.value_or_default(),
+                                       cfg.DlssNrIntensity.value_or_default(),
+                                       float(cfg.DlssNrStyle.value_or_default()),
+                                       cfg.DlssNrLocalStructure.value_or_default(),
+                                       cfg.DlssNrLocalTone.value_or_default(),
+                                       cfg.DlssNrSkinStructure.value_or_default(),
+                                       float(cfg.DlssNrAutoMask.value_or_default()),
+                                       float(cfg.DlssNrPreset.value_or_default()) };
+        const auto overrides = cfg.DlssNrPassOverrides.value_or_default();
+        if (renderKey != Context().cacheRenderKey || overrides != Context().cachePassOverrides)
+        {
+            Context().editCache->Invalidate();
+            Context().cacheJitterValid = false;
+            Context().cacheRenderKey = std::move(renderKey);
+            Context().cachePassOverrides = overrides;
+        }
+        const bool jitterUsable = frame.JitterValid && std::isfinite(frame.JitterX) && std::isfinite(frame.JitterY);
+        if (frame.PreUpscale)
+        {
+            if (!jitterUsable)
+                Context().editCache->Invalidate(); // Never reuse a jittered history without its offset.
+            else if (Context().cacheJitterValid && !frame.Reset && !Context().nr.reset)
+            {
+                cacheIn.jitterDeltaX = (Context().cacheJitterX - frame.JitterX) / float(std::max(width, 1u));
+                cacheIn.jitterDeltaY = (Context().cacheJitterY - frame.JitterY) / float(std::max(height, 1u));
+            }
+            Context().cacheJitterX = frame.JitterX;
+            Context().cacheJitterY = frame.JitterY;
+            Context().cacheJitterValid = jitterUsable;
+        }
+        else
+            Context().cacheJitterValid = false;
+        cacheRefresh = Context().editCache->BeginFrame(cmdList, cfg, device, width, height, desc.Format,
+                                                       frame.Reset || Context().nr.reset, frame.PreUpscale);
+        cacheActive = cacheBegan = Context().editCache->ActiveThisFrame();
+        Context().cachePauseReason = cacheActive ? "" : "GPU resources or recording slots unavailable";
+        if (!cacheActive)
+        {
+            ResetAllHistories();
+            ReportSkipOnce("Sky cache unavailable this frame; running the fresh model");
+        }
+        else if (!Context().editCache->GetStatus().active)
+        {
+            // Settings changes, discarded recordings and missing jitter can invalidate
+            // the cache inside BeginFrame. Its accumulator now starts from zero.
+            Context().nr.reset = true;
+            for (bool& resetPass : Context().nr.passReset)
+                resetPass = true;
+        }
+    }
+    else if (Context().editCache)
+        Context().editCache->Invalidate();
+
+    if (cacheActive && !cacheRefresh)
+    {
+        if (!Context().cacheTime)
+            Context().cacheTime = std::make_unique<GpuTime_Dx12>(device, true);
+        bool copied = true, applied = false;
+        {
+            ScopedGpuTime_Dx12 timer(Context().cacheTime.get(), cmdList);
+            if (split)
+            {
+                // Private preOut must start from this frame's game colour, not last frame's output.
+                Barrier(cmdList, source, sourceIdle, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+                copied = Context().editCache->CopyIn(cmdList, source, target);
+                Barrier(cmdList, source, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, sourceIdle);
+            }
+            if (copied)
+                applied = Context().editCache->RunCached(cmdList, device, target, Context().nr.hdrCopy, cacheIn);
+        }
+        if (applied)
+        {
+            Context().nr.wroteTarget = true;
+            Context().cacheCachedLastFrame = true;
+            finishFrame();
+            return;
+        }
+        // A failed cached dispatch falls back to fresh NR using the unchanged game input.
+        ResetAllHistories();
+        Context().editCache->EndFrame(cmdList);
+        cacheActive = cacheBegan = false;
+        Context().cachePauseReason = "cached dispatch failed; using fresh NR";
+        ReportSkipOnce("Sky cached dispatch unavailable; refreshing the model this frame");
+    }
+
     DlssNrConstants encodeParams {};
     encodeParams.Mode = DlssNrMode_Encode;
     // A frame that is already display-referred is handed over untouched: the encode becomes a copy and
@@ -2610,12 +2928,10 @@ void DlssNr_Dx12::Dispatch(ID3D12GraphicsCommandList* cmdList, ID3D12Resource* c
     Barrier(cmdList, source, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, sourceIdle);
     if (!encoded)
     {
-        if (Context().gpuTime)
-            Context().gpuTime->End(cmdList);
-        Barrier(cmdList, target, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, outputArrival);
-        device->Release();
+        finishFrame();
         return;
     }
+    encodedResources = true;
     // The transitions double as the wait for the encode's writes.
     Barrier(cmdList, Context().nr.colorCopy, D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
             D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
@@ -2640,73 +2956,34 @@ void DlssNr_Dx12::Dispatch(ID3D12GraphicsCommandList* cmdList, ID3D12Resource* c
                                               Context().nr.colorSmall, nullptr);
         if (!downsampled)
         {
-            Barrier(cmdList, Context().nr.colorCopy, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE,
-                    D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-            Barrier(cmdList, Context().nr.hdrCopy, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE,
-                    D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-            if (Context().gpuTime)
-                Context().gpuTime->End(cmdList);
-            Barrier(cmdList, target, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, outputArrival);
-            device->Release();
+            finishFrame();
             return;
         }
         Barrier(cmdList, Context().nr.colorSmall, D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
                 D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+        smallReadable = true;
         modelInput = Context().nr.colorSmall;
     }
 
     // Read the exposure scan's candidates on the pass's own command list, once a frame.
     DlssNr::ExposureScan::Tick(device, cmdList);
 
-    // The state the game left its guides in, read the same way the output's is at the top of this
-    // function and the same way every upscaler in this tree reads it. Unset means the NGX contract
-    // holds and they arrive shader-readable, which is what this pass assumed unconditionally before.
-    const D3D12_RESOURCE_STATES depthArrival = cfg.DepthResourceBarrier.has_value()
-                                                   ? (D3D12_RESOURCE_STATES) cfg.DepthResourceBarrier.value()
-                                                   : D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE;
-
-    const D3D12_RESOURCE_STATES motionArrival = cfg.MVResourceBarrier.has_value()
-                                                    ? (D3D12_RESOURCE_STATES) cfg.MVResourceBarrier.value()
-                                                    : D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE;
-
-    ID3D12Resource* depthIn = ReadableGuide(device, cmdList, depth, &Context().nr.depthClone, depthArrival);
-    ID3D12Resource* motionIn = ReadableGuide(device, cmdList, motion, &Context().nr.motionClone, motionArrival);
-
-    if (depthIn == nullptr || motionIn == nullptr)
-    {
-        Context().nr.failed = true;
-        Context().nr.reason = "the game's depth or motion vectors could not be made readable";
-        LOG_ERROR("DLSS-NR unavailable: {}", Context().nr.reason);
-        Barrier(cmdList, target, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, outputArrival);
-        device->Release();
-        return;
-    }
-
-    // A typed guide is handed to the model as it stands -- no clone, so ReadableGuide issued no
-    // barriers and it is still in the state the game left it. The model reads it, so it has to be
-    // shader-readable for that read, and is put back before this function returns. Both transitions
-    // are no-ops Barrier() skips when the arrival state already is NON_PIXEL_SHADER_RESOURCE.
-    const bool depthPassedThrough = depthIn == depth;
-    const bool motionPassedThrough = motionIn == motion;
-
-    if (depthPassedThrough)
-        Barrier(cmdList, depth, depthArrival, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
-
-    if (motionPassedThrough)
-        Barrier(cmdList, motion, motionArrival, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
-
-    const auto restoreGuides = [&]()
-    {
-        if (depthPassedThrough)
-            Barrier(cmdList, depth, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, depthArrival);
-
-        if (motionPassedThrough)
-            Barrier(cmdList, motion, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, motionArrival);
-    };
-
     // The vectors were scaled to full-frame pixels; the image the model reprojects is the working size.
     // The vectors were scaled to full-frame pixels; the image the model reprojects is the
     // working size.
+    if (cacheActive)
+    {
+        bool resetModel = false;
+        if (auto* accumulated = Context().editCache->ModelMotion(cmdList, device, cacheIn, resetModel))
+            motionIn = accumulated;
+        if (resetModel)
+        {
+            Context().nr.reset = true;
+            for (bool& resetPass : Context().nr.passReset)
+                resetPass = true;
+        }
+    }
+
     const float mvToWork = width != 0 ? (float) workWidth / (float) width : 1.0f;
 
     SetExtras(cfg, nullptr, nullptr, 0, 0, 0, 0);
@@ -2733,9 +3010,7 @@ void DlssNr_Dx12::Dispatch(ID3D12GraphicsCommandList* cmdList, ID3D12Resource* c
                       NgxResultName(proxyResult));
         }
 
-        restoreGuides();
-        Barrier(cmdList, target, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, outputArrival);
-        device->Release();
+        finishFrame();
         return;
     }
 
@@ -2762,14 +3037,6 @@ void DlssNr_Dx12::Dispatch(ID3D12GraphicsCommandList* cmdList, ID3D12Resource* c
     // Counted from the features that exist and have been submitted, not from the setting: while the
     // ramp is still building, a frame runs only the passes it holds, and a feature whose creation is
     // still sitting in this open command list is not one of them.
-    unsigned int passes = 1;
-
-    if (work[1] != nullptr)
-    {
-        while (passes < livePasses && Context().nr.passFeature[passes] != nullptr && PassWasSubmitted(passes, cmdList))
-            ++passes;
-    }
-
     if (Context().ngxTime != nullptr)
         Context().ngxTime->Start(cmdList);
 
@@ -2958,7 +3225,21 @@ void DlssNr_Dx12::Dispatch(ID3D12GraphicsCommandList* cmdList, ID3D12Resource* c
 
         // A failed resolve must not hand an unwritten scratch texture to SR.
         Context().nr.wroteTarget = resolved;
-        if (resolved && cfg.DlssNrStabilizationEnabled.value_or_default())
+        if (resolved && cacheActive)
+        {
+            if (!Context().cacheTime)
+                Context().cacheTime = std::make_unique<GpuTime_Dx12>(device, true);
+            ScopedGpuTime_Dx12 timer(Context().cacheTime.get(), cmdList);
+            if (!Context().editCache->CaptureRefresh(cmdList, device, target, Context().nr.hdrCopy, cacheIn))
+            {
+                Context().editCache->Invalidate();
+                ReportSkipOnce("Sky anti-flicker unavailable this frame; using the fresh NR resolve");
+            }
+            if (Context().stabilizer)
+                Context().stabilizer->Invalidate();
+            Context().lastStabilizerTime.reset();
+        }
+        else if (resolved && cfg.DlssNrStabilizationEnabled.value_or_default())
         {
             if (!Context().stabilizer)
                 Context().stabilizer = std::make_unique<NrStabilizer_Dx12>(device);
@@ -3004,80 +3285,7 @@ void DlssNr_Dx12::Dispatch(ID3D12GraphicsCommandList* cmdList, ID3D12Resource* c
     setWork(0, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
     setWork(1, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
-    Barrier(cmdList, Context().nr.hdrCopy, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE,
-            D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-
-    if (Context().gpuTime != nullptr)
-    {
-        Context().gpuTime->End(cmdList);
-
-        // This path records into the game's own list, so there is no queue of ours to read from.
-        // A caller that knows which queue the list goes to says so; otherwise the one the upscaler was
-        // invoked on serves. The bridges have to say, because they run on a queue of their own that
-        // State never learns about -- a Vulkan game creates no D3D12 swapchain, so nothing ever sets
-        // currentCommandQueue and the cost went unreported.
-        auto* queue =
-            timingQueue != nullptr ? timingQueue : (ID3D12CommandQueue*) State::Instance().currentCommandQueue;
-
-        if (queue != nullptr)
-        {
-            if (auto ms = Context().gpuTime->ReadGpuTime(queue); ms.has_value())
-                Context().lastGpuTime = ms;
-
-            if (Context().ngxTime != nullptr)
-            {
-                if (auto ngx = Context().ngxTime->ReadGpuTime(queue); ngx.has_value())
-                    Context().lastNgxTime = ngx;
-            }
-            if (cfg.DlssNrStabilizationEnabled.value_or_default() && Context().stabilizerTime)
-            {
-                if (auto ms = Context().stabilizerTime->ReadGpuTime(queue); ms.has_value())
-                    Context().lastStabilizerTime = ms;
-            }
-
-            // The split, once every few hundred frames. What is worth reading is not the total but the
-            // remainder: the model's cost is NVIDIA's to set, and everything else is ours.
-            if (Context().lastGpuTime.has_value() && Context().lastNgxTime.has_value() &&
-                Context().frames - Context().lastSplitLog > 600)
-            {
-                Context().lastSplitLog = Context().frames;
-                const double total = Context().lastGpuTime.value();
-                const double ngx = Context().lastNgxTime.value();
-                LOG_INFO("DLSS-NR cost: {:.2f} ms total = {:.2f} ms model + {:.2f} ms ours ({:.0f}% ours)", total, ngx,
-                         total - ngx, total > 0.0 ? 100.0 * (total - ngx) / total : 0.0);
-                if (Context().lastStabilizerTime)
-                    LOG_INFO("DLSS-NR stabilization cost: {:.3f} ms (last completed GPU sample; not frame time)",
-                             *Context().lastStabilizerTime);
-            }
-        }
-    }
-
-    // Put any guide clones back where the next frame's copy expects to find them.
-    // A clone left in NON_PIXEL_SHADER_RESOURCE by a frozen frame was never transitioned back to
-    // COPY_DEST, because a frozen frame does not copy. Putting it back unconditionally would be a
-    // barrier from a state it is not in, so the frozen case is skipped here and picked up by the
-    // first live frame after the toggle goes off -- which is a copy, and copies transition it.
-    if (Context().nr.depthClone != nullptr)
-        Barrier(cmdList, Context().nr.depthClone, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE,
-                D3D12_RESOURCE_STATE_COPY_DEST);
-
-    if (Context().nr.motionClone != nullptr)
-        Barrier(cmdList, Context().nr.motionClone, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE,
-                D3D12_RESOURCE_STATE_COPY_DEST);
-
-    if (reduced && Context().nr.colorSmall != nullptr)
-        Barrier(cmdList, Context().nr.colorSmall, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE,
-                D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-
-    // Leave the staging copy as the next frame expects to find it.
-    Barrier(cmdList, Context().nr.colorCopy, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE,
-            D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-
-    // Hand the guides and the output back in the states the upscaler and the game expect.
-    restoreGuides();
-    Barrier(cmdList, target, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, outputArrival);
-
-    device->Release();
+    finishFrame();
 }
 
 namespace DlssNr
@@ -3147,6 +3355,12 @@ void EvaluateAtSeam(ID3D12GraphicsCommandList* cmdList, NVSDK_NGX_Parameter* par
                 entry.second->nr.reset = true;
                 if (entry.second->stabilizer)
                     entry.second->stabilizer->Invalidate();
+                if (entry.second->editCache)
+                    entry.second->editCache->Invalidate();
+                entry.second->cacheJitterValid = false;
+                entry.second->cacheCachedLastFrame = false;
+                for (bool& resetPass : entry.second->nr.passReset)
+                    resetPass = true;
             }
         ReportSkipOnce("it is switched off");
         return;
@@ -3716,6 +3930,32 @@ std::optional<double> LastStabilizerGpuTime()
     return Context().lastStabilizerTime;
 }
 
+std::optional<double> LastEditCacheGpuTime()
+{
+    std::lock_guard<std::recursive_mutex> lock(g_nrMutex);
+    return Context().lastCacheTime;
+}
+EditCacheStatus GetEditCacheStatus()
+{
+    std::lock_guard<std::recursive_mutex> lock(g_nrMutex);
+    EditCacheStatus out {};
+    out.requested = Config::Instance()->DlssNrCacheEnabled.value_or_default();
+    out.suspendedReason = Context().cachePauseReason;
+    if (Context().editCache)
+    {
+        const auto status = Context().editCache->GetStatus();
+        out.active =
+            out.requested && EnabledAtD3D12Seam() && !Context().nr.failed && Context().cacheWasWanted && status.active;
+        out.cachedLastFrame = out.active && Context().cacheCachedLastFrame;
+        out.refreshes = status.refreshes;
+        out.cached = status.cached;
+        out.interval = status.interval;
+        out.lastRejected = status.lastRejected;
+        out.lastRefreshReason = status.lastRefreshReason;
+    }
+    return out;
+}
+
 void RequestCapture(unsigned int frames)
 {
     std::lock_guard<std::recursive_mutex> lock(g_nrMutex);
@@ -3859,6 +4099,13 @@ void ShutdownContext()
     Context().lastGpuTime.reset();
 
     Context().stabilizer.reset();
+    Context().editCache.reset();
+    Context().cacheTime.reset();
+    Context().lastCacheTime.reset();
+    Context().cacheRenderKey.clear();
+    Context().cachePassOverrides.clear();
+    Context().cacheWasWanted = Context().cacheCachedLastFrame = Context().cacheJitterValid = false;
+    Context().cachePauseReason = "disabled";
     Context().compose.reset();
 }
 void ReleaseSrContext(uint64_t identity)

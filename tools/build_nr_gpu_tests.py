@@ -52,6 +52,22 @@ def main():
         subprocess.run(common + ["-fms-extensions", "-Wno-unknown-pragmas", "-c", str(staged / f"{name}.cpp"), "-o", str(obj)], check=True)
         third_party.append(str(obj))
     strict = common + ["-Wall", "-Wextra", "-Werror"]
+    # The standalone fixture supplies application plumbing; cache defaults come
+    # from the real production Config declarations, not a duplicate test model.
+    fixture = output / "cache-fixture-config"
+    fixture.mkdir(exist_ok=True)
+    fields = re.findall(r"^    CustomOptional<[^>]+> DlssNrCache\w+ \{ [^}]+ \};$", (REPO / "OptiScaler/Config.h").read_text(), re.M)
+    if len(fields) != 18:
+        raise SystemExit("Expected 18 production cache config declarations")
+    (fixture / "Config.h").write_text("#pragma once\n#include <cstdint>\n"
+        "template<class T> struct CustomOptional { T value; T value_or_default() const { return value; } "
+        "CustomOptional& operator=(T v) { value=v; return *this; } };\nclass Config { public:\n"
+        "CustomOptional<bool> UsePrecompiledShaders { true };\n" + "\n".join(fields) +
+        "\nstatic Config* Instance() { static Config cfg; return &cfg; }\n};\n")
+    lifetime_obj = output / "NrGpuLifetime.o"
+    subprocess.run(strict + ["-DNR_LIFETIME_STANDALONE", "-I" + str(REPO / "tests/standalone"),
+                   "-I" + str(REPO / "OptiScaler/include"), "-c",
+                   str(REPO / "OptiScaler/dlssnr/NrGpuLifetime.cpp"), "-o", str(lifetime_obj)], check=True)
     gpu = REPO / "tests/nr_lifetime_gpu.cpp"
     libs = ["-ld3d12", "-ldxgi", "-ldxguid"]
     binaries = []
@@ -62,14 +78,28 @@ def main():
          ["-DNR_LIFETIME_STANDALONE", "-I" + str(REPO / "tests/standalone"),
           "-I" + str(REPO / "OptiScaler/include")] + third_party),
         ("nr_stabilizer_gpu.exe", [REPO / "tests/nr_stabilizer_gpu.cpp"], ["-ld3dcompiler_47"]),
+        ("nr_cache_gpu.exe", [REPO / "tests/nr_cache_gpu.cpp", REPO / "tests/nr_lifetime_queue_adapter.cpp",
+          REPO / "tests/nr_cache_shader_compile.cpp", lifetime_obj,
+          REPO / "OptiScaler/shaders/dlssnr/DlssNr_EditCache_Dx12.cpp",
+          REPO / "OptiScaler/shaders/Shader_Dx12.cpp", REPO / "OptiScaler/gpu_time/GpuTime_Dx12.cpp"],
+         ["-DNR_LIFETIME_STANDALONE", "-Wno-unknown-pragmas", "-I" + str(fixture), "-I" + str(REPO / "tests/standalone/cache"),
+          "-I" + str(REPO / "OptiScaler"), "-I" + str(REPO / "OptiScaler/include"), "-ld3dcompiler_47"] + third_party),
     ):
         target = output / name
         subprocess.run(strict + [str(p) for p in inputs] + extra + libs + ["-o", str(target)], check=True)
         binaries.append({"name": name, "sha256": sha(target)})
-    tracked = ("OptiScaler/dlssnr/NrGpuLifetime.cpp", "OptiScaler/dlssnr/SubmissionLifetime.h",
+    tracked = ("OptiScaler/dlssnr/NrGpuLifetime.cpp", "OptiScaler/dlssnr/NrGpuLifetime.h", "OptiScaler/dlssnr/SubmissionLifetime.h",
                "OptiScaler/shaders/dlssnr/NrStabilizer_Common.h",
                "OptiScaler/shaders/dlssnr/precompile/nr_stabilize.hlsl",
                "OptiScaler/shaders/dlssnr/precompile/NrStabilizer_Shader.h",
+               "OptiScaler/shaders/dlssnr/DlssNr_EditCache_Dx12.cpp", "OptiScaler/shaders/dlssnr/DlssNr_EditCache_Dx12.h",
+               "OptiScaler/shaders/dlssnr/DlssNr_CacheCommon.h", "OptiScaler/dlssnr/EditCacheCadence.h",
+               "OptiScaler/shaders/dlssnr/precompile/dlssnr_cache.hlsl", "OptiScaler/shaders/dlssnr/precompile/DlssNr_Cache_Shader.h",
+               "OptiScaler/shaders/Shader_Dx12.cpp", "OptiScaler/gpu_time/GpuTime_Dx12.cpp", "OptiScaler/Config.h",
+               "tests/nr_cache_gpu.cpp", "tests/nr_cache_shader_compile.cpp", "tests/nr_cache_cadence_test.cpp",
+               "tests/standalone/cache/pch.h", "tests/standalone/cache/SysUtils.h", "tests/standalone/cache/State.h",
+               "tests/standalone/cache/Util.h", "tools/build_nr_gpu_tests.py", "tools/run_nr_cache_gpu_tests.py",
+               "tools/compile_nr_shader.cpp",
                "tests/nr_lifetime_gpu.cpp", "tests/nr_lifetime_queue_adapter.cpp", "tests/nr_stabilizer_gpu.cpp")
     manifest = {
         "source_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=REPO, text=True).strip(),

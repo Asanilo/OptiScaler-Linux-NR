@@ -4,7 +4,7 @@ Primary target: DS2 / RTX 4060 Laptop / NVIDIA 615.71.09 / GE-Proton11-7 /
 Wayland. The previous SR→NR build has a sustained flicker failure. The new build
 is a candidate for testing; neither its appearance nor Linux acceptance is granted.
 
-## Diagnosis and completed implementation
+## Diagnosis and completed implementation (502c4140)
 
 The frozen, unmodified y4m `7b7220bb` also reproduced post-SR flicker with the same
 SF-v2 runtime and Detail/Intensity=1. Evidence remains in
@@ -124,7 +124,14 @@ regression check. A surviving failure stays a failure in the record.
 
 ## Outstanding gates
 
-New DLL game launch, targeted stabiliser A/B, extended NR→SR stress/memory test
-and controlled performance repetitions are **pending**. The source/Windows/GPU
-checks cannot establish that flicker is fixed. Native Vulkan, RR/FG/DualFeature,
-video and adaptive cache acceleration remain later stages.
+The `502c4140` DLL was installed and actually executed in DS2. The operator's
+follow-up enabled the minimal stabiliser; it remained ineffective and post-SR
+visual acceptance **failed**. Raw on/off and actual GPU-cost evidence is retained
+in `../testlogs/nr-iteration-502c4140/stabilizer-followup-20261009T181009Z`.
+
+The next port now implements [Sky's complete cache and anti-flicker](sky-cache.md),
+including optional adaptive cadence. Its isolated production-wrapper GPU tests
+and intentional defect controls pass. New DLL game appearance, extended NR→SR
+stress/memory and controlled performance repetitions remain **pending**.
+Native Vulkan, RR/FG/DualFeature and video remain outside this port's acceptance.
+Source/Windows/GPU checks do not establish that DS2 flicker is fixed.

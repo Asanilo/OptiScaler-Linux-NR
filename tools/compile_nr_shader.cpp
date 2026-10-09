@@ -8,7 +8,7 @@
 
 int main(int argc, char** argv)
 {
-    if (argc != 3)
+    if (argc != 3 && argc != 4)
         return 2;
     std::ifstream input(argv[1], std::ios::binary);
     if (!input)
@@ -33,8 +33,9 @@ int main(int argc, char** argv)
         binary->Release();
         return 5;
     }
-    header << "// Generated from nr_stabilize.hlsl (CSMain, cs_5_0, optimisation 3).\n#pragma once\n"
-              "const unsigned char NrStabilizer_cso[] = {\n";
+    header << "// Generated from input HLSL (CSMain, cs_5_0, optimisation 3).\n#pragma once\n"
+              "const unsigned char "
+           << (argc == 4 ? argv[3] : "NrStabilizer_cso") << "[] = {\n";
     const auto* bytes = static_cast<const unsigned char*>(binary->GetBufferPointer());
     for (size_t i = 0; i < binary->GetBufferSize(); ++i)
     {

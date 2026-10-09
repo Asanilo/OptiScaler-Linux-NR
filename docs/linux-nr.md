@@ -21,7 +21,7 @@ RR、FG、原生 Vulkan 和 D3D11 bridge 不在本轮 pre-SR 验收范围。
 临时 placement comparison 只对直接 D3D12 路径有效；开启 DualFeature 时使用保存的配置。
 
 后续稳定性阶段已实现真实队列 fence 回收、每个设备/SR 句柄独立状态，以及默认关闭的每帧 edit 重投影稳定器。
-没有移植跳帧缓存、额外 temporal mixing、截图 benchmark 或自动性能验收。
+本轮已补上 [Sky 隔帧缓存和完整防闪](sky-cache.md)，默认关闭；未接入截图 benchmark 或自动游戏性能验收。
 独立 Proton GPU 测试通过，新的游戏画面、长期稳定性与性能门槛仍待验收，详见 [next-stage.md](next-stage.md)。
 
 ## 配置和比较
@@ -139,8 +139,8 @@ SR 前运行 NR 的处理像素更少，本次 NR pass 耗时中位数约低 54%
 | DS2 SR→NR | 实际执行；画面验收失败 | 用户报告保持模式仍持续闪烁 |
 | 闪烁来源 | 基准也复现；根因未知 | 同一 SF-v2、强度 1；仅排除“移植独有”，不证明新版本已修复 |
 | GPU 对象回收/descriptor 复用 | 已实现并通过真实 Proton GPU 检查 | 生产 Reset/Release/Execute/Signal 与负对照；实际 NGX/游戏长期验收待测 |
-| edit 重投影/稳定器 | 最小每帧移植完成；默认关闭 | 生产 DXBC 合成测试通过；闪烁、拖影和开销待游戏 A/B |
-| 跳帧缓存/额外 temporal mix | 未移植 | 保持模型每帧运行 |
+| edit 重投影/稳定器 | 最小每帧版仍保留；用户复测无效 | 旧版 post-SR 画面失败记录保留 |
+| Sky 隔帧缓存/完整防闪 | 已移植；默认关闭 | 生产 wrapper/DXBC 的独立 Proton GPU 检查与负对照通过；新游戏画面、FPS 待验收 |
 
 对 portable helper 做了三个负向控制：临时删除恢复、错误地改用 untyped setter、
 绕过 master toggle，现有测试均失败；原始实现通过。修改仅发生在临时目录，
