@@ -122,6 +122,7 @@ SR 前运行 NR 的处理像素更少，本次 NR pass 耗时中位数约低 54%
 ## 验收状态与反证检查
 
 第一阶段的代码移植已完成，完整功能整合和 Linux 稳定性验收未完成。
+下一阶段的固定步骤、准备工具与剩余验收见 [next-stage.md](next-stage.md)。
 本机唯一游戏实测为 DS2 / RTX 4060 Laptop / NVIDIA 615.71.09 / GE-Proton11-7 / Wayland；
 不能推广为所有 Linux、Proton、游戏或 GPU 已兼容。
 
@@ -129,7 +130,7 @@ SR 前运行 NR 的处理像素更少，本次 NR pass 耗时中位数约低 54%
 | --- | --- | --- |
 | MSVC Release | 通过 | 编译和链接，不证明运行正确 |
 | typed/untyped 参数恢复 | 通过 | 生产 helper 与独立类型槽 mock，不是实际 NGX 实现 |
-| 创建/跳过帧顺序 | helper 单测通过 | 测试中的五帧循环模拟调用，未执行真实 NVNGX hook |
+| 创建/跳过帧顺序 | 生产编排函数单测通过 | 五帧测试调用 hook 复用的 EvaluateWithNr；未执行实际 vendor NGX 或 GPU |
 | DS2 NR→SR | 实际执行；本次未报告闪烁 | 未测长时间、动态分辨率和其他游戏 |
 | DS2 SR→NR | 实际执行；画面验收失败 | 用户报告保持模式仍持续闪烁 |
 | 闪烁来源 | 未归因 | 尚未完成未修改基准同条件对照 |

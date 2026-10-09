@@ -4,6 +4,8 @@
 #include <iostream>
 #include <stdexcept>
 #include <type_traits>
+#include <string>
+#include <vector>
 
 namespace
 {
@@ -140,22 +142,136 @@ void PlacementAcrossCreationFrames()
     for (int frame = 0; frame < 5; ++frame)
     {
         const bool requested = DlssNr::UsePreUpscale(true, true, false, true);
-        {
-            Color color(&params, "Color");
-            if (requested && color.Original() != nullptr)
+        const auto result = DlssNr::EvaluateWithNr<Resource, 1>(
+            &params, "Color", requested, true,
+            [&]() -> Resource*
             {
                 ++preCalls;
                 // First frame creates NR, third frame skips: neither produced an edited resource.
-                color.Replace(frame == 0 || frame == 2 ? nullptr : &edited);
-            }
-            ++srCalls;
-            assert(params.typed == (frame == 0 || frame == 2 ? &original : &edited));
-        }
+                return frame == 0 || frame == 2 ? nullptr : &edited;
+            },
+            [&]()
+            {
+                ++srCalls;
+                assert(params.typed == (frame == 0 || frame == 2 ? &original : &edited));
+                return 1;
+            },
+            [&]() { ++postCalls; });
+        assert(result == 1);
         assert(params.typed == &original);
-        if (!requested)
-            ++postCalls;
     }
     assert(preCalls == 5 && srCalls == 5 && postCalls == 0);
+}
+
+void ProductionOrchestration()
+{
+    Resource original { 1 }, edited { 2 }, otherOriginal { 3 };
+    for (bool typed : { false, true })
+        for (bool pre : { false, true })
+            for (bool allowPost : { false, true })
+                for (int srResult : { -1, 1 })
+                {
+                    Parameters params;
+                    if (typed)
+                        params.typed = &original;
+                    else
+                        params.untyped = &original;
+                    std::vector<std::string> events;
+                    auto current = [&]() { return typed ? params.typed : static_cast<Resource*>(params.untyped); };
+                    const int result = DlssNr::EvaluateWithNr<Resource, 1>(
+                        &params, "Color", pre, allowPost,
+                        [&]()
+                        {
+                            assert(current() == &original);
+                            events.push_back("pre");
+                            return &edited;
+                        },
+                        [&]()
+                        {
+                            assert(current() == (pre ? &edited : &original));
+                            events.push_back("sr");
+                            return srResult;
+                        },
+                        [&]()
+                        {
+                            assert(current() == &original);
+                            events.push_back("post");
+                        });
+                    assert(result == srResult && current() == &original);
+                    std::vector<std::string> expected =
+                        pre ? std::vector<std::string> { "pre", "sr" } : std::vector<std::string> { "sr" };
+                    if (!pre && allowPost && srResult == 1)
+                        expected.push_back("post");
+                    assert(events == expected);
+                    if (!pre)
+                        assert(params.typedWrites == 0 && params.untypedWrites == 0);
+                }
+
+    // A missing input skips pre NR but does not change the requested placement to post NR.
+    Parameters missing;
+    int before = 0, sr = 0, after = 0;
+    DlssNr::EvaluateWithNr<Resource, 1>(
+        &missing, "Color", true, true,
+        [&]()
+        {
+            ++before;
+            return &edited;
+        },
+        [&]()
+        {
+            ++sr;
+            return 1;
+        },
+        [&]() { ++after; });
+    assert(before == 0 && sr == 1 && after == 0);
+
+    // Exceptions in either backend restore the input and do not invoke the post callback.
+    for (bool failBefore : { false, true })
+    {
+        Parameters params;
+        params.typed = &original;
+        after = 0;
+        try
+        {
+            DlssNr::EvaluateWithNr<Resource, 1>(
+                &params, "Color", true, true,
+                [&]() -> Resource*
+                {
+                    if (failBefore)
+                        throw std::runtime_error("NR backend threw");
+                    return &edited;
+                },
+                [&]() -> int { throw std::runtime_error("SR backend threw"); }, [&]() { ++after; });
+            assert(false);
+        }
+        catch (const std::runtime_error&)
+        {
+            assert(params.typed == &original && after == 0);
+        }
+    }
+
+    // Nested evaluations for independent parameter blocks cannot restore each other's Color.
+    Parameters first, second;
+    first.typed = &original;
+    second.typed = &otherOriginal;
+    DlssNr::EvaluateWithNr<Resource, 1>(
+        &first, "Color", true, true, [&]() { return &edited; },
+        [&]()
+        {
+            assert(first.typed == &edited && second.typed == &otherOriginal);
+            DlssNr::EvaluateWithNr<Resource, 1>(
+                &second, "Color", true, true, [&]() { return &edited; },
+                [&]()
+                {
+                    assert(first.typed == &edited && second.typed == &edited);
+                    return -1;
+                },
+                []() {});
+            assert(first.typed == &edited && second.typed == &otherOriginal);
+            return 1;
+        },
+        []() {});
+    assert(first.typed == &original && second.typed == &otherOriginal);
 }
 } // namespace
 
@@ -163,5 +279,6 @@ int main()
 {
     ParameterRestoration();
     PlacementAcrossCreationFrames();
-    std::cout << "NR pre-upscale parameter and placement regressions passed\n";
+    ProductionOrchestration();
+    std::cout << "NR parameter, placement and production orchestration regressions passed\n";
 }

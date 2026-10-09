@@ -1,5 +1,7 @@
 #pragma once
 
+#include <type_traits>
+
 namespace DlssNr
 {
 // Temporary A/B placement, inspired by Sky's live comparison. Never written to the user's ini.
@@ -85,4 +87,24 @@ template <typename Resource, typename Parameters, auto Success> class ScopedColo
     bool _typed = true;
     bool _substituted = false;
 };
+
+// Both native passthrough and OptiScaler's SR hook call this same orchestration. Callbacks provide
+// the real NGX/NR backend in production and a recording backend in contract tests. Placement is a
+// request, not an output-presence test: a skipped pre pass must never fall through to post NR.
+template <typename Resource, auto Success, typename Parameters, typename Before, typename Upscale, typename After>
+auto EvaluateWithNr(Parameters* params, const char* colorKey, bool preRequested, bool postAllowed, Before&& before,
+                    Upscale&& upscale, After&& after)
+{
+    using Result = std::invoke_result_t<Upscale&>;
+    Result result;
+    {
+        ScopedColorSubstitution<Resource, Parameters, Success> color(preRequested ? params : nullptr, colorKey);
+        if (preRequested && color.Original() != nullptr)
+            color.Replace(before());
+        result = upscale();
+    } // Restore Color before post processing, including failed SR and exceptions.
+    if (result == Success && postAllowed && !preRequested)
+        after();
+    return result;
+}
 } // namespace DlssNr
