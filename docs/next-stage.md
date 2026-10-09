@@ -65,6 +65,22 @@ python3 tools/game_nr_compare.py collect \
 ```
 
 Use modes `off`, `pre-sr`, `post-sr`, versions `baseline`, `ported`, rounds 1–3.
+For operator-controlled Steam runs, use this launch option instead of manually
+preparing and collecting every case (replace the case arguments as needed):
+
+```text
+python3 /home/arinp/Code/dlss5_linux/OptiScaler-Linux-NR/tools/game_nr_steam.py baseline pre-sr 1 -- %command%
+```
+
+Keep GE-Proton11-7 selected in Steam. The wrapper preserves Steam's actual command,
+sets the documented PRIME/dxgi/Proton logging environment, applies the same frozen
+comparison files, and waits for that command to return. It then attempts guarded
+collection with observation `uncertain`; the operator reports visual results
+separately. Each case has its own Proton log directory and launcher transcript.
+Duplicate sessions, a running game, or changed installation files stop launch.
+If Steam returns before DS2 exits, collection is refused and the error is retained
+for review. No process is killed and no visual/performance pass is inferred.
+
 Installed configuration must stay unchanged; if it is saved/modified, collection
 stops for review instead of silently treating different settings as comparable.
 Game SR/vsync/frame-cap settings and camera operations still require an operator.
