@@ -336,6 +336,11 @@ bool Config::Reload(std::filesystem::path iniPath)
             DlssNrTagScale.set_from_config(readFloat("DlssNr", "TagScale"));
             DlssNrWorkingScale.set_from_config(readFloat("DlssNr", "WorkingScale"));
             DlssNrPreUpscale.set_from_config(readBool("DlssNr", "PreUpscale"));
+            DlssNrStabilizationEnabled.set_from_config(readBool("DlssNr", "StabilizationEnabled"));
+            DlssNrStabilizationStep.set_from_config(readFloat("DlssNr", "StabilizationStep"));
+            DlssNrStabilizationDepthTolerance.set_from_config(readFloat("DlssNr", "StabilizationDepthTolerance"));
+            DlssNrStabilizationColourTolerance.set_from_config(readFloat("DlssNr", "StabilizationColourTolerance"));
+            DlssNrStabilizationDespeckle.set_from_config(readBool("DlssNr", "StabilizationDespeckle"));
             // Sky's spelling is accepted when the native y4m key is absent/auto.
             DlssNrPreUpscale.set_from_config(readBool("DlssNr", "PreSr"));
             DlssNrDualFeature.set_from_config(readBool("DlssNr", "DualFeature"));
@@ -1233,6 +1238,11 @@ bool Config::SaveIni()
                  GetFloatValue(Instance()->DlssNrTagScale.value_for_config()).c_str());
     ini.SetValue("DlssNr", "WorkingScale", GetFloatValue(Instance()->DlssNrWorkingScale.value_for_config()).c_str());
     ini.SetValue("DlssNr", "PreUpscale", GetBoolValue(Instance()->DlssNrPreUpscale.value_for_config()).c_str());
+    ini.SetValue("DlssNr", "StabilizationEnabled", GetBoolValue(Instance()->DlssNrStabilizationEnabled.value_for_config()).c_str());
+    ini.SetValue("DlssNr", "StabilizationStep", GetFloatValue(Instance()->DlssNrStabilizationStep.value_for_config()).c_str());
+    ini.SetValue("DlssNr", "StabilizationDepthTolerance", GetFloatValue(Instance()->DlssNrStabilizationDepthTolerance.value_for_config()).c_str());
+    ini.SetValue("DlssNr", "StabilizationColourTolerance", GetFloatValue(Instance()->DlssNrStabilizationColourTolerance.value_for_config()).c_str());
+    ini.SetValue("DlssNr", "StabilizationDespeckle", GetBoolValue(Instance()->DlssNrStabilizationDespeckle.value_for_config()).c_str());
     ini.SetValue("DlssNr", "DualFeature", GetBoolValue(Instance()->DlssNrDualFeature.value_for_config()).c_str());
     ini.SetValue("DlssNr", "DualEnlarger",
                  Instance()->DlssNrDualEnlarger.value_for_config().transform(UpscalerToCode).value_or("auto").c_str());

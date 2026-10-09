@@ -156,6 +156,23 @@ void RenderMenu(Config* config, float menuResScale)
                    "\nRR remains after the upscaler; it does not use the direct pre-SR seam.");
 
         const bool comparisonOff = directDx12 && !DlssNr::EnabledAtD3D12Seam();
+        if (directDx12)
+        {
+            bool stabilization = config->DlssNrStabilizationEnabled.value_or_default();
+            if (ImGui::Checkbox("Edit stabilization (experimental)", &stabilization))
+                config->DlssNrStabilizationEnabled = stabilization;
+            HelpMarker("Reprojects the model's edit using depth and motion, then limits its luminance step."
+                       "\nThe model runs every frame. Default is off."
+                       "\nPre-SR reprojection includes camera jitter. Reset/disocclusion uses this frame's result.");
+            ImGui::BeginDisabled(!stabilization);
+            float step = config->DlssNrStabilizationStep.value_or_default();
+            if (ImGui::SliderFloat("Maximum edit step", &step, 0.0f, 2.0f, "%.2f stops"))
+                config->DlssNrStabilizationStep = step;
+            bool despeckle = config->DlssNrStabilizationDespeckle.value_or_default();
+            if (ImGui::Checkbox("Despeckle edit", &despeckle))
+                config->DlssNrStabilizationDespeckle = despeckle;
+            ImGui::EndDisabled();
+        }
 
         // Turning the pass off does not release the model, so the feature handle stays alive and
         // IsRunning keeps answering yes. Reporting a cost from that was wrong in the way that matters

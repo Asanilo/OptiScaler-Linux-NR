@@ -53,6 +53,9 @@ constexpr uint32_t kDlssNrMeterGrid = 64;
 // sizes from theirs, so there is one less thing for a call site to get wrong.
 struct DlssNrFrameInfo
 {
+    bool PreUpscale = false;
+    bool JitterValid = false;
+    float JitterX = 0.0f, JitterY = 0.0f;
     // Which way round depth runs. The game states this when it creates its own upscaler.
     bool DepthInverted = false;
 

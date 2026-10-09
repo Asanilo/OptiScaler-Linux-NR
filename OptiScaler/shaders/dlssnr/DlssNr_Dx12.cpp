@@ -11,6 +11,7 @@
 #include <dlssnr/DlssNr_ExposureScan.h>
 
 #include "DlssNr_Dx12.h"
+#include "NrStabilizer_Dx12.h"
 
 #include <Config.h>
 #include <State.h>
@@ -259,6 +260,7 @@ struct NrState
     // surface for the frame needs this: without it a skipped pass hands over last frame's picture.
     bool wroteTarget = false;
     DlssNr::GpuLifetime::Token lastRecording;
+    std::optional<bool> placement;
 
     // Whether the pass has ever run as a stage of an upscaler's own pipeline.
     //
@@ -384,6 +386,7 @@ struct NrContext
 {
     NrState nr;
     std::unique_ptr<DlssNr_Dx12> compose;
+    std::unique_ptr<NrStabilizer_Dx12> stabilizer;
     std::unique_ptr<GpuTime_Dx12> gpuTime, ngxTime;
     std::optional<double> lastNgxTime, lastGpuTime;
     capture::FrameCapture capture;
@@ -863,6 +866,7 @@ void ForgetCalibration()
 // creation of a single extra feature resets one index on its own.
 void ResetAllHistories()
 {
+    if (Context().stabilizer) Context().stabilizer->Invalidate();
     Context().nr.reset = true;
 
     for (bool& r : Context().nr.passReset)
@@ -1765,20 +1769,13 @@ bool DlssNr_Dx12::DispatchPass(ID3D12GraphicsCommandList* InCmdList, const DlssN
     const auto recording = DlssNr::GpuLifetime::Begin(InCmdList);
     if (!recording)
         return false;
-    uint32_t slot = _heapIndex;
-    uint32_t searched = 0;
-    while (searched < DLSSNR_NUM_OF_HEAPS && !DlssNr::GpuLifetime::Reusable(_slotOwners[slot]))
-    {
-        slot = (slot + 1) % DLSSNR_NUM_OF_HEAPS;
-        ++searched;
-    }
-    if (searched == DLSSNR_NUM_OF_HEAPS)
+    const int claimed = DlssNr::GpuLifetime::ClaimSlot(_slotOwners, DLSSNR_NUM_OF_HEAPS, _heapIndex, recording);
+    if (claimed < 0)
     {
         ReportSkipOnce("all NR descriptors/constants are retained by unfinished recordings");
         return false;
     }
-    _slotOwners[slot] = recording;
-    _heapIndex = (slot + 1) % DLSSNR_NUM_OF_HEAPS;
+    const auto slot = static_cast<unsigned int>(claimed);
 
     FrameDescriptorHeap& currentHeap = _frameHeaps[slot];
 
@@ -2964,6 +2961,20 @@ void DlssNr_Dx12::Dispatch(ID3D12GraphicsCommandList* cmdList, ID3D12Resource* c
 
         // A failed resolve must not hand an unwritten scratch texture to SR.
         Context().nr.wroteTarget = resolved;
+        if (resolved && cfg.DlssNrStabilizationEnabled.value_or_default())
+        {
+            if (!Context().stabilizer)
+                Context().stabilizer = std::make_unique<NrStabilizer_Dx12>(device);
+            if (!Context().stabilizer->Run(cmdList, target, Context().nr.hdrCopy, depthIn, motionIn, frame,
+                                           whitePoint, cfg.DlssNrStabilizationStep.value_or_default(),
+                                           cfg.DlssNrStabilizationDepthTolerance.value_or_default(),
+                                           cfg.DlssNrStabilizationColourTolerance.value_or_default(),
+                                           cfg.DlssNrStabilizationDespeckle.value_or_default()))
+                ReportSkipOnce("edit stabilisation unavailable this frame; using the fresh NR resolve");
+        }
+        else if (Context().stabilizer)
+            Context().stabilizer->Invalidate();
+
 
         // On-demand capture works in this path too: the staging copy still holds the frame as the
         // upscaler produced it, and the edited frame is the output itself. The write happens a few
@@ -3123,6 +3134,12 @@ void EvaluateAtSeam(ID3D12GraphicsCommandList* cmdList, NVSDK_NGX_Parameter* par
     std::lock_guard<std::recursive_mutex> nrLock(g_nrMutex);
     if (!EnabledAtD3D12Seam())
     {
+        for (const auto& entry : g_contexts)
+            if (!g_srIdentity || entry.first.second == g_srIdentity)
+            {
+                entry.second->nr.reset = true;
+                if (entry.second->stabilizer) entry.second->stabilizer->Invalidate();
+            }
         ReportSkipOnce("it is switched off");
         return;
     }
@@ -3177,6 +3194,9 @@ void EvaluateAtSeam(ID3D12GraphicsCommandList* cmdList, NVSDK_NGX_Parameter* par
         ReportSkipOnce("NR context limit reached; leaving this SR feature unchanged");
         return;
     }
+    if (Context().nr.placement.has_value() && Context().nr.placement.value() != preUpscale)
+        ResetAllHistories();
+    Context().nr.placement = preUpscale;
     if (!preUpscale && !sourceIn && StageCarriesTheModel())
         return;
 
@@ -3184,6 +3204,11 @@ void EvaluateAtSeam(ID3D12GraphicsCommandList* cmdList, NVSDK_NGX_Parameter* par
     params->Get(NVSDK_NGX_Parameter_DLSS_Feature_Create_Flags, &createFlags);
 
     DlssNrFrameInfo frame {};
+    frame.PreUpscale = preUpscale;
+    frame.JitterValid =
+        params->Get(NVSDK_NGX_Parameter_Jitter_Offset_X, &frame.JitterX) == NVSDK_NGX_Result_Success &&
+        params->Get(NVSDK_NGX_Parameter_Jitter_Offset_Y, &frame.JitterY) == NVSDK_NGX_Result_Success &&
+        std::isfinite(frame.JitterX) && std::isfinite(frame.JitterY);
     frame.DepthInverted = (createFlags & NVSDK_NGX_DLSS_Feature_Flags_DepthInverted) != 0;
     frame.ColourIsLinearHdr = (createFlags & NVSDK_NGX_DLSS_Feature_Flags_IsHDR) != 0;
 
@@ -3382,6 +3407,7 @@ void EvaluateAfterUpscale(ID3D12GraphicsCommandList* cmdList, NVSDK_NGX_Paramete
 void EvaluateBeforeUpscale(ID3D12GraphicsCommandList* cmdList, NVSDK_NGX_Parameter* params,
                            ID3D12CommandQueue* timingQueue)
 {
+    std::lock_guard<std::recursive_mutex> lock(g_nrMutex);
     // Cleared here as well as inside the pass: this call can give up before the pass is reached.
     Context().nr.wroteTarget = false;
     EvaluateAtSeam(cmdList, params, timingQueue, true);
@@ -3802,6 +3828,7 @@ void ShutdownContext()
     Context().lastNgxTime.reset();
     Context().lastGpuTime.reset();
 
+    Context().stabilizer.reset();
     Context().compose.reset();
 }
 void ReleaseSrContext(uint64_t identity)

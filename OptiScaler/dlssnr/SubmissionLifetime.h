@@ -30,6 +30,8 @@ struct Recording
     bool submitted = false;
     bool poisoned = false;
     unsigned int pendingSubmissions = 0;
+    uint64_t timestampFrequency = 0;
+    bool timestampFrequencyValid = true;
     std::vector<Submission> submissions;
     std::vector<std::weak_ptr<Recording>> dependencies;
     std::vector<std::shared_ptr<void>> retained;
@@ -95,5 +97,21 @@ inline bool SlotAvailable(const std::weak_ptr<Recording>& slot)
 {
     const auto previous = slot.lock();
     return !previous || previous->Reusable();
+}
+
+inline int ClaimSlot(std::weak_ptr<Recording>* slots, unsigned int count,
+                     unsigned int& cursor, const Token& recording)
+{
+    for (unsigned int n = 0; n < count; ++n)
+    {
+        const auto slot = (cursor + n) % count;
+        if (SlotAvailable(slots[slot]))
+        {
+            slots[slot] = recording;
+            cursor = (slot + 1) % count;
+            return static_cast<int>(slot);
+        }
+    }
+    return -1;
 }
 } // namespace DlssNr::Lifetime

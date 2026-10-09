@@ -354,6 +354,12 @@ class Config
     //
     // Experimental: colour at this point is jittered per frame and the model takes no jitter offset.
     CustomOptional<bool> DlssNrPreUpscale { false };
+    // Every-frame edit stabilisation; independent from placement and model cost.
+    CustomOptional<bool> DlssNrStabilizationEnabled { false };
+    CustomOptional<float> DlssNrStabilizationStep { 0.5f };
+    CustomOptional<float> DlssNrStabilizationDepthTolerance { 0.1f };
+    CustomOptional<float> DlssNrStabilizationColourTolerance { 0.5f };
+    CustomOptional<bool> DlssNrStabilizationDespeckle { false };
 
     // Split the upscaler in two and put the model between the halves.
     //

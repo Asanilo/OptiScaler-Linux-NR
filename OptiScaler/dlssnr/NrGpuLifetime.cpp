@@ -3,7 +3,7 @@
 
 #include <Util.h>
 #include <resource_tracking/ResTrack_dx12.h>
-#include <detours.h>
+#include <detours/detours.h>
 #include <mutex>
 #include <unordered_map>
 #include <algorithm>
@@ -43,8 +43,17 @@ void* releaseAddress = nullptr;
 
 void* Real(IUnknown* object)
 {
+    if (!object) return nullptr;
+    // Same unwrapping IID as Util; keep this hot path free of per-dispatch logs.
+    static const GUID streamline { 0xadec44e2, 0x61f0, 0x45c3,
+                                   { 0xad, 0x9f, 0x1b, 0x37, 0x37, 0x92, 0x84, 0xff } };
     IUnknown* real = nullptr;
-    return CheckForRealObject("DLSS-NR lifetime", object, &real) && real ? real : object;
+    if (SUCCEEDED(object->QueryInterface(streamline, reinterpret_cast<void**>(&real))) && real)
+    {
+        real->Release();
+        return real;
+    }
+    return object;
 }
 
 void Close(void* list)
@@ -255,6 +264,19 @@ bool ReadbackReady(const Token& token)
     return token && token->ReadbackReady();
 }
 
+uint64_t TimestampFrequency(const Token& token)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex);
+    return token && token->timestampFrequencyValid ? token->timestampFrequency : 0;
+}
+
+int ClaimSlot(std::weak_ptr<Lifetime::Recording>* slots, unsigned int count,
+              unsigned int& cursor, const Token& recording)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex);
+    return Lifetime::ClaimSlot(slots, count, cursor, recording);
+}
+
 std::vector<Token> Submitting(ID3D12CommandQueue* queue, UINT count, ID3D12CommandList* const* lists)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex);
@@ -319,6 +341,11 @@ void Submitted(ID3D12CommandQueue* queue, const std::vector<Token>& used)
     }
     for (const auto& token : used)
     {
+        UINT64 frequency = 0;
+        if (FAILED(queue->GetTimestampFrequency(&frequency)) || frequency == 0 ||
+            (token->timestampFrequency && token->timestampFrequency != frequency))
+            token->timestampFrequencyValid = false;
+        token->timestampFrequency = frequency;
         token->Submit(fence, value);
         --token->pendingSubmissions;
     }

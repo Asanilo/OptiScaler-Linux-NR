@@ -107,8 +107,16 @@ std::optional<double> GpuTime_Dx12::ReadGpuTime(ID3D12CommandQueue* commandQueue
     if (timestampData != nullptr)
     {
         // Get the GPU timestamp frequency (ticks per second)
-        UINT64 gpuFrequency;
-        commandQueue->GetTimestampFrequency(&gpuFrequency);
+        UINT64 gpuFrequency = 0;
+        if (_nrFenced)
+            gpuFrequency = DlssNr::GpuLifetime::TimestampFrequency(_completion[previousFrameIndex]);
+        else
+            commandQueue->GetTimestampFrequency(&gpuFrequency);
+        if (!gpuFrequency)
+        {
+            _readbackBuffer->Unmap(0, &writeRange);
+            return elapsedTimeMs;
+        }
 
         // Calculate elapsed time in milliseconds
         UINT64 startTime = timestampData[previousFrameIndex * 2];
@@ -128,6 +136,7 @@ std::optional<double> GpuTime_Dx12::ReadGpuTime(ID3D12CommandQueue* commandQueue
     }
 
     _readbackBuffer->Unmap(0, &writeRange);
+    if (_nrFenced) _trigger[previousFrameIndex] = false;
 
     return elapsedTimeMs;
 }
