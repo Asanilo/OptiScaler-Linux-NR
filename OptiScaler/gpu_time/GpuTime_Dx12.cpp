@@ -136,7 +136,8 @@ std::optional<double> GpuTime_Dx12::ReadGpuTime(ID3D12CommandQueue* commandQueue
     }
 
     _readbackBuffer->Unmap(0, &writeRange);
-    if (_nrFenced) _trigger[previousFrameIndex] = false;
+    if (_nrFenced)
+        _trigger[previousFrameIndex] = false;
 
     return elapsedTimeMs;
 }

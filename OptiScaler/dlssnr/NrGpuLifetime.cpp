@@ -28,7 +28,13 @@ struct Fence final : Lifetime::Completion
     ID3D12Fence* fence = nullptr;
     ID3D12CommandQueue* queue = nullptr;
     uint64_t next = 0;
-    ~Fence() override { if (fence) fence->Release(); if (queue) queue->Release(); }
+    ~Fence() override
+    {
+        if (fence)
+            fence->Release();
+        if (queue)
+            queue->Release();
+    }
     uint64_t Value() const override { return fence->GetCompletedValue(); }
 };
 struct Feature
@@ -54,10 +60,10 @@ void* releaseAddress = nullptr;
 
 void* Real(IUnknown* object)
 {
-    if (!object) return nullptr;
+    if (!object)
+        return nullptr;
     // Same unwrapping IID as Util; keep this hot path free of per-dispatch logs.
-    static const GUID streamline { 0xadec44e2, 0x61f0, 0x45c3,
-                                   { 0xad, 0x9f, 0x1b, 0x37, 0x37, 0x92, 0x84, 0xff } };
+    static const GUID streamline { 0xadec44e2, 0x61f0, 0x45c3, { 0xad, 0x9f, 0x1b, 0x37, 0x37, 0x92, 0x84, 0xff } };
     IUnknown* real = nullptr;
     if (SUCCEEDED(object->QueryInterface(streamline, reinterpret_cast<void**>(&real))) && real)
     {
@@ -78,14 +84,15 @@ bool Close(void* list)
     return true;
 }
 
-HRESULT STDMETHODCALLTYPE ResetHook(ID3D12GraphicsCommandList* list,
-                                    ID3D12CommandAllocator* allocator, ID3D12PipelineState* state)
+HRESULT STDMETHODCALLTYPE ResetHook(ID3D12GraphicsCommandList* list, ID3D12CommandAllocator* allocator,
+                                    ID3D12PipelineState* state)
 {
     const auto result = originalReset(list, allocator, state);
     if (SUCCEEDED(result))
     {
         std::lock_guard<std::recursive_mutex> lock(mutex);
-        if (Close(list)) Poll();
+        if (Close(list))
+            Poll();
     }
     return result;
 }
@@ -97,7 +104,8 @@ ULONG STDMETHODCALLTYPE ReleaseHook(IUnknown* list)
     if (count == 0)
     {
         std::lock_guard<std::recursive_mutex> lock(mutex);
-        if (Close(list)) Poll();
+        if (Close(list))
+            Poll();
     }
     return count;
 }
@@ -130,9 +138,14 @@ void Poll()
 {
     std::lock_guard<std::recursive_mutex> lock(mutex);
     static bool polling = false;
-    if (polling) return;
+    if (polling)
+        return;
     polling = true;
-    struct PollGuard { bool& flag; ~PollGuard() { flag = false; } } guard { polling };
+    struct PollGuard
+    {
+        bool& flag;
+        ~PollGuard() { flag = false; }
+    } guard { polling };
     std::vector<Token> ready;
     for (auto it = closed.begin(); it != closed.end();)
     {
@@ -147,7 +160,8 @@ void Poll()
     // COM/model deleters can reenter ReleaseHook and append to closed. Drop
     // references only after the vector iteration has ended, and suppress Poll
     // reentry while those callbacks run.
-    for (const auto& token : ready) token->ReleaseCompleted();
+    for (const auto& token : ready)
+        token->ReleaseCompleted();
 }
 
 bool DrainForShutdown(unsigned int timeoutMs)
@@ -177,11 +191,13 @@ bool DrainForShutdown(unsigned int timeoutMs)
             }
             for (const auto& token : closed)
             {
-                if (token->poisoned) return false;
+                if (token->poisoned)
+                    return false;
                 for (const auto& submission : token->submissions)
                 {
                     const auto completed = submission.fence->Value();
-                    if (completed == UINT64_MAX) return false;
+                    if (completed == UINT64_MAX)
+                        return false;
                     if (completed < submission.value && !waiting)
                     {
                         waiting = std::static_pointer_cast<Fence>(submission.fence);
@@ -191,7 +207,8 @@ bool DrainForShutdown(unsigned int timeoutMs)
             }
         }
         const auto now = GetTickCount64();
-        if (now >= deadline) return false;
+        if (now >= deadline)
+            return false;
         if (!waiting)
         {
             // Execute is still returning to its Signal hook; do not hold mutex.
@@ -199,12 +216,14 @@ bool DrainForShutdown(unsigned int timeoutMs)
             continue;
         }
         HANDLE event = CreateEventW(nullptr, FALSE, FALSE, nullptr);
-        if (!event) return false;
+        if (!event)
+            return false;
         const auto result = waiting->fence->SetEventOnCompletion(value, event);
-        const auto status = SUCCEEDED(result)
-            ? WaitForSingleObject(event, static_cast<DWORD>(deadline - now)) : WAIT_FAILED;
+        const auto status =
+            SUCCEEDED(result) ? WaitForSingleObject(event, static_cast<DWORD>(deadline - now)) : WAIT_FAILED;
         CloseHandle(event);
-        if (status != WAIT_OBJECT_0) return false;
+        if (status != WAIT_OBJECT_0)
+            return false;
     }
 }
 
@@ -260,9 +279,7 @@ void Hold(const Token& token, IUnknown* object)
     if (!token || !object || token->keys.count(object))
         return;
     object->AddRef();
-    token->Hold(object, std::shared_ptr<void>(object, [](void* value) {
-        static_cast<IUnknown*>(value)->Release();
-    }));
+    token->Hold(object, std::shared_ptr<void>(object, [](void* value) { static_cast<IUnknown*>(value)->Release(); }));
 }
 
 void Hold(ID3D12GraphicsCommandList* list, IUnknown* object)
@@ -320,9 +337,8 @@ bool FeatureDiscarded(void* feature)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex);
     const auto entry = features.find(feature);
-    return entry != features.end() && entry->second.builtOn &&
-           !entry->second.builtOn->active && !entry->second.builtOn->submitted &&
-           entry->second.builtOn->pendingSubmissions == 0;
+    return entry != features.end() && entry->second.builtOn && !entry->second.builtOn->active &&
+           !entry->second.builtOn->submitted && entry->second.builtOn->pendingSubmissions == 0;
 }
 
 bool Sequence(const Token& current, const Token& previous)
@@ -354,8 +370,8 @@ uint64_t TimestampFrequency(const Token& token)
     return token && token->timestampFrequencyValid ? token->timestampFrequency : 0;
 }
 
-int ClaimSlot(std::weak_ptr<Lifetime::Recording>* slots, unsigned int count,
-              unsigned int& cursor, const Token& recording)
+int ClaimSlot(std::weak_ptr<Lifetime::Recording>* slots, unsigned int count, unsigned int& cursor,
+              const Token& recording)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex);
     return Lifetime::ClaimSlot(slots, count, cursor, recording);

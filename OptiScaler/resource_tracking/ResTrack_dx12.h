@@ -539,7 +539,6 @@ class ResTrack_Dx12
     static void hkExecuteCommandLists(ID3D12CommandQueue* This, UINT NumCommandLists,
                                       ID3D12CommandList* const* ppCommandLists);
 
-
     static HRESULT hkCreateDescriptorHeap(ID3D12Device* This, D3D12_DESCRIPTOR_HEAP_DESC* pDescriptorHeapDesc,
                                           REFIID riid, void** ppvHeap);
 

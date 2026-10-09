@@ -99,8 +99,7 @@ inline bool SlotAvailable(const std::weak_ptr<Recording>& slot)
     return !previous || previous->Reusable();
 }
 
-inline int ClaimSlot(std::weak_ptr<Recording>* slots, unsigned int count,
-                     unsigned int& cursor, const Token& recording)
+inline int ClaimSlot(std::weak_ptr<Recording>* slots, unsigned int count, unsigned int& cursor, const Token& recording)
 {
     for (unsigned int n = 0; n < count; ++n)
     {

@@ -1078,8 +1078,7 @@ bool Config::SaveIni()
         ini.SetValue("DLSSG", "OverrideForceDMFG",
                      GetBoolValue(Instance()->FGDLSSGOverrideForceDMFG.value_for_config()).c_str());
         ini.SetValue("DLSSG", "ForceDMFG", GetBoolValue(Instance()->FGDLSSGForceDMFG.value_for_config()).c_str());
-        ini.SetValue("DLSSG", "AdaMfgUnlock",
-                     GetBoolValue(Instance()->FGDLSSGAdaMfgUnlock.value_for_config()).c_str());
+        ini.SetValue("DLSSG", "AdaMfgUnlock", GetBoolValue(Instance()->FGDLSSGAdaMfgUnlock.value_for_config()).c_str());
         ini.SetValue("DLSSG", "AdaBlackwellKernels",
                      GetBoolValue(Instance()->FGDLSSGAdaBlackwellKernels.value_for_config()).c_str());
     }
@@ -1207,77 +1206,82 @@ bool Config::SaveIni()
     {
         ini.SetValue("DLSS", "Enabled", GetBoolValue(Instance()->DLSSEnabled.value_for_config()).c_str());
 
-    // --- DLSS 5 Neural Rendering (OptiScaler/dlssnr) ---
-    ini.SetValue("DlssNr", "Enabled", GetBoolValue(Instance()->DlssNrEnabled.value_for_config()).c_str());
-    {
-        auto toggle = Instance()->DlssNrToggleKey.value_for_config();
-        ini.SetValue("DlssNr", "ToggleKey", GetIntValue(toggle, toggle > 0).c_str());
-    }
-    ini.SetValue("DlssNr", "TransferStrength",
-                 GetFloatValue(Instance()->DlssNrTransferStrength.value_for_config()).c_str());
-    ini.SetValue("DlssNr", "ColourStrength",
-                 GetFloatValue(Instance()->DlssNrColourStrength.value_for_config()).c_str());
-    ini.SetValue("DlssNr", "MaxRatio", GetFloatValue(Instance()->DlssNrMaxRatio.value_for_config()).c_str());
-    ini.SetValue("DlssNr", "Transfer", GetIntValue(Instance()->DlssNrTransfer.value_for_config()).c_str());
+        // --- DLSS 5 Neural Rendering (OptiScaler/dlssnr) ---
+        ini.SetValue("DlssNr", "Enabled", GetBoolValue(Instance()->DlssNrEnabled.value_for_config()).c_str());
+        {
+            auto toggle = Instance()->DlssNrToggleKey.value_for_config();
+            ini.SetValue("DlssNr", "ToggleKey", GetIntValue(toggle, toggle > 0).c_str());
+        }
+        ini.SetValue("DlssNr", "TransferStrength",
+                     GetFloatValue(Instance()->DlssNrTransferStrength.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "ColourStrength",
+                     GetFloatValue(Instance()->DlssNrColourStrength.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "MaxRatio", GetFloatValue(Instance()->DlssNrMaxRatio.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "Transfer", GetIntValue(Instance()->DlssNrTransfer.value_for_config()).c_str());
 
-    ini.SetValue("DlssNr", "ProbeD3D11",
-                 GetBoolValue(Instance()->DlssNrProbeD3D11.value_for_config()).c_str());
-    ini.SetValue("DlssNr", "WhitePointFromExposure",
-                 GetBoolValue(Instance()->DlssNrWhitePointFromExposure.value_for_config()).c_str());
-    ini.SetValue("DlssNr", "DebugView", GetIntValue(Instance()->DlssNrDebugView.value_for_config()).c_str());
-    ini.SetValue("DlssNr", "Compare", GetIntValue(Instance()->DlssNrCompare.value_for_config()).c_str());
-    ini.SetValue("DlssNr", "CompareSplit",
-                 GetFloatValue(Instance()->DlssNrCompareSplit.value_for_config()).c_str());
-    ini.SetValue("DlssNr", "CompareZoom",
-                 GetFloatValue(Instance()->DlssNrCompareZoom.value_for_config()).c_str());
-    ini.SetValue("DlssNr", "CompareSwap",
-                 GetBoolValue(Instance()->DlssNrCompareSwap.value_for_config()).c_str());
-    ini.SetValue("DlssNr", "CompareTags",
-                 GetBoolValue(Instance()->DlssNrCompareTags.value_for_config()).c_str());
-    ini.SetValue("DlssNr", "TagScale",
-                 GetFloatValue(Instance()->DlssNrTagScale.value_for_config()).c_str());
-    ini.SetValue("DlssNr", "WorkingScale", GetFloatValue(Instance()->DlssNrWorkingScale.value_for_config()).c_str());
-    ini.SetValue("DlssNr", "PreUpscale", GetBoolValue(Instance()->DlssNrPreUpscale.value_for_config()).c_str());
-    ini.SetValue("DlssNr", "StabilizationEnabled", GetBoolValue(Instance()->DlssNrStabilizationEnabled.value_for_config()).c_str());
-    ini.SetValue("DlssNr", "StabilizationStep", GetFloatValue(Instance()->DlssNrStabilizationStep.value_for_config()).c_str());
-    ini.SetValue("DlssNr", "StabilizationDepthTolerance", GetFloatValue(Instance()->DlssNrStabilizationDepthTolerance.value_for_config()).c_str());
-    ini.SetValue("DlssNr", "StabilizationColourTolerance", GetFloatValue(Instance()->DlssNrStabilizationColourTolerance.value_for_config()).c_str());
-    ini.SetValue("DlssNr", "StabilizationDespeckle", GetBoolValue(Instance()->DlssNrStabilizationDespeckle.value_for_config()).c_str());
-    ini.SetValue("DlssNr", "DualFeature", GetBoolValue(Instance()->DlssNrDualFeature.value_for_config()).c_str());
-    ini.SetValue("DlssNr", "DualEnlarger",
-                 Instance()->DlssNrDualEnlarger.value_for_config().transform(UpscalerToCode).value_or("auto").c_str());
-    ini.SetValue("DlssNr", "AutoCapture", GetBoolValue(Instance()->DlssNrAutoCapture.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "ProbeD3D11", GetBoolValue(Instance()->DlssNrProbeD3D11.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "WhitePointFromExposure",
+                     GetBoolValue(Instance()->DlssNrWhitePointFromExposure.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "DebugView", GetIntValue(Instance()->DlssNrDebugView.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "Compare", GetIntValue(Instance()->DlssNrCompare.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "CompareSplit",
+                     GetFloatValue(Instance()->DlssNrCompareSplit.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "CompareZoom", GetFloatValue(Instance()->DlssNrCompareZoom.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "CompareSwap", GetBoolValue(Instance()->DlssNrCompareSwap.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "CompareTags", GetBoolValue(Instance()->DlssNrCompareTags.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "TagScale", GetFloatValue(Instance()->DlssNrTagScale.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "WorkingScale",
+                     GetFloatValue(Instance()->DlssNrWorkingScale.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "PreUpscale", GetBoolValue(Instance()->DlssNrPreUpscale.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "StabilizationEnabled",
+                     GetBoolValue(Instance()->DlssNrStabilizationEnabled.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "StabilizationStep",
+                     GetFloatValue(Instance()->DlssNrStabilizationStep.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "StabilizationDepthTolerance",
+                     GetFloatValue(Instance()->DlssNrStabilizationDepthTolerance.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "StabilizationColourTolerance",
+                     GetFloatValue(Instance()->DlssNrStabilizationColourTolerance.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "StabilizationDespeckle",
+                     GetBoolValue(Instance()->DlssNrStabilizationDespeckle.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "DualFeature", GetBoolValue(Instance()->DlssNrDualFeature.value_for_config()).c_str());
+        ini.SetValue(
+            "DlssNr", "DualEnlarger",
+            Instance()->DlssNrDualEnlarger.value_for_config().transform(UpscalerToCode).value_or("auto").c_str());
+        ini.SetValue("DlssNr", "AutoCapture", GetBoolValue(Instance()->DlssNrAutoCapture.value_for_config()).c_str());
 
-    // These were read every launch but never written, so nothing set through the menu survived a
-    // restart -- the white-point source, both trims, the anchor, the pass count and the rest all
-    // reset to default on the next run.
-    ini.SetValue("DlssNr", "WhitePointSource", GetIntValue(Instance()->DlssNrWhitePointSource.value_for_config()).c_str());
-    ini.SetValue("DlssNr", "WhitePointTrim", GetFloatValue(Instance()->DlssNrWhitePointTrim.value_for_config()).c_str());
-    ini.SetValue("DlssNr", "ScanTrim", GetFloatValue(Instance()->DlssNrScanTrim.value_for_config()).c_str());
-    ini.SetValue("DlssNr", "ScanAnchorValue", GetFloatValue(Instance()->DlssNrScanAnchorValue.value_for_config()).c_str());
-    ini.SetValue("DlssNr", "ScanAnchorWhitePoint", GetFloatValue(Instance()->DlssNrScanAnchorWhitePoint.value_for_config()).c_str());
-    ini.SetValue("DlssNr", "ScanAnchors", Instance()->DlssNrScanAnchors.value_for_config_or("").c_str());
-    ini.SetValue("DlssNr", "PassOverrides", Instance()->DlssNrPassOverrides.value_for_config_or("").c_str());
-    ini.SetValue("DlssNr", "UnlockPasses",
-                 GetBoolValue(Instance()->DlssNrUnlockPasses.value_for_config()).c_str());
-    ini.SetValue("DlssNr", "ScanInverted", GetBoolValue(Instance()->DlssNrScanInverted.value_for_config()).c_str());
-    ini.SetValue("DlssNr", "ScanMeter", GetBoolValue(Instance()->DlssNrScanMeter.value_for_config()).c_str());
-    ini.SetValue("DlssNr", "Passes", GetIntValue(Instance()->DlssNrPasses.value_for_config()).c_str());
-    ini.SetValue("DlssNr", "UseProxy", GetBoolValue(Instance()->DlssNrUseProxy.value_for_config()).c_str());
-    ini.SetValue("DlssNr", "ProxyProbe", GetBoolValue(Instance()->DlssNrProxyProbe.value_for_config()).c_str());
-    // ScanExposure is a developer override with no menu control; persist it so a set ini keeps it.
-    ini.SetValue("DlssNr", "ScanExposure", GetBoolValue(Instance()->DlssNrScanExposure.value_for_config()).c_str());
-    ini.SetValue("DlssNr", "WhitePointScale",
-                 GetFloatValue(Instance()->DlssNrWhitePointScale.value_for_config()).c_str());
-    ini.SetValue("DlssNr", "Preset", GetIntValue(Instance()->DlssNrPreset.value_for_config()).c_str());
-    ini.SetValue("DlssNr", "Intensity", GetFloatValue(Instance()->DlssNrIntensity.value_for_config()).c_str());
-    ini.SetValue("DlssNr", "Style", GetIntValue(Instance()->DlssNrStyle.value_for_config()).c_str());
-    ini.SetValue("DlssNr", "LocalStructure",
-                 GetFloatValue(Instance()->DlssNrLocalStructure.value_for_config()).c_str());
-    ini.SetValue("DlssNr", "LocalTone", GetFloatValue(Instance()->DlssNrLocalTone.value_for_config()).c_str());
-    ini.SetValue("DlssNr", "SkinStructure",
-                 GetFloatValue(Instance()->DlssNrSkinStructure.value_for_config()).c_str());
-    ini.SetValue("DlssNr", "AutoMask", GetBoolValue(Instance()->DlssNrAutoMask.value_for_config()).c_str());
+        // These were read every launch but never written, so nothing set through the menu survived a
+        // restart -- the white-point source, both trims, the anchor, the pass count and the rest all
+        // reset to default on the next run.
+        ini.SetValue("DlssNr", "WhitePointSource",
+                     GetIntValue(Instance()->DlssNrWhitePointSource.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "WhitePointTrim",
+                     GetFloatValue(Instance()->DlssNrWhitePointTrim.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "ScanTrim", GetFloatValue(Instance()->DlssNrScanTrim.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "ScanAnchorValue",
+                     GetFloatValue(Instance()->DlssNrScanAnchorValue.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "ScanAnchorWhitePoint",
+                     GetFloatValue(Instance()->DlssNrScanAnchorWhitePoint.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "ScanAnchors", Instance()->DlssNrScanAnchors.value_for_config_or("").c_str());
+        ini.SetValue("DlssNr", "PassOverrides", Instance()->DlssNrPassOverrides.value_for_config_or("").c_str());
+        ini.SetValue("DlssNr", "UnlockPasses", GetBoolValue(Instance()->DlssNrUnlockPasses.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "ScanInverted", GetBoolValue(Instance()->DlssNrScanInverted.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "ScanMeter", GetBoolValue(Instance()->DlssNrScanMeter.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "Passes", GetIntValue(Instance()->DlssNrPasses.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "UseProxy", GetBoolValue(Instance()->DlssNrUseProxy.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "ProxyProbe", GetBoolValue(Instance()->DlssNrProxyProbe.value_for_config()).c_str());
+        // ScanExposure is a developer override with no menu control; persist it so a set ini keeps it.
+        ini.SetValue("DlssNr", "ScanExposure", GetBoolValue(Instance()->DlssNrScanExposure.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "WhitePointScale",
+                     GetFloatValue(Instance()->DlssNrWhitePointScale.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "Preset", GetIntValue(Instance()->DlssNrPreset.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "Intensity", GetFloatValue(Instance()->DlssNrIntensity.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "Style", GetIntValue(Instance()->DlssNrStyle.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "LocalStructure",
+                     GetFloatValue(Instance()->DlssNrLocalStructure.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "LocalTone", GetFloatValue(Instance()->DlssNrLocalTone.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "SkinStructure",
+                     GetFloatValue(Instance()->DlssNrSkinStructure.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "AutoMask", GetBoolValue(Instance()->DlssNrAutoMask.value_for_config()).c_str());
         ini.SetValue("DLSS", "RenderPresetOverride",
                      GetBoolValue(Instance()->RenderPresetOverride.value_for_config()).c_str());
         ini.SetValue("DLSS", "RenderPresetForAll",

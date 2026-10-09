@@ -22,8 +22,8 @@ bool Sequence(const Token& current, const Token& previous);
 bool Reusable(const std::weak_ptr<Lifetime::Recording>& token);
 bool ReadbackReady(const Token& token);
 uint64_t TimestampFrequency(const Token& token);
-int ClaimSlot(std::weak_ptr<Lifetime::Recording>* slots, unsigned int count,
-              unsigned int& cursor, const Token& recording);
+int ClaimSlot(std::weak_ptr<Lifetime::Recording>* slots, unsigned int count, unsigned int& cursor,
+              const Token& recording);
 void Poll();
 // SDK shutdown ends the right to replay NR recordings. Drain their actual GPU
 // submissions before the vendor core shuts down; false keeps that core alive.

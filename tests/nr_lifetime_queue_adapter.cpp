@@ -15,14 +15,20 @@ void STDMETHODCALLTYPE ExecuteHook(ID3D12CommandQueue* queue, UINT count, ID3D12
 }
 bool NrTestEnsureQueueHook(ID3D12Device* device)
 {
-    if (originalExecute) return true;
+    if (originalExecute)
+        return true;
     ID3D12CommandQueue* queue = nullptr;
-    D3D12_COMMAND_QUEUE_DESC desc {}; desc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
-    if (FAILED(device->CreateCommandQueue(&desc, IID_PPV_ARGS(&queue)))) return false;
+    D3D12_COMMAND_QUEUE_DESC desc {};
+    desc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
+    if (FAILED(device->CreateCommandQueue(&desc, IID_PPV_ARGS(&queue))))
+        return false;
     originalExecute = reinterpret_cast<Execute>((*reinterpret_cast<void***>(queue))[10]);
-    DetourTransactionBegin(); DetourUpdateThread(GetCurrentThread());
+    DetourTransactionBegin();
+    DetourUpdateThread(GetCurrentThread());
     DetourAttach(reinterpret_cast<PVOID*>(&originalExecute), reinterpret_cast<PVOID>(ExecuteHook));
-    const auto status = DetourTransactionCommit(); queue->Release();
-    if (status != NO_ERROR) originalExecute = nullptr;
+    const auto status = DetourTransactionCommit();
+    queue->Release();
+    if (status != NO_ERROR)
+        originalExecute = nullptr;
     return status == NO_ERROR;
 }

@@ -16,16 +16,19 @@ int main()
     auto generation = std::make_shared<Recording>();
     std::weak_ptr<Recording> slot = generation;
     bool released = false;
-    auto resource = std::shared_ptr<void>(new int(1), [&](void* value) {
-        released = true; delete static_cast<int*>(value);
-    });
+    auto resource = std::shared_ptr<void>(new int(1),
+                                          [&](void* value)
+                                          {
+                                              released = true;
+                                              delete static_cast<int*>(value);
+                                          });
     generation->Hold(resource.get(), resource);
     resource.reset();
     assert(!SlotAvailable(slot)); // open recording
     generation->Submit(first, 1);
     first->completed = 1;
-    assert(!SlotAvailable(slot)); // closed-but-executable lists can be replayed
-    generation->Submit(first, 2); // later submission extends ownership
+    assert(!SlotAvailable(slot));  // closed-but-executable lists can be replayed
+    generation->Submit(first, 2);  // later submission extends ownership
     generation->Submit(second, 3); // every queue must finish
     generation->active = false;
     generation->ReleaseCompleted();

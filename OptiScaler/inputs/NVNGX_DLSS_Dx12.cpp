@@ -1165,9 +1165,9 @@ NVSDK_NGX_API NVSDK_NGX_Result NVSDK_NGX_D3D12_EvaluateFeature(ID3D12GraphicsCom
 
     // Direct NR -> SR, as in Sky's PreSr path. Keep y4m's pass and Proton state envelope;
     // only the SR Color input is substituted. RR and FG do not use this experimental seam.
-    const bool preUpscaleRequested = DlssNr::UsePreUpscale(
-        DlssNr::EnabledAtD3D12Seam(), DlssNr::BeforeSrAtD3D12Seam(),
-        cfg.DlssNrDualFeature.value_or_default(), feature == NVSDK_NGX_Feature_SuperSampling);
+    const bool preUpscaleRequested =
+        DlssNr::UsePreUpscale(DlssNr::EnabledAtD3D12Seam(), DlssNr::BeforeSrAtD3D12Seam(),
+                              cfg.DlssNrDualFeature.value_or_default(), feature == NVSDK_NGX_Feature_SuperSampling);
 
     auto beforeUpscale = [&]() -> ID3D12Resource*
     {
@@ -1185,10 +1185,8 @@ NVSDK_NGX_API NVSDK_NGX_Result NVSDK_NGX_D3D12_EvaluateFeature(ID3D12GraphicsCom
             LOG_DEBUG("Passthrough to native DLSS EvaluateFeature for handle {}", handleId);
 
             const auto result = DlssNr::EvaluateWithNr<ID3D12Resource, NVSDK_NGX_Result_Success>(
-                InParameters, NVSDK_NGX_Parameter_Color, preUpscaleRequested, postAllowed, beforeUpscale,
-                [&]() {
-                    return NVNGXProxy::D3D12_EvaluateFeature()(InCmdList, InFeatureHandle, InParameters, InCallback);
-                },
+                InParameters, NVSDK_NGX_Parameter_Color, preUpscaleRequested, postAllowed, beforeUpscale, [&]()
+                { return NVNGXProxy::D3D12_EvaluateFeature()(InCmdList, InFeatureHandle, InParameters, InCallback); },
                 afterUpscale);
             LOG_DEBUG("Native DLSS EvaluateFeature result: 0x{:X}", (uint32_t) result);
 

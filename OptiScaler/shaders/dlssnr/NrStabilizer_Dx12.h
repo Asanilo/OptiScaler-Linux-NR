@@ -24,8 +24,12 @@ class NrStabilizer_Dx12 : public Shader_Dx12
   public:
     explicit NrStabilizer_Dx12(ID3D12Device* device);
     ~NrStabilizer_Dx12();
-    void Invalidate() { valid_ = false; jitterValid_ = false; }
-    bool Run(ID3D12GraphicsCommandList* list, ID3D12Resource* target, ID3D12Resource* original,
-             ID3D12Resource* depth, ID3D12Resource* motion, const DlssNrFrameInfo& frame,
-             float whitePoint, float stepLimit, float depthTolerance, float colourTolerance, bool despeckle);
+    void Invalidate()
+    {
+        valid_ = false;
+        jitterValid_ = false;
+    }
+    bool Run(ID3D12GraphicsCommandList* list, ID3D12Resource* target, ID3D12Resource* original, ID3D12Resource* depth,
+             ID3D12Resource* motion, const DlssNrFrameInfo& frame, float whitePoint, float stepLimit,
+             float depthTolerance, float colourTolerance, bool despeckle);
 };
