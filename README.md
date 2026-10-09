@@ -1,3 +1,21 @@
+# OptiScaler Linux NR integration
+
+Linux/Proton game integration based on y4m `7b7220bb`, retaining its adapter,
+overlay queue and D3D12 state-restoration fixes. The `linux-nr` branch adds Sky-inspired
+direct NR → SR parameter handling and temporary NR off / NR → SR / SR → NR comparison.
+
+MSVC Release builds and parameter regression tests pass. Initial testing on an
+RTX 4060 Laptop, NVIDIA 615.71.09 and GE-Proton11-7 confirms actual pre/post-SR NR
+execution in Death Stranding 2, with both placements visually confirmed by the user.
+Full performance and long-session stability validation is ongoing.
+The NR runtime is supplied separately and is not included in this repository.
+
+See [Linux integration and testing notes](docs/linux-nr.md) for scope, setup,
+build provenance and rollback. Edit cache, reprojection, anti-flicker and GPU fence
+retirement remain later integration stages.
+
+---
+
 <div align="center">
 
   ![Logo](https://github.com/user-attachments/assets/c7dad5da-0b29-4710-8a57-b58e4e407abd)
@@ -190,4 +208,3 @@ This project uses [FreeType](https://gitlab.freedesktop.org/freetype/freetype) l
   </tr>
  </tbody>
 </table>
-
