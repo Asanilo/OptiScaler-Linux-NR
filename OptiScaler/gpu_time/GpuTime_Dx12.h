@@ -1,6 +1,7 @@
 #pragma once
 #include "SysUtils.h"
 #include <d3d12.h>
+#include <dlssnr/NrGpuLifetime.h>
 
 class GpuTime_Dx12
 {
@@ -12,9 +13,12 @@ class GpuTime_Dx12
 
     int _currentFrameIndex = 0;
     bool _init = false;
+    bool _nrFenced = false;
+    bool _recordingStarted = false;
+    std::array<DlssNr::GpuLifetime::Token, QUERY_BUFFER_COUNT> _completion {};
 
   public:
-    GpuTime_Dx12(ID3D12Device* device);
+    GpuTime_Dx12(ID3D12Device* device, bool nrFenced = false);
     ~GpuTime_Dx12();
 
     void Start(ID3D12GraphicsCommandList* cmdList);

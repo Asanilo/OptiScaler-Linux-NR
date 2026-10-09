@@ -373,6 +373,7 @@ NVSDK_NGX_API NVSDK_NGX_Result NVSDK_NGX_D3D12_Init_with_ProjectID(
 
 NVSDK_NGX_API NVSDK_NGX_Result NVSDK_NGX_D3D12_Shutdown(void)
 {
+    DlssNr::Shutdown();
     shutdown = true;
     State::Instance().nvngxDx12Inited = false;
 
@@ -827,6 +828,7 @@ NVSDK_NGX_API NVSDK_NGX_Result NVSDK_NGX_D3D12_ReleaseFeature(NVSDK_NGX_Handle* 
     DlssNr::ExposureScan::ReleaseTrackedResources();
 
     auto handleId = InHandle->Id;
+    DlssNr::ReleaseSrContext(handleId);
 
     // Clean up framegen
     if (State::Instance().currentFG != nullptr && State::Instance().activeFgInput == FGInput::Upscaler)
@@ -961,6 +963,7 @@ static NVSDK_NGX_Result TryEvaluateOptiFeature(ID3D12GraphicsCommandList* InCmdL
     State& state = State::Instance();
     const Config& cfg = *Config::Instance();
     const uint32_t handleId = InFeatureHandle->Id;
+    DlssNr::SrContextScope nrContext(handleId);
 
     auto ctxIt = Dx12Contexts.find(handleId);
 
@@ -1108,6 +1111,7 @@ NVSDK_NGX_API NVSDK_NGX_Result NVSDK_NGX_D3D12_EvaluateFeature(ID3D12GraphicsCom
     }
 
     const uint32_t handleId = InFeatureHandle->Id;
+    DlssNr::SrContextScope nrContext(handleId);
     LOG_DEBUG("EvaluateFeature - Handle: {}, CmdList: {:p}", handleId, (void*) InCmdList);
 
     const State& state = State::Instance();

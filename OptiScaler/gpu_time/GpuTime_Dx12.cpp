@@ -5,7 +5,7 @@
 
 #include <include/d3dx/d3dx12.h>
 
-GpuTime_Dx12::GpuTime_Dx12(ID3D12Device* device)
+GpuTime_Dx12::GpuTime_Dx12(ID3D12Device* device, bool nrFenced) : _nrFenced(nrFenced)
 {
     // Create query heap for Start and End timestamps per buffer
     D3D12_QUERY_HEAP_DESC queryHeapDesc = {};
@@ -46,9 +46,23 @@ GpuTime_Dx12::~GpuTime_Dx12()
 
 void GpuTime_Dx12::Start(ID3D12GraphicsCommandList* cmdList)
 {
+    _recordingStarted = false;
     if (_init && _queryHeap != nullptr)
     {
-        _currentFrameIndex = (_currentFrameIndex + 1) % QUERY_BUFFER_COUNT;
+        const auto next = (_currentFrameIndex + 1) % QUERY_BUFFER_COUNT;
+        if (_nrFenced)
+        {
+            if (!DlssNr::GpuLifetime::Reusable(_completion[next]))
+                return;
+            _completion[next] = DlssNr::GpuLifetime::Begin(cmdList);
+            if (!_completion[next])
+                return;
+            DlssNr::GpuLifetime::Hold(_completion[next], _queryHeap);
+            DlssNr::GpuLifetime::Hold(_completion[next], _readbackBuffer);
+        }
+        _currentFrameIndex = next;
+        _trigger[next] = false;
+        _recordingStarted = true;
 
         cmdList->EndQuery(_queryHeap, D3D12_QUERY_TYPE_TIMESTAMP, _currentFrameIndex * 2);
     }
@@ -56,7 +70,7 @@ void GpuTime_Dx12::Start(ID3D12GraphicsCommandList* cmdList)
 
 void GpuTime_Dx12::End(ID3D12GraphicsCommandList* cmdList)
 {
-    if (_init && _queryHeap != nullptr)
+    if (_init && _queryHeap != nullptr && _recordingStarted)
     {
         cmdList->EndQuery(_queryHeap, D3D12_QUERY_TYPE_TIMESTAMP, _currentFrameIndex * 2 + 1);
 
@@ -77,7 +91,8 @@ std::optional<double> GpuTime_Dx12::ReadGpuTime(ID3D12CommandQueue* commandQueue
     // Try to read the previous frame's timestamps
     uint32_t previousFrameIndex = (_currentFrameIndex + 1) % QUERY_BUFFER_COUNT;
 
-    if (!_trigger[previousFrameIndex])
+    if (!_trigger[previousFrameIndex] ||
+        (_nrFenced && !DlssNr::GpuLifetime::ReadbackReady(_completion[previousFrameIndex])))
         return elapsedTimeMs;
 
     UINT64* timestampData {};

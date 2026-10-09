@@ -12,6 +12,7 @@
 // Raw, because a codec is the confound. A manifest alongside says how to read them.
 
 #pragma once
+#include "NrGpuLifetime.h"
 
 #include <windows.h>
 #include <d3d12.h>
@@ -29,6 +30,7 @@ constexpr unsigned int kMaxFrames = 8;
 
 struct Shot
 {
+    DlssNr::GpuLifetime::Token completion;
     ID3D12Resource* readback = nullptr;
     D3D12_PLACED_SUBRESOURCE_FOOTPRINT layout = {};
     unsigned long long bytes = 0;
@@ -95,12 +97,21 @@ class FrameCapture
 
     // True once every frame has been copied and the GPU has been waited for. The caller does the waiting,
     // since it owns the fence.
-    bool readyToWrite() const { return ready_; }
+    bool readyToWrite() const
+    {
+        if (!ready_)
+            return false;
+        for (unsigned int i = 0; i < captured_; ++i)
+            if (!DlssNr::GpuLifetime::ReadbackReady(beforeShots_[i].completion) ||
+                !DlssNr::GpuLifetime::ReadbackReady(afterShots_[i].completion))
+                return false;
+        return true;
+    }
 
     // Writes what was captured and releases everything. Returns the directory, or an empty string.
     std::string write(const std::filesystem::path& directory)
     {
-        if (!ready_)
+        if (!readyToWrite())
             return {};
 
         // A dark frame -- a menu, a loading screen -- measures nothing. Discard the run and quietly
@@ -226,6 +237,10 @@ class FrameCapture
     {
         if (shot.readback == nullptr)
             return;
+
+        shot.completion = DlssNr::GpuLifetime::Begin(cmd);
+        DlssNr::GpuLifetime::Hold(shot.completion, src);
+        DlssNr::GpuLifetime::Hold(shot.completion, shot.readback);
 
         D3D12_RESOURCE_BARRIER b = {};
         b.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;

@@ -7,7 +7,17 @@ an independently accepted NR→SR delivery.
 
 ## Ordered gates
 
-1. Compare the frozen y4m baseline `7b7220bb` with the frozen port `26aea636`, each
+1. Attribution diagnosis: post-SR flicker has now also been reported on the
+   frozen unmodified y4m baseline `7b7220bb`, with the same SF-v2 model and
+   Detail/Intensity=1. Its completed log is retained in
+   `../testlogs/nr-comparison/baseline-post-sr-round-01`. This demonstrates that
+   the symptom is not exclusive to the port; it does not identify the root cause
+   or rule out additional port regressions. Stop the remaining diagnostic matrix
+   at the operator's request and proceed with source investigation. The prepared
+   baseline/off round 2 has not been played and is not a completed control.
+
+   The full controlled matrix below remains a validation protocol, not a blocker
+   to beginning the fix investigation. Compare the frozen baseline with `26aea636`, each
    with NR off, NR→SR and SR→NR. Keep the same SF-v2 model, save, camera, SR quality
    and exposure. Passes=1, WorkingScale=1, Detail/Intensity=1. FG, dynamic resolution,
    vsync and frame caps off. Each condition starts a fresh process, warms up for
@@ -26,7 +36,8 @@ an independently accepted NR→SR delivery.
    size/format or placement change. Invalid history uses this frame's result.
 4. Complete real GPU tests and the game acceptance below before delivery.
 
-The anti-flicker/synchronisation renderer changes are not enabled before gate 1.
+Further renderer changes can proceed after this attribution evidence. They must
+be reviewed and compared against the retained failing control before acceptance.
 Cache skip/adaptive acceleration, FG/RR/DualFeature, video and native Vulkan are
 later stages. A baseline failure is attribution evidence, never an acceptance pass.
 
@@ -108,7 +119,9 @@ reviewed before acceptance. A collected log is not proof that a full run occurre
 
 ## Current outstanding work
 
-The six-condition live experiment, actual GPU lifetime changes/tests, stabiliser
+The full six-condition experiment was curtailed after baseline post-SR reproduced
+the symptom. Remaining cases must not be reported as completed or passed.
+Actual GPU lifetime changes/tests, stabiliser
 port and long-session/performance gates are **not completed**. No success is
 inferred from the new contract/tool tests. Preparation can proceed while awaiting
 the user's normal game exit and participation in the controlled camera experiment.

@@ -1,4 +1,5 @@
 #include "pch.h"
+#include <dlssnr/NrGpuLifetime.h>
 
 #include <dlssnr/DlssNr_ExposureScan.h>
 
@@ -639,6 +640,7 @@ void ResTrack_Dx12::hkCreateUnorderedAccessView(ID3D12Device* This, ID3D12Resour
 void ResTrack_Dx12::hkExecuteCommandLists(ID3D12CommandQueue* This, UINT NumCommandLists,
                                           ID3D12CommandList* const* ppCommandLists)
 {
+    const auto nrSubmission = DlssNr::GpuLifetime::Submitting(This, NumCommandLists, ppCommandLists);
     auto fg = State::Instance().currentFG;
 
     if (fg != nullptr && fg->IsActive() && !fg->IsPaused())
@@ -696,6 +698,7 @@ void ResTrack_Dx12::hkExecuteCommandLists(ID3D12CommandQueue* This, UINT NumComm
         if (!found.empty())
         {
             o_ExecuteCommandLists(This, NumCommandLists, ppCommandLists);
+            DlssNr::GpuLifetime::Submitted(This, nrSubmission);
 
             for (size_t i = 0; i < found.size(); i++)
             {
@@ -709,6 +712,7 @@ void ResTrack_Dx12::hkExecuteCommandLists(ID3D12CommandQueue* This, UINT NumComm
     LOG_TRACK("Done NumCommandLists: {}", NumCommandLists);
 
     o_ExecuteCommandLists(This, NumCommandLists, ppCommandLists);
+    DlssNr::GpuLifetime::Submitted(This, nrSubmission);
 }
 
 #pragma region Heap hooks
@@ -1875,6 +1879,8 @@ void ResTrack_Dx12::HookCommandList(ID3D12Device* InDevice)
 
 void ResTrack_Dx12::HookToQueue(ID3D12Device* InDevice)
 {
+    static std::mutex queueHookMutex;
+    std::lock_guard<std::mutex> hookLock(queueHookMutex);
     if (o_ExecuteCommandLists != nullptr)
         return;
 
@@ -1913,6 +1919,14 @@ void ResTrack_Dx12::HookToQueue(ID3D12Device* InDevice)
 
         queue->Release();
     }
+}
+
+bool ResTrack_Dx12::EnsureQueueSubmissionHook(ID3D12Device* device)
+{
+    if (!device)
+        return false;
+    HookToQueue(device);
+    return o_ExecuteCommandLists != nullptr;
 }
 
 void ResTrack_Dx12::HookDevice(ID3D12Device* device)

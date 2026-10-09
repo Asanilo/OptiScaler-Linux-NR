@@ -24,6 +24,18 @@ class Config;
 
 namespace DlssNr
 {
+// The actual SR handle, not a reusable parameter block, owns its model history.
+class SrContextScope
+{
+    uint64_t previous_;
+  public:
+    explicit SrContextScope(uint64_t identity);
+    ~SrContextScope();
+    SrContextScope(const SrContextScope&) = delete;
+    SrContextScope& operator=(const SrContextScope&) = delete;
+};
+void ReleaseSrContext(uint64_t identity);
+
 // The ceiling on how many times the model runs over one frame. The array of extra features, the
 // pass-side clamp, the slider's bounds and the slider's own clamp all read this one number.
 // What the arrays are sized for, and the ceiling the unlocked slider reaches.
