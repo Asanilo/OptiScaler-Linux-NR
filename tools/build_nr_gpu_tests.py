@@ -7,6 +7,7 @@ is staged in the output directory; compatibility edits do not enter production.
 import argparse
 import hashlib
 import json
+import re
 from pathlib import Path
 import shutil
 import subprocess
@@ -34,7 +35,7 @@ def main():
     shutil.copytree(source, staged, dirs_exist_ok=True)
     header = staged / "detours.h"
     text = header.read_text()
-    if "#define DETOURS_VERSION 0x4c0c1" not in text or text.count("#if (_MSC_VER < 1299)") != 1:
+    if not re.search(r"#define\s+DETOURS_VERSION\s+0x4c0c1\b", text) or text.count("#if (_MSC_VER < 1299)") != 2:
         raise SystemExit("Expected unmodified Detours 4.0.1 header")
     header.write_text(text.replace("#if (_MSC_VER < 1299)", "#if defined(_MSC_VER) && (_MSC_VER < 1299)"))
     modules = staged / "modules.cpp"
