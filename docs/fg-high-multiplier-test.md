@@ -88,3 +88,5 @@ Workspace evidence: `testlogs/fg-eee98821/test-status.json`, `operator-fps-repor
 The original seven game runtime DLLs and previous OptiScaler files are retained in
 `backups/ds2-fg-eee98821/`. `build/install_fg_test.py --rollback` previews a guarded restore;
 `--apply` requires the game closed and all current file hashes matching the rollback record.
+
+Current shared-workspace installation also includes the later FSR SR test layer. Restore that layer first using `build/install_fsr41_test.py --rollback`; its adopted user-saved INI has a separate update history. Then preview FG rollback. See [FSR deployment](../../docs/fsr41-ds2-test.md) and [handoff](../../docs/handoff-20261010.md). Do not bypass a current-INI hash mismatch in the older FG rollback.

@@ -1,21 +1,12 @@
 # OptiScaler Linux NR integration
 
-Linux/Proton game integration based on y4m `7b7220bb`, retaining its adapter,
-overlay queue and D3D12 state-restoration fixes. The `linux-nr` branch adds Sky-inspired
-direct NR → SR parameter handling and temporary NR off / NR → SR / SR → NR comparison.
+Linux/Proton game integration based on y4m `7b7220bb`, retaining its adapter, overlay queue and D3D12 state-restoration fixes. The `linux-nr` branch adds direct NR → SR, live placement comparison, Sky temporal caching/anti-flicker, fenced GPU ownership and corrected timing. This development branch has not been merged into the fork's default `dlss-neural-rendering` branch.
 
-MSVC Release builds and parameter regression tests pass. Initial testing on an
-RTX 4060 Laptop, NVIDIA 615.71.09 and GE-Proton11-7 confirms actual pre/post-SR NR
-execution in Death Stranding 2. Later observation reports persistent flicker after SR;
-the user reports no flicker before SR in this session. Post-SR visual acceptance fails.
-Full performance, baseline regression and long-session stability validation is ongoing.
-The NR runtime is supplied separately and is not included in this repository.
+`fee544fe` fixes planar depth extraction and post-SR motion jitter. DS2 on RTX4060 Laptop / NVIDIA615.71.09 / GE-Proton11-7 passed the current-scene stationary/moving and pre-SR/Sky1/2 short checks. The initial post-SR flicker failure is retained as historical evidence; it is not the latest result. Broader games/scenes, long sessions and controlled performance remain unaccepted.
 
-See [Linux integration and testing notes](docs/linux-nr.md) for scope, setup,
-build provenance and rollback. Fenced GPU ownership, per-SR contexts and the
-[Sky temporal edit cache / anti-flicker port](docs/sky-cache.md) are implemented.
-Cache/anti-flicker defaults off; DS2 appearance, FPS and long-session acceptance
-for the new port are pending.
+The installed `eee98821` build retains those NR fixes and adds read-only native DLSS-G diagnostics. DS2 native2X/4X/5X/6X requests and FPS were observed; RSYNC/frame-spacing compatibility remains unresolved. Separately supplied FSR4.1.1 INT8 SR executed in DS2 and live switching back to DLSS worked. No FSR4-FG acceptance follows. Models and test logs remain outside Git.
+
+See [Linux integration](docs/linux-nr.md), [Sky cache](docs/sky-cache.md), [FG observations](docs/fg-high-multiplier-test.md), and [current remaining work](docs/next-stage.md). In the local shared workspace, start with [the handoff](../docs/handoff-20261010.md) and [installation/provenance index](../docs/game-references.json).
 
 ---
 
