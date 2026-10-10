@@ -18,7 +18,8 @@ import numpy as np
 # DXGI formats, little-endian storage, including RG/R guide sidecars.
 FORMATS = {2: ('<f4', 4), 10: ('<f2', 4), 16: ('<f4', 2), 34: ('<f2', 2),
            41: ('<f4', 1), 54: ('<f2', 1), 28: ('u1', 4), 29: ('u1', 4),
-           87: ('u1', 4), 91: ('u1', 4), 24: ('<u4', 1)}
+           87: ('u1', 4), 91: ('u1', 4), 24: ('<u4', 1), 26: ('<u4', 1),
+           35: ('<u2', 2), 37: ('<i2', 2), 40: ('<f4', 1), 56: ('<u2', 1)}
 
 
 def decode(root, image):
@@ -38,7 +39,22 @@ def decode(root, image):
         raise ValueError('Truncated or inconsistent raw image')
     a = np.ndarray((h, w, channels), dtype=dtype, buffer=raw, offset=offset,
                    strides=(pitch, channels * dtype.itemsize, dtype.itemsize)).astype(np.float32)
-    if image['format'] == 24:
+    if image['format'] == 26:
+        # DXGI R11G11B10_FLOAT: unsigned 5-bit exponents, fractions 6/6/5.
+        # Shift each channel into IEEE half's exponent/fraction positions.
+        # This also preserves subnormals, infinities and NaNs exactly.
+        # https://learn.microsoft.com/en-us/windows/win32/api/dxgiformat/ne-dxgiformat-dxgi_format
+        packed = np.ndarray((h, w), dtype='<u4', buffer=raw, offset=offset, strides=(pitch, 4))
+        components = []
+        for shift, bits in ((0, 11), (11, 11), (22, 10)):
+            half = (((packed >> shift) & ((1 << bits) - 1)) << (15 - bits)).astype('<u2')
+            components.append(half.view('<f2').astype(np.float32))
+        a = np.stack(components, axis=-1)
+    elif image['format'] in (35, 56):
+        a /= 65535
+    elif image['format'] == 37:
+        a = np.maximum(a / 32767, -1)
+    elif image['format'] == 24:
         # Re-read as integers: float32 would lose low packed bits.
         packed = np.ndarray((h, w), dtype='<u4', buffer=raw, offset=offset, strides=(pitch, 4))
         a = np.stack([(packed >> shift) & mask for shift, mask in

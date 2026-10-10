@@ -47,6 +47,19 @@ class CaptureAnalysis(unittest.TestCase):
             item = self.image(root, 0, 'packed', packed, 24)
             np.testing.assert_allclose(analysis.decode(root, item)[0, 0], [1/1023, 511/1023, 1, 1])
 
+    def test_r11g11b10_hdr(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            # Independent hand-encoded values: 1, 2, 0.5; smallest subnormals; inf/NaN.
+            words = np.array([[[ (15 << 6) | ((16 << 6) << 11) | ((14 << 5) << 22) ],
+                               [1 | (1 << 11) | (1 << 22)],
+                               [(31 << 6) | (((31 << 6) | 1) << 11)]]], '<u4')
+            decoded = analysis.decode(root, self.image(root, 0, 'original', words, 26))
+            np.testing.assert_array_equal(decoded[0, 0], [1, 2, .5])
+            np.testing.assert_array_equal(decoded[0, 1], [2**-20, 2**-20, 2**-19])
+            self.assertTrue(np.isinf(decoded[0, 2, 0]))
+            self.assertTrue(np.isnan(decoded[0, 2, 1]))
+
     def test_known_model_flicker_and_roi(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
