@@ -52,3 +52,39 @@ flicker and crashes. A high FPS counter with repeated images does not pass accep
 The diagnostic does not add GetState calls, synchronize the GPU, change the vendor result or alter
 frame generation requests beyond the existing configured override. It logs native statistics every
 two seconds only when Ada unlock is enabled and both OptiScaler FG Input/Output are None.
+
+## Current-machine observations (2026-10-10)
+
+Build `eee988215be4a1087c9414d86264a063f563c40c`, MSVC Release run `38049791749`, format run
+`38049778100`: both passed. DS2 loaded the supplied production runtime. Both unlock signatures
+matched and 31 kernel containers were retargeted at runtime.
+
+The initial fixed 4X configuration overrode the game's 2X and 6X choices with three generated
+frames. Consequently, changing the game setting initially kept FPS around 110. Resetting
+`Override DLSSG Ratio` to **Default** allowed native game requests to select the count. The saved
+configuration now uses `OverrideInterpolationCount=auto`; no restart or NR change was required.
+When comparing **game** multipliers, always cancel OptiScaler's fixed override first.
+
+| Game multiplier | Operator FPS | Native requested/forwarded generated frames | Raw presents per poll in steady samples |
+| --- | --- | --- | --- |
+| 2X | 67 | 1 / 1 | 2 |
+| 4X | 110 | 3 / 3 | 4 |
+| 5X | 127 | 4 / 4 | 5 |
+| 6X | 142 | 5 / 5 | 6 |
+
+Native requests returned `eOk`, and sampled runtime status bits were zero. The operator reports
+similar subjective smoothness at 6X versus 4X and no observed tearing. This is one session on the
+current machine; the numbers are in-game counter reports, not a controlled benchmark. No claim
+of independently verified unique generated images, uniform display frame spacing or improved
+input latency follows from these counters.
+
+RSYNC repeatedly logs `setDynamicMFGParams failed with status 1` even with
+`DisableReflexSync=true` and `DisableFlipMetering=true`. Withholding the ReflexSync entry point
+did **not** eliminate those errors in this run. Pacing compatibility remains unresolved; do not
+treat either configuration option as a proven fix or hide the errors to pass acceptance.
+
+Workspace evidence: `testlogs/fg-eee98821/test-status.json`, `operator-fps-report.json`,
+`native-multiplier-observations.json` and `operator-fps-confirmed/OptiScaler.log`.
+The original seven game runtime DLLs and previous OptiScaler files are retained in
+`backups/ds2-fg-eee98821/`. `build/install_fg_test.py --rollback` previews a guarded restore;
+`--apply` requires the game closed and all current file hashes matching the rollback record.
