@@ -32,6 +32,43 @@ static bool IsSL1AndFGActive()
     return state.streamlineVersion.major == 1 && state.activeFgInput == FGInput::DLSSG;
 }
 
+// Observe the native runtime before OptiScaler changes the returned state. No extra GetState calls:
+// numFramesActuallyPresented counts presents since the runtime's previous GetState call.
+static void RecordNativeDlssgState(const sl::ViewportHandle& viewport, sl::Result result,
+                                   const sl::DLSSGState& runtimeState)
+{
+    const auto& state = State::Instance();
+    if (!Config::Instance()->FGDLSSGAdaMfgUnlock.value_or_default() || state.activeFgInput != FGInput::NoFG ||
+        state.activeFgOutput != FGOutput::NoFG || result != sl::Result::eOk)
+        return;
+
+    struct Samples
+    {
+        ULONGLONG start = GetTickCount64();
+        uint64_t calls = 0;
+        uint64_t presents = 0;
+        uint64_t counts[8] {}; // 0..6, then >6 (polling can span multiple real frames).
+        uint32_t statusBits = 0;
+    };
+    static thread_local Samples samples;
+    ++samples.calls;
+    samples.presents += runtimeState.numFramesActuallyPresented;
+    ++samples.counts[std::min(runtimeState.numFramesActuallyPresented, 7u)];
+    samples.statusBits |= static_cast<uint32_t>(runtimeState.status);
+
+    const auto now = GetTickCount64();
+    if (now - samples.start < 2000)
+        return;
+
+    LOG_INFO("Native DLSSG runtime: viewport {}, window {} ms, calls {}, presents {}, "
+             "presents-per-call histogram [0:{},1:{},2:{},3:{},4:{},5:{},6:{},>6:{}], "
+             "status bits 0x{:X}, runtime ceiling {} generated frames; counters are before OptiScaler overrides",
+             (unsigned int) viewport, now - samples.start, samples.calls, samples.presents, samples.counts[0],
+             samples.counts[1], samples.counts[2], samples.counts[3], samples.counts[4], samples.counts[5],
+             samples.counts[6], samples.counts[7], samples.statusBits, runtimeState.numFramesToGenerateMax);
+    samples = Samples {};
+}
+
 static void PatchSL1PluginJson(nlohmann::json& configJson)
 {
     if (!IsSL1AndFGActive())
@@ -1208,7 +1245,26 @@ sl::Result StreamlineHooks::hkslDLSSGSetOptions(const sl::ViewportHandle& viewpo
 
     state.dlssgLastSetMode = newOptions.mode;
 
-    return o_slDLSSGSetOptions(viewport, newOptions);
+    const auto result = o_slDLSSGSetOptions(viewport, newOptions);
+    if (Config::Instance()->FGDLSSGAdaMfgUnlock.value_or_default() && state.activeFgInput == FGInput::NoFG &&
+        state.activeFgOutput == FGOutput::NoFG)
+    {
+        static thread_local ULONGLONG lastLog = 0;
+        static thread_local uint32_t lastCount = 0;
+        static thread_local sl::DLSSGMode lastMode = sl::DLSSGMode::eOff;
+        const auto now = GetTickCount64();
+        if (now - lastLog >= 2000 || newOptions.numFramesToGenerate != lastCount || newOptions.mode != lastMode)
+        {
+            LOG_INFO("Native DLSSG request: viewport {}, mode {}, game requested {}, forwarded {} generated frames, "
+                     "result {}",
+                     (unsigned int) viewport, magic_enum::enum_name(newOptions.mode), options.numFramesToGenerate,
+                     newOptions.numFramesToGenerate, magic_enum::enum_name(result));
+            lastLog = now;
+            lastCount = newOptions.numFramesToGenerate;
+            lastMode = newOptions.mode;
+        }
+    }
+    return result;
 }
 
 sl::Result StreamlineHooks::hkslDLSSGGetState(const sl::ViewportHandle& viewport, sl::DLSSGState& state,
@@ -1226,6 +1282,8 @@ sl::Result StreamlineHooks::hkslDLSSGGetState(const sl::ViewportHandle& viewport
 
         // We might be feeding a newer struct to an older SL but that seems to work just fine for this Get function
         result = o_slDLSSGGetState(viewport, dynamic_cast<sl::DLSSGState&>(newState), options);
+
+        RecordNativeDlssgState(viewport, result, newState);
 
         // Copy back data to game's struct
         memcpy(&state, &newState, 56); // struct ver 1 size
@@ -1256,6 +1314,7 @@ sl::Result StreamlineHooks::hkslDLSSGGetState(const sl::ViewportHandle& viewport
     else
     {
         result = o_slDLSSGGetState(viewport, state, options);
+        RecordNativeDlssgState(viewport, result, state);
         State::Instance().dlssgGameDMFGSupported = state.bIsDynamicMFGSupported == sl::eTrue;
 
         // The wrapper's ceiling, replaced by the unlocked count.
