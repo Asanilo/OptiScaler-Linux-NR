@@ -206,6 +206,7 @@ EditCacheStatus GetEditCacheStatus();
 // The pair is a control: same frames, same run, one variable.
 void RequestCapture(unsigned int frames);
 bool CaptureInProgress();
+std::string CaptureStatus();
 
 void Shutdown();
 } // namespace DlssNr

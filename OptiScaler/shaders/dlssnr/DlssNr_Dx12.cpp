@@ -334,6 +334,11 @@ struct NrState
     // The grid is read three frames after it is written, so the flag has to travel with the slot
     // rather than being asked of the current frame.
     bool meterExposureValid[4] = {};
+    uint64_t meterOriginFrame[4] = {};
+    float meterPreExposure[4] = {};
+    uint64_t exposureOriginFrame = 0;
+    float exposureOriginPreExposure = 0;
+    const char* exposureReadStatus = "not_read";
     unsigned int meterSlot = 0;
     unsigned long long meterFrames = 0;
 
@@ -417,8 +422,7 @@ struct NrContext
     unsigned long long lastCacheLog = 0;
     const char* cachePauseReason = "disabled";
     capture::FrameCapture capture;
-    bool autoCaptureDone = false;
-    unsigned long long frames = 0, lastPresent = 0, captureWriteAtFrame = 0;
+    unsigned long long frames = 0, lastPresent = 0;
     unsigned long long lastSplitLog = 0;
     bool presentMoves = false, saidMemoryTight = false;
     IDXGIAdapter3* adapter = nullptr;
@@ -471,35 +475,6 @@ bool SelectContext(ID3D12Device* device)
 //
 // Splitting them says how much of the pass is the model and how much is ours -- and ours is the half
 // we can actually do something about.
-
-// Writes matched before/after frames on request, so comparisons stop depending on video.
-
-// One capture happens on its own each session, so there is always a fresh sample without anyone having
-// to remember to ask. Started after the scene has had a moment to settle: the first frames after a
-// feature is built carry its reset, and are not representative of anything.
-constexpr unsigned long long kAutoCaptureAfterFrames = 180;
-
-// Cleared once per run, so a session's captures are its own and nothing accumulates across launches.
-void ClearCaptureDirectory()
-{
-    static bool cleared = false;
-
-    if (cleared)
-        return;
-
-    cleared = true;
-
-    std::error_code ec;
-    const auto dir = Util::DllPath().remove_filename() / "dlssnr-capture";
-
-    if (std::filesystem::exists(dir, ec))
-    {
-        std::filesystem::remove_all(dir, ec);
-
-        if (ec)
-            LOG_WARN("DLSS-NR could not clear {}: {}", dir.string(), ec.message());
-    }
-}
 
 // The present count as of the previous Dispatch, and whether it has ever moved. State::frameCount is
 // written by the wrapped swapchain's Present; a session whose swapchain is not wrapped -- native
@@ -985,11 +960,12 @@ void CopyMeterToReadback(ID3D12GraphicsCommandList* cmdList, ID3D12Device* devic
     if (Context().nr.meterReadback[slot] == nullptr)
         return;
 
-    // Travels with the grid: read back three frames from now, alongside the tiles it describes.
-    Context().nr.meterExposureValid[slot] = exposureBound;
-
+    // Metadata travels only with a copy actually recorded into this reusable slot.
     if (!DlssNr::GpuLifetime::Reusable(Context().nr.meterCompletion[slot]))
         return;
+    Context().nr.meterExposureValid[slot] = exposureBound;
+    Context().nr.meterOriginFrame[slot] = Context().frames;
+    Context().nr.meterPreExposure[slot] = Context().nr.gamePreExposure;
     Context().nr.meterCompletion[slot] = DlssNr::GpuLifetime::Begin(cmdList);
     DlssNr::GpuLifetime::Hold(Context().nr.meterCompletion[slot], Context().nr.meterReadback[slot]);
 
@@ -1127,6 +1103,7 @@ void ConsumeCalibrationReadback()
 
 void ConsumeMeterReadback()
 {
+    Context().nr.exposureReadStatus = "pending";
     if (Context().nr.meterFrames < 4)
         return;
 
@@ -1151,8 +1128,15 @@ void ConsumeMeterReadback()
     //
     // When it is not believed gameExposure keeps its last good value, or stays 0 and lets
     // ResolveWhitePoint fall back to the slider, which is what a game supplying none should get.
+    Context().nr.exposureReadStatus = !Context().nr.meterExposureValid[slot]       ? "absent"
+                                      : (!std::isfinite(src[0]) || src[0] <= 0.0f) ? "invalid"
+                                                                                   : "valid";
     if (Context().nr.meterExposureValid[slot] && std::isfinite(src[0]) && src[0] > 0.0f)
+    {
         Context().nr.gameExposure = src[0];
+        Context().nr.exposureOriginFrame = Context().nr.meterOriginFrame[slot];
+        Context().nr.exposureOriginPreExposure = Context().nr.meterPreExposure[slot];
+    }
 
     D3D12_RANGE nothingWritten { 0, 0 };
     buffer->Unmap(0, &nothingWritten);
@@ -1178,6 +1162,8 @@ void ConsumeMeterReadback()
 void InvalidateExposureMeter()
 {
     Context().nr.gameExposure = 0.0f;
+    Context().nr.exposureOriginFrame = 0;
+    Context().nr.exposureReadStatus = "reset";
 
     for (bool& valid : Context().nr.meterExposureValid)
         valid = false;
@@ -2367,16 +2353,6 @@ void DlssNr_Dx12::Dispatch(ID3D12GraphicsCommandList* cmdList, ID3D12Resource* c
     TickNrRetired();
     CheckCaptureTrigger();
 
-    if (Context().captureWriteAtFrame != 0 && Context().capture.readyToWrite())
-    {
-        Context().captureWriteAtFrame = 0;
-        const auto captureDir = Util::DllPath().remove_filename() / "dlssnr-capture";
-        const auto written = Context().capture.write(captureDir);
-
-        if (!written.empty())
-            LOG_INFO("DLSS-NR wrote matched before/after frames to {}", written);
-    }
-
     // The extra passes, one feature apiece, each built a frame before it is first evaluated.
     //
     // Creating and evaluating a feature on one command list is the dice-roll that hung the GPU, so a
@@ -2560,6 +2536,7 @@ void DlssNr_Dx12::Dispatch(ID3D12GraphicsCommandList* cmdList, ID3D12Resource* c
     // Gated on the source the menu actually writes. This read the retired WhitePointFromExposure
     // flag while consumption keyed on WhitePointSource == 1, so choosing "the game's own exposure"
     // never dispatched the meter and the white point silently fell back to the slider.
+    Context().nr.gamePreExposure = frame.PreExposure;
     const bool exposureSettingOn = cfg.DlssNrWhitePointSource.value_or_default() == 1;
 
     // Nothing held from before the option was switched off may survive switching it back on. See
@@ -2573,6 +2550,7 @@ void DlssNr_Dx12::Dispatch(ID3D12GraphicsCommandList* cmdList, ID3D12Resource* c
     Context().nr.exposureSettingWasOn = exposureSettingOn;
 
     const bool wantExposure = exposureSettingOn && frame.ExposureTexture != nullptr;
+    Context().nr.exposureReadStatus = !exposureSettingOn ? "disabled" : !frame.ExposureTexture ? "absent" : "pending";
 
     if (Context().nr.meter != nullptr && wantExposure)
     {
@@ -2613,8 +2591,6 @@ void DlssNr_Dx12::Dispatch(ID3D12GraphicsCommandList* cmdList, ID3D12Resource* c
             CopyMeterToReadback(cmdList, device, true);
         ConsumeMeterReadback();
     }
-
-    Context().nr.gamePreExposure = frame.PreExposure;
 
     const float whitePoint = ResolveWhitePoint(cfg, isHdrBuffer);
 
@@ -2676,6 +2652,7 @@ void DlssNr_Dx12::Dispatch(ID3D12GraphicsCommandList* cmdList, ID3D12Resource* c
     Context().cacheCachedLastFrame = false;
     const auto finishFrame = [&]()
     {
+        Context().capture.endFrame();
         if (cacheBegan && Context().editCache)
             Context().editCache->EndFrame(cmdList);
         if (encodedResources)
@@ -2785,12 +2762,12 @@ void DlssNr_Dx12::Dispatch(ID3D12GraphicsCommandList* cmdList, ID3D12Resource* c
         device->Release();
     };
 
-    // Cache only at the direct D3D12 seam. Diagnostic captures/comparisons keep
-    // their fresh model output, and the original Vulkan/bridge paths are unchanged.
+    // Cache only at the direct D3D12 seam. Captures observe actual cache decisions;
+    // comparisons and debug views still require fresh model output.
     const bool cacheWanted = cfg.DlssNrCacheEnabled.value_or_default() && State::Instance().swapchainApi == API::DX12 &&
                              !cfg.DlssNrDualFeature.value_or_default() && cfg.DlssNrCompare.value_or_default() == 0 &&
                              cfg.DlssNrDebugView.value_or_default() == 0 && !cfg.DlssNrUseProxy.value_or_default() &&
-                             !Context().capture.isActive() && !callerOutputArrival.has_value();
+                             !callerOutputArrival.has_value();
     if (cacheWanted != Context().cacheWasWanted)
     {
         ResetAllHistories(); // The model may have missed input frames before the switch.
@@ -2905,6 +2882,51 @@ void DlssNr_Dx12::Dispatch(ID3D12GraphicsCommandList* cmdList, ID3D12Resource* c
     else if (Context().editCache)
         Context().editCache->Invalidate();
 
+    if (Context().capture.isActive())
+    {
+        std::ostringstream meta;
+        meta.imbue(std::locale::classic());
+        const auto number = [](float x)
+        {
+            std::ostringstream value;
+            value.imbue(std::locale::classic());
+            if (std::isfinite(x))
+                value << std::setprecision(9) << x;
+            else
+                value << "null";
+            return value.str();
+        };
+        meta << "{\"nr_frame\":" << Context().frames << ",\"present_hint\":" << Context().lastPresent
+             << ",\"pre_sr\":" << frame.PreUpscale << ",\"linear_hdr\":" << isHdrBuffer
+             << ",\"cache_active\":" << cacheActive << ",\"cache_refresh\":" << cacheRefresh
+             << ",\"legacy_filter_requested\":" << cfg.DlssNrStabilizationEnabled.value_or_default()
+             << ",\"whitepoint_source\":" << cfg.DlssNrWhitePointSource.value_or_default()
+             << ",\"whitepoint\":" << number(whitePoint) << ",\"exposure_held\":" << number(Context().nr.gameExposure)
+             << ",\"whitepoint_uses_game_exposure\":"
+             << (isHdrBuffer && cfg.DlssNrWhitePointSource.value_or_default() == 1 && Context().nr.gameExposure > 1e-6f)
+             << ",\"exposure_offered\":" << Context().nr.exposureOfferedNow
+             << ",\"exposure_origin_frame\":" << Context().nr.exposureOriginFrame << ",\"exposure_age\":"
+             << (Context().nr.exposureOriginFrame ? std::to_string(Context().frames - Context().nr.exposureOriginFrame)
+                                                  : "null")
+             << ",\"exposure_read_status\":" << std::quoted(Context().nr.exposureReadStatus)
+             << ",\"exposure_origin_pre_exposure\":" << number(Context().nr.exposureOriginPreExposure)
+             << ",\"pre_exposure\":" << number(frame.PreExposure)
+             << ",\"reset_requested\":" << (frame.Reset || Context().nr.reset) << ",\"passes_requested\":" << passes
+             << ",\"working_scale\":" << number(cfg.DlssNrWorkingScale.value_or_default())
+             << ",\"detail\":" << number(cfg.DlssNrTransferStrength.value_or_default())
+             << ",\"colour\":" << number(cfg.DlssNrColourStrength.value_or_default())
+             << ",\"intensity\":" << number(cfg.DlssNrIntensity.value_or_default())
+             << ",\"max_ratio\":" << number(cfg.DlssNrMaxRatio.value_or_default())
+             << ",\"transfer\":" << cfg.DlssNrTransfer.value_or_default()
+             << ",\"debug\":" << cfg.DlssNrDebugView.value_or_default()
+             << ",\"compare\":" << cfg.DlssNrCompare.value_or_default() << ",\"guide_width\":" << guideWidth
+             << ",\"guide_height\":" << guideHeight << ",\"depth_inverted\":" << Context().nr.guideDepthInverted
+             << ",\"jitter_x\":" << number(frame.JitterX) << ",\"jitter_y\":" << number(frame.JitterY) << "}";
+        Context().capture.beginFrame(meta.str());
+        Context().capture.record(cmdList, device, "original", source, sourceIdle,
+                                 isHdrBuffer ? "linear_hdr" : "game_tonemapped_unknown_transfer");
+    }
+
     if (cacheActive && !cacheRefresh)
     {
         if (!Context().cacheTime)
@@ -2925,6 +2947,12 @@ void DlssNr_Dx12::Dispatch(ID3D12GraphicsCommandList* cmdList, ID3D12Resource* c
         if (applied)
         {
             Context().nr.wroteTarget = true;
+            Context().capture.record(cmdList, device, "final_cached", target, D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
+                                     isHdrBuffer ? "linear_hdr" : "game_tonemapped_unknown_transfer");
+            Context().capture.record(cmdList, device, "cache_depth", depthIn,
+                                     D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, "depth");
+            Context().capture.record(cmdList, device, "cache_motion", motionIn,
+                                     D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, "motion");
             Context().cacheCachedLastFrame = true;
             finishFrame();
             return;
@@ -2954,6 +2982,7 @@ void DlssNr_Dx12::Dispatch(ID3D12GraphicsCommandList* cmdList, ID3D12Resource* c
     Barrier(cmdList, source, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, sourceIdle);
     if (!encoded)
     {
+        Context().capture.fail("encode_failed");
         finishFrame();
         return;
     }
@@ -2982,6 +3011,7 @@ void DlssNr_Dx12::Dispatch(ID3D12GraphicsCommandList* cmdList, ID3D12Resource* c
                                               Context().nr.colorSmall, nullptr);
         if (!downsampled)
         {
+            Context().capture.fail("downsample_failed");
             finishFrame();
             return;
         }
@@ -3012,6 +3042,17 @@ void DlssNr_Dx12::Dispatch(ID3D12GraphicsCommandList* cmdList, ID3D12Resource* c
 
     const float mvToWork = width != 0 ? (float) workWidth / (float) width : 1.0f;
 
+    if (Context().capture.isActive())
+        Context().capture.annotate("\"model_reset\":" + std::to_string(Context().nr.reset) +
+                                   ",\"mv_scale_x\":" + std::to_string(Context().nr.guideMvScaleX * mvToWork) +
+                                   ",\"mv_scale_y\":" + std::to_string(Context().nr.guideMvScaleY * mvToWork));
+    Context().capture.record(cmdList, device, "proxy", modelInput, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE,
+                             "srgb_encoded");
+    Context().capture.record(cmdList, device, "depth", depthIn, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE,
+                             "depth");
+    Context().capture.record(cmdList, device, "motion", motionIn, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE,
+                             "motion");
+
     SetExtras(cfg, nullptr, nullptr, 0, 0, 0, 0);
 
     // The proxy path, when asked for. Same inputs, same model -- the difference is who calls it.
@@ -3021,6 +3062,7 @@ void DlssNr_Dx12::Dispatch(ID3D12GraphicsCommandList* cmdList, ID3D12Resource* c
     // quietly doing the work.
     if (cfg.DlssNrUseProxy.value_or_default())
     {
+        Context().capture.fail("proxy_backend_capture_unsupported");
         const unsigned int proxyResult =
             DlssNr::Proxy::Run(cmdList, device, modelInput, depthIn, motionIn, Context().nr.output, workWidth,
                                workHeight, guideWidth, guideHeight, Context().nr.guideDepthInverted, Context().nr.reset,
@@ -3077,6 +3119,14 @@ void DlssNr_Dx12::Dispatch(ID3D12GraphicsCommandList* cmdList, ID3D12Resource* c
 
         const bool wantReset = pass == 0 ? Context().nr.reset : Context().nr.passReset[pass];
         const auto tuning = TuningFor(cfg, pass);
+        if (Context().capture.isActive())
+        {
+            std::ostringstream tuningMeta;
+            tuningMeta.imbue(std::locale::classic());
+            tuningMeta << "\"pass_" << pass << "_reset\":" << wantReset << ",\"pass_" << pass
+                       << "_intensity\":" << tuning.Intensity << ",\"pass_" << pass << "_style\":" << tuning.Style;
+            Context().capture.annotate(tuningMeta.str());
+        }
 
         // Every feature in the chain sees one frame per frame, so each is handed the frame's own
         // guides and the frame's own motion scale. Telling a later pass nothing moved would be a lie
@@ -3245,12 +3295,21 @@ void DlssNr_Dx12::Dispatch(ID3D12GraphicsCommandList* cmdList, ID3D12Resource* c
         }
 
         setWork(answer, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+        if (Context().capture.isActive())
+            Context().capture.annotate("\"passes_completed\":" + std::to_string(passes));
+        Context().capture.record(cmdList, device, "model_raw", work[answer],
+                                 D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, "srgb_encoded");
         const bool resolved = DispatchPass(cmdList, resolveParams, modelInput, work[answer], Context().nr.hdrCopy,
                                            motionIn, nullptr, target, nullptr);
         setWork(answer, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
         // A failed resolve must not hand an unwritten scratch texture to SR.
         Context().nr.wroteTarget = resolved;
+        if (resolved)
+            Context().capture.record(cmdList, device, "resolve", target, D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
+                                     isHdrBuffer ? "linear_hdr" : "game_tonemapped_unknown_transfer");
+        else
+            Context().capture.fail("resolve_failed");
         if (resolved && cacheActive)
         {
             if (!Context().cacheTime)
@@ -3285,23 +3344,15 @@ void DlssNr_Dx12::Dispatch(ID3D12GraphicsCommandList* cmdList, ID3D12Resource* c
             Context().lastStabilizerTime.reset();
         }
 
-        // On-demand capture works in this path too: the staging copy still holds the frame as the
-        // upscaler produced it, and the edited frame is the output itself. The write happens a few
-        // recordings later, after all actual queue submissions and Reset have completed.
-        if (Context().capture.isActive())
-        {
-            Context().capture.record(cmdList, device, Context().nr.colorCopy,
-                                     D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, target,
-                                     D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-
-            if (Context().capture.readyToWrite() && Context().captureWriteAtFrame == 0)
-                Context().captureWriteAtFrame = Context().frames + 8;
-        }
+        if (resolved && (cacheActive || cfg.DlssNrStabilizationEnabled.value_or_default()))
+            Context().capture.record(cmdList, device, "final_filtered", target, D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
+                                     isHdrBuffer ? "linear_hdr" : "game_tonemapped_unknown_transfer");
     }
     else
     {
         Context().nr.failed = true;
         Context().nr.reason = "the model refused to run";
+        Context().capture.fail("model_evaluate_failed");
         LOG_ERROR("DLSS-NR evaluate returned 0x{:X} ({}), disabling for this session", (uint32_t) result,
                   NgxResultName((unsigned int) result));
     }
@@ -3373,6 +3424,14 @@ void EvaluateAtSeam(ID3D12GraphicsCommandList* cmdList, NVSDK_NGX_Parameter* par
                     std::optional<D3D12_RESOURCE_STATES> destArrival = std::nullopt)
 {
     std::lock_guard<std::recursive_mutex> nrLock(g_nrMutex);
+    for (const auto& entry : g_contexts)
+    {
+        if (!entry.second->capture.isActive())
+            continue;
+        auto result = entry.second->capture.poll(Util::DllPath().remove_filename() / "dlssnr-capture");
+        if (!result.empty())
+            LOG_INFO("DLSS-NR capture: {}", result);
+    }
     if (!EnabledAtD3D12Seam())
     {
         for (const auto& entry : g_contexts)
@@ -3993,8 +4052,13 @@ EditCacheStatus GetEditCacheStatus()
 void RequestCapture(unsigned int frames)
 {
     std::lock_guard<std::recursive_mutex> lock(g_nrMutex);
-    ClearCaptureDirectory();
     Context().capture.request(frames);
+}
+
+std::string CaptureStatus()
+{
+    std::lock_guard<std::recursive_mutex> lock(g_nrMutex);
+    return Context().capture.status();
 }
 
 bool CaptureInProgress()
@@ -4124,6 +4188,12 @@ void ShutdownContext()
     ParkNrResource(Context().nr.preOut);
     ParkNrResource(Context().nr.depthConstant);
     Context().nr.lastRecording.reset();
+    Context().capture.fail("context_shutdown");
+    const auto captureResult = Context().capture.poll(Util::DllPath().remove_filename() / "dlssnr-capture");
+    if (!captureResult.empty())
+        LOG_INFO("DLSS-NR capture: {}", captureResult);
+    if (Context().capture.isActive())
+        LOG_WARN("DLSS-NR capture abandoned at shutdown: GPU recording still pending");
     Context().capture.release();
     Context().gpuTime.reset();
     Context().gpuTiming.Reset();

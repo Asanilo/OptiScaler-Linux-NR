@@ -5,6 +5,7 @@
 #include <dxgi1_4.h>
 #include <stdexcept>
 #include <functional>
+#include "../OptiScaler/dlssnr/DlssNr_Capture.h"
 #include "../OptiScaler/shaders/dlssnr/DlssNr_EditCache_Dx12.h"
 #include "../OptiScaler/gpu_time/GpuTime_Dx12.h"
 
@@ -211,6 +212,78 @@ void TimingCases()
     std::puts(
         "PASS: production GPU timer drains both phases, exact identities, bounded slots, discard and legacy path");
 }
+void CaptureTest(const std::filesystem::path& root)
+{
+    capture::FrameCapture capture;
+    auto* texture = Texture(DXGI_FORMAT_R32G32B32A32_FLOAT, kSrv);
+    capture.request(2);
+    capture.request(8); // Duplicate request must not replace the active batch.
+    for (unsigned int f = 0; f < 2; ++f)
+    {
+        capture.beginFrame("{\"nr_frame\":" + std::to_string(f + 1) + "}");
+        for (const auto* stage : { "original", "proxy", "model_raw", "resolve" })
+        {
+            const float value = stage[0] == 'o' ? 0.0f : stage[0] == 'p' ? 0.5f : stage[0] == 'm' ? 0.75f : 2.0f;
+            Uniform(texture, kSrv, 4, value);
+            capture.record(list, device, stage, texture, kSrv,
+                           stage[0] == 'p' || stage[0] == 'm' ? "srgb_encoded" : "linear_hdr");
+        }
+        capture.endFrame();
+        Require(capture.poll(root).empty(), "capture cannot map unsubmitted GPU copies");
+    }
+    Require(capture.progress() == 2, "duplicate request preserves requested frame count");
+    Submit();
+    const auto first = capture.poll(root);
+    Require(first.find("Saved: ") == 0, "dark HDR capture saved after real completion");
+    const auto directory = std::filesystem::path(first.substr(7));
+    for (const auto* stage : { "original", "proxy", "model_raw", "resolve" })
+    {
+        std::ifstream input(directory / (std::string("0-") + stage + ".raw"), std::ios::binary);
+        float actual = -1;
+        input.read(reinterpret_cast<char*>(&actual), sizeof(actual));
+        const float expected = stage[0] == 'o' ? 0 : stage[0] == 'p' ? 0.5f : stage[0] == 'm' ? 0.75f : 2;
+        Require(input.good() && actual == expected, "stage copied before subsequent overwrite");
+    }
+    capture.request(1);
+    capture.beginFrame("{\"nr_frame\":3}");
+    capture.record(list, device, "original", texture, kSrv, "linear_hdr");
+    capture.endFrame();
+    Check(list->Close(), "capture discard close");
+    Check(allocator->Reset(), "capture discard allocator");
+    Check(list->Reset(allocator, nullptr), "capture discard reset");
+    Require(capture.poll(root).find("Incomplete: ") == 0, "discard reports incomplete batch");
+    Require(std::filesystem::exists(directory / "manifest.json"), "previous capture preserved");
+    capture.request(1);
+    capture.beginFrame("{\"nr_frame\":4}");
+    capture.record(list, device, "original", texture, kSrv, "linear_hdr");
+    capture.endFrame();
+    Submit();
+    capture.poll(directory / "manifest.json"); // Existing regular file cannot be a directory.
+    Require(!capture.isActive() && capture.status().find("capture_directory_failed") == 0,
+            "write failure visible and request released");
+    capture::FrameCapture bounded(1024);
+    bounded.request(1);
+    bounded.beginFrame("{\"nr_frame\":5}");
+    bounded.record(list, device, "original", texture, kSrv, "linear_hdr");
+    Require(bounded.status() == "readback_budget_exceeded", "budget rejected before allocation");
+    Require(bounded.poll(root).find("Incomplete: ") == 0, "budget failure manifest saved");
+    capture.request(2);
+    capture.beginFrame("{\"nr_frame\":6}");
+    capture.record(list, device, "original", texture, kSrv, "linear_hdr");
+    capture.record(list, device, "resolve", texture, kSrv, "linear_hdr");
+    capture.endFrame();
+    const auto previousWidth = width;
+    ++width;
+    auto* resized = Texture(DXGI_FORMAT_R32G32B32A32_FLOAT, kSrv);
+    width = previousWidth;
+    capture.beginFrame("{\"nr_frame\":7}");
+    capture.record(list, device, "original", resized, kSrv, "linear_hdr");
+    Require(capture.status() == "resource_layout_changed", "resize rejected explicitly");
+    Submit();
+    Require(capture.poll(root).find("Incomplete: ") == 0, "resize preserves partial capture evidence");
+    std::puts("PASS: production capture stages, dark HDR, padded rows, actual fences, duplicate request, discard, "
+              "preservation and write failure");
+}
 void AllocateFrames()
 {
     original = Texture(DXGI_FORMAT_R32G32B32A32_FLOAT, kSrv);
@@ -304,6 +377,8 @@ int main(int argc, char** argv)
         if (!breakFresh && !breakRegional && !breakJitter)
             TimingCases();
         AllocateFrames();
+        if (argc == 3)
+            CaptureTest(std::filesystem::path(argv[2]).parent_path() / "captures");
         Config cfg;
         cfg.DlssNrCacheInterval = 2;
         cfg.DlssNrCacheAdaptive = false;

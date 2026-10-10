@@ -1283,13 +1283,14 @@ void RenderMenu(Config* config, float menuResScale)
             DlssNr::RequestCapture(8);
         }
 
-        HelpMarker("Writes eight consecutive frames twice: as the upscaler produced them, and again"
-                   "\nonce the model's edit was applied."
-                   "\n\nSame frames, same run, one variable -- which is what comparing two video"
-                   "\ncaptures can never be, since they have different camera paths and a codec in"
-                   "\nbetween that discards exactly the fine temporal detail in question."
-                   "\n\nRaw, into a dlssnr-capture folder beside OptiScaler. Bounded to eight frames,"
-                   "\nand each run overwrites the last.");
+        ImGui::TextWrapped("%s", DlssNr::CaptureStatus().c_str());
+        HelpMarker("Captures up to eight NR recordings, not necessarily consecutive Presents."
+                   "\nOriginal, actual model input/output, resolve before filters, and applied filter output."
+                   "\nDepth, motion and exposure metadata accompany raw images in a unique batch folder."
+                   "\nCache stays active: cached frames omit model stages that did not run."
+                   "\nNo dark-frame rejection. Up to 768 MiB readback; oversized batches report failure."
+                   "\nWaits for real GPU completion. Existing captures are preserved."
+                   "\nCapture affects timing; measure performance with capture off.");
 
         static const char* compareNames[] = { "Off", "Side by side", "Wipe" };
         int compare = (int) config->DlssNrCompare.value_or_default();

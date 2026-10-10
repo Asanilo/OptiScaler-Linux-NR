@@ -88,7 +88,7 @@ def main():
         target = output / name
         subprocess.run(strict + [str(p) for p in inputs] + extra + libs + ["-o", str(target)], check=True)
         binaries.append({"name": name, "sha256": sha(target)})
-    tracked = ("OptiScaler/dlssnr/NrGpuLifetime.cpp", "OptiScaler/dlssnr/NrGpuLifetime.h", "OptiScaler/dlssnr/SubmissionLifetime.h",
+    tracked = ("OptiScaler/dlssnr/DlssNr_Capture.h", "OptiScaler/dlssnr/NrGpuLifetime.cpp", "OptiScaler/dlssnr/NrGpuLifetime.h", "OptiScaler/dlssnr/SubmissionLifetime.h",
                "OptiScaler/shaders/dlssnr/NrStabilizer_Common.h",
                "OptiScaler/shaders/dlssnr/precompile/nr_stabilize.hlsl",
                "OptiScaler/shaders/dlssnr/precompile/NrStabilizer_Shader.h",
