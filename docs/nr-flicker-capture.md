@@ -201,3 +201,37 @@ include seven deliberately failing controls; restoring the old depth copy and
 reversing the motion correction each trigger the intended assertion. Evidence:
 `testlogs/nr-guide-fix-final/`. No claim of vendor-model or game-image acceptance
 follows from these tests.
+
+
+## First in-game verification of fee544fe
+
+The operator reports that sustained flicker is no longer visible in the current
+DS2 private-room scene. Three new complete eight-frame batches verify post-SR,
+one completed NR pass, working scale/detail/colour/intensity 1.0, Sky and legacy
+stabilization off, and Debug/Compare off. NR is running; this observation was not
+obtained by disabling or weakening it.
+
+All 24 extracted depth images exactly match their corresponding original game
+depth images. Every pixel has nonzero depth (range across the windows approximately
+0.0153754 to 0.0865254, reversed Z). All 24 actual model motion images match the
+recorded original vectors plus the recorded jitter correction, with zero maximum
+component error in decoded float32. No model history reset occurs in these windows.
+A static background ROI has approximately 0.505619 pixel RMS motion before
+correction and 0.000619 afterward.
+
+The new camera is visibly different from the baseline: the display-shelf lamp
+moved from approximately y489 to y566 at 1080p. The inherited ROI now samples
+background above the lamp. Its motion check is useful, but pixel-aligned
+before/after flicker percentages would be invalid. Both fixes shipped together;
+their separate contributions to the visual improvement were not measured.
+
+Evidence is local at `testlogs/nr-flicker-fee544fe/`: `acceptance.json`,
+`guide-verification.json`, `camera-comparison.json`, the operator report, hashed
+capture manifests and stage analyses. This is a positive current-scene result,
+not full Linux acceptance. The operator also completed the requested slow camera
+turn and character walk/stop check and reports stable output with no obvious new
+ghosting. The operator then checked Sky-off NR->SR and SR->NR with Sky intervals 1 and 2,
+reporting all three normal without sustained flicker, obvious new ghosting or
+crashes. Logs confirm the placement changes and actual Sky intervals 1/2, including
+alternating model refresh/cache reuse at interval 2. Long sessions, other scenes
+or games, explicit Alt-Tab stress and controlled FPS/latency remain unaccepted.
