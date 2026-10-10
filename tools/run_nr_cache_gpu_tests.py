@@ -38,6 +38,8 @@ def main():
     (output / "gpu-build-manifest.json").write_text(json.dumps(provenance, indent=2) + "\n")
     cases = [
         ("cache", "nr_cache_gpu.exe", [], "PASS: production Sky cache", 0),
+        ("break-depth", "nr_cache_gpu.exe", ["--break-depth"], "FAIL: production depth-plane extraction preserves depth", 1),
+        ("break-motion", "nr_cache_gpu.exe", ["--break-motion"], "FAIL: post-SR correction preserves real motion", 1),
         ("break-fresh", "nr_cache_gpu.exe", ["--break-fresh"], "FAIL: cached edit uses fresh game frame", 1),
         ("break-regional", "nr_cache_gpu.exe", ["--break-regional"], "FAIL: pre-SR low-only temporal path", 1),
         ("break-jitter", "nr_cache_gpu.exe", ["--break-jitter"], "FAIL: jitter shifts edit across boundary", 1),

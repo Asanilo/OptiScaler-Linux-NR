@@ -6,12 +6,14 @@
 
 #include <dlssnr/DlssNr.h>
 #include <dlssnr/GpuTimingWindow.h>
+#include <dlssnr/MotionJitter.h>
 
 #include <dlssnr/DlssNr_Capture.h>
 #include <dlssnr/DlssNr_Proxy.h>
 #include <dlssnr/DlssNr_ExposureScan.h>
 
 #include "DlssNr_Dx12.h"
+#include "DepthPlane_Dx12.h"
 #include "NrStabilizer_Dx12.h"
 #include "DlssNr_EditCache_Dx12.h"
 
@@ -367,7 +369,9 @@ struct NrState
 
     // Cloned unconditionally when running at present, and only for typeless formats otherwise.
     ID3D12Resource* depthClone = nullptr;
+    ID3D12Resource* depthPlane = nullptr;
     ID3D12Resource* motionClone = nullptr;
+    ID3D12Resource* motionUnjittered = nullptr;
 
     // The constant-depth probe's surface. Separate from depthClone on purpose: it is defined by
     // never having been written, and sharing a surface with a mode that writes would destroy that.
@@ -408,6 +412,8 @@ std::recursive_mutex g_nrMutex;
 struct NrContext
 {
     NrState nr;
+    DlssNr::MotionJitterHistory motionJitter;
+    uint64_t inputSerial = 0;
     std::unique_ptr<DlssNr_Dx12> compose;
     std::unique_ptr<NrStabilizer_Dx12> stabilizer;
     std::unique_ptr<DlssNrEditCache_Dx12> editCache;
@@ -1803,7 +1809,10 @@ bool DlssNr_Dx12::DispatchPass(ID3D12GraphicsCommandList* InCmdList, const DlssN
     };
 
     for (uint32_t i = 0; i < kSrvCount; ++i)
-        CreateShaderResourceView(_device, srvs[i], currentHeap.GetSrvCPU(i));
+        if (InConstants.Mode == DlssNrMode_Depth)
+            DlssNr::CreateDepthPlaneSrv(_device, srvs[i], currentHeap.GetSrvCPU(i));
+        else
+            CreateShaderResourceView(_device, srvs[i], currentHeap.GetSrvCPU(i));
 
     ID3D12Resource* const uavs[kUavCount] = {
         OutTarget,
@@ -1856,11 +1865,13 @@ DlssNr_Dx12::~DlssNr_Dx12()
 }
 
 void DlssNr_Dx12::Dispatch(ID3D12GraphicsCommandList* cmdList, ID3D12Resource* colour, ID3D12Resource* depth,
-                           ID3D12Resource* motion, ID3D12Resource* output, const DlssNrFrameInfo& frame,
+                           ID3D12Resource* motion, ID3D12Resource* output, const DlssNrFrameInfo& inputFrame,
                            ID3D12CommandQueue* timingQueue, std::optional<D3D12_RESOURCE_STATES> callerOutputArrival)
 {
     std::lock_guard<std::recursive_mutex> nrLock(g_nrMutex);
     const Config& cfg = *Config::Instance();
+    DlssNrFrameInfo frame = inputFrame;
+    const auto inputSerial = Context().inputSerial;
 
     if (Context().nr.failed || cmdList == nullptr || colour == nullptr || depth == nullptr || motion == nullptr ||
         output == nullptr)
@@ -1880,6 +1891,11 @@ void DlssNr_Dx12::Dispatch(ID3D12GraphicsCommandList* cmdList, ID3D12Resource* c
     {
         ReportSkipOnce("the previous NR recording has not been submitted");
         return;
+    }
+    if (DlssNr::GpuLifetime::Discarded(Context().nr.lastRecording))
+    {
+        Context().motionJitter.Invalidate();
+        ResetAllHistories();
     }
     Context().nr.lastRecording = recording;
     for (auto* resource : { colour, depth, motion, output })
@@ -2605,14 +2621,62 @@ void DlssNr_Dx12::Dispatch(ID3D12GraphicsCommandList* cmdList, ID3D12Resource* c
                                                     ? (D3D12_RESOURCE_STATES) cfg.MVResourceBarrier.value()
                                                     : D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE;
 
-    ID3D12Resource* depthIn = ReadableGuide(device, cmdList, depth, &Context().nr.depthClone, depthArrival);
+    // Depth/stencil is planar in D3D12. A colour resource created with an SRV-only
+    // depth/stencil format is not a usable CopyResource destination on Proton.
+    // Sample plane 0 into a real R32_FLOAT texture instead of handing NR zeros.
+    const bool planarDepth = DlssNr::IsPlanarDepth(depth->GetDesc().Format);
+    bool depthPlaneReadable = false;
+    ID3D12Resource* depthIn = nullptr;
+    if (planarDepth)
+    {
+        const auto d = depth->GetDesc();
+        auto*& plane = Context().nr.depthPlane;
+        if (plane && (plane->GetDesc().Width != d.Width || plane->GetDesc().Height != d.Height))
+            ParkNrResource(plane);
+        const bool supported = d.Dimension == D3D12_RESOURCE_DIMENSION_TEXTURE2D && d.SampleDesc.Count == 1 &&
+                               d.DepthOrArraySize == 1 && !(d.Flags & D3D12_RESOURCE_FLAG_DENY_SHADER_RESOURCE);
+        if (supported && !plane)
+            plane = CreateScratch(device, DXGI_FORMAT_R32_FLOAT, static_cast<unsigned int>(d.Width), d.Height);
+        if (supported && plane)
+        {
+            DlssNrConstants constants {};
+            constants.Mode = DlssNrMode_Depth;
+            constants.Width = static_cast<unsigned int>(d.Width);
+            constants.Height = d.Height;
+            Barrier(cmdList, depth, depthArrival, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+            const bool copied =
+                DispatchPass(cmdList, constants, depth, nullptr, nullptr, nullptr, nullptr, plane, nullptr);
+            Barrier(cmdList, depth, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, depthArrival);
+            if (copied)
+            {
+                Barrier(cmdList, plane, D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
+                        D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+                depthIn = plane;
+                depthPlaneReadable = true;
+            }
+        }
+    }
+    else
+        depthIn = ReadableGuide(device, cmdList, depth, &Context().nr.depthClone, depthArrival);
     ID3D12Resource* motionIn = ReadableGuide(device, cmdList, motion, &Context().nr.motionClone, motionArrival);
 
     if (depthIn == nullptr || motionIn == nullptr)
     {
-        Context().nr.failed = true;
-        Context().nr.reason = "the game's depth or motion vectors could not be made readable";
-        LOG_ERROR("DLSS-NR unavailable: {}", Context().nr.reason);
+        if (planarDepth && !depthIn && motionIn)
+        {
+            // Descriptor exhaustion is transient; never latch NR off for it.
+            ResetAllHistories();
+            ReportSkipOnce("depth-plane extraction unavailable; leaving this input frame unchanged");
+        }
+        else
+        {
+            Context().nr.failed = true;
+            Context().nr.reason = "the game's depth or motion vectors could not be made readable";
+            LOG_ERROR("DLSS-NR unavailable: {}", Context().nr.reason);
+        }
+        if (depthPlaneReadable)
+            Barrier(cmdList, Context().nr.depthPlane, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE,
+                    D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
         if (depthIn && depthIn == Context().nr.depthClone)
             Barrier(cmdList, depthIn, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_COPY_DEST);
         if (motionIn && motionIn == Context().nr.motionClone)
@@ -2647,7 +2711,7 @@ void DlssNr_Dx12::Dispatch(ID3D12GraphicsCommandList* cmdList, ID3D12Resource* c
             Barrier(cmdList, motion, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, motionArrival);
     };
 
-    bool encodedResources = false, smallReadable = false;
+    bool encodedResources = false, smallReadable = false, correctedMotionReadable = false;
     bool cacheActive = false, cacheRefresh = true, cacheBegan = false;
     Context().cacheCachedLastFrame = false;
     const auto finishFrame = [&]()
@@ -2733,6 +2797,13 @@ void DlssNr_Dx12::Dispatch(ID3D12GraphicsCommandList* cmdList, ID3D12Resource* c
             }
         }
 
+        if (depthPlaneReadable)
+            Barrier(cmdList, Context().nr.depthPlane, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE,
+                    D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+        if (correctedMotionReadable)
+            Barrier(cmdList, Context().nr.motionUnjittered, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE,
+                    D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+
         // Put any guide clones back where the next frame's copy expects to find them.
         // A clone left in NON_PIXEL_SHADER_RESOURCE by a frozen frame was never transitioned back to
         // COPY_DEST, because a frozen frame does not copy. Putting it back unconditionally would be a
@@ -2779,12 +2850,50 @@ void DlssNr_Dx12::Dispatch(ID3D12GraphicsCommandList* cmdList, ID3D12Resource* c
     }
     Context().cachePauseReason =
         cfg.DlssNrCacheEnabled.value_or_default() ? "diagnostic or non-direct seam" : "disabled";
+    const auto motionDesc = motion->GetDesc();
+    const auto correction = Context().motionJitter.Advance(
+        inputSerial, frame.PreUpscale, frame.MotionJittered, frame.JitterValid, frame.JitterX, frame.JitterY,
+        frame.MvScaleX, frame.MvScaleY, static_cast<unsigned int>(motionDesc.Width), motionDesc.Height,
+        frame.Reset || Context().nr.reset, guideWidth, guideHeight);
+    if (correction.reset)
+    {
+        ResetAllHistories();
+        frame.Reset = true;
+    }
+    if (correction.apply)
+    {
+        auto*& corrected = Context().nr.motionUnjittered;
+        if (corrected &&
+            (corrected->GetDesc().Width != motionDesc.Width || corrected->GetDesc().Height != motionDesc.Height))
+            ParkNrResource(corrected);
+        if (!corrected)
+            corrected = CreateScratch(device, DXGI_FORMAT_R32G32_FLOAT, static_cast<unsigned int>(motionDesc.Width),
+                                      motionDesc.Height);
+        DlssNrConstants constants {};
+        constants.Mode = DlssNrMode_Motion;
+        constants.Width = static_cast<unsigned int>(motionDesc.Width);
+        constants.Height = motionDesc.Height;
+        constants.MotionOffsetX = correction.x;
+        constants.MotionOffsetY = correction.y;
+        if (!corrected ||
+            !DispatchPass(cmdList, constants, motionIn, nullptr, nullptr, nullptr, nullptr, corrected, nullptr))
+        {
+            Context().motionJitter.Invalidate();
+            ResetAllHistories();
+            ReportSkipOnce("post-SR motion correction unavailable; leaving this input frame unchanged");
+            finishFrame();
+            return;
+        }
+        Barrier(cmdList, corrected, D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
+                D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+        correctedMotionReadable = true;
+        motionIn = corrected;
+    }
     DlssNrCacheInputs cacheIn {};
     cacheIn.depth = depthIn;
     cacheIn.motion = motionIn;
     cacheIn.depthWidth = guideWidth;
     cacheIn.depthHeight = guideHeight;
-    const auto motionDesc = motion->GetDesc();
     cacheIn.motionWidth = (unsigned int) motionDesc.Width;
     cacheIn.motionHeight = motionDesc.Height;
     if (motionDesc.Width == guideDesc.Width && motionDesc.Height == guideDesc.Height)
@@ -2816,6 +2925,7 @@ void DlssNr_Dx12::Dispatch(ID3D12GraphicsCommandList* cmdList, ID3D12Resource* c
                                        frame.MvScaleY,
                                        float(frame.DepthInverted),
                                        float(frame.PreUpscale),
+                                       float(frame.MotionJittered),
                                        float(isHdrBuffer),
                                        float(guideDesc.Format),
                                        float(motionDesc.Format),
@@ -2850,7 +2960,7 @@ void DlssNr_Dx12::Dispatch(ID3D12GraphicsCommandList* cmdList, ID3D12Resource* c
         {
             if (!jitterUsable)
                 Context().editCache->Invalidate(); // Never reuse a jittered history without its offset.
-            else if (Context().cacheJitterValid && !frame.Reset && !Context().nr.reset)
+            else if (!frame.MotionJittered && Context().cacheJitterValid && !frame.Reset && !Context().nr.reset)
             {
                 cacheIn.jitterDeltaX = (Context().cacheJitterX - frame.JitterX) / float(std::max(width, 1u));
                 cacheIn.jitterDeltaY = (Context().cacheJitterY - frame.JitterY) / float(std::max(height, 1u));
@@ -2921,8 +3031,15 @@ void DlssNr_Dx12::Dispatch(ID3D12GraphicsCommandList* cmdList, ID3D12Resource* c
              << ",\"debug\":" << cfg.DlssNrDebugView.value_or_default()
              << ",\"compare\":" << cfg.DlssNrCompare.value_or_default() << ",\"guide_width\":" << guideWidth
              << ",\"guide_height\":" << guideHeight << ",\"depth_inverted\":" << Context().nr.guideDepthInverted
+             << ",\"mv_jittered\":" << frame.MotionJittered << ",\"motion_corrected\":" << correction.apply
+             << ",\"motion_offset_x\":" << number(correction.x) << ",\"motion_offset_y\":" << number(correction.y)
              << ",\"jitter_x\":" << number(frame.JitterX) << ",\"jitter_y\":" << number(frame.JitterY) << "}";
         Context().capture.beginFrame(meta.str());
+        Context().capture.record(cmdList, device, "game_depth", depth,
+                                 depthPassedThrough ? D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE : depthArrival,
+                                 "depth");
+        Context().capture.record(cmdList, device, "game_motion", cacheInMotionForCleanup,
+                                 D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, "motion");
         Context().capture.record(cmdList, device, "original", source, sourceIdle,
                                  isHdrBuffer ? "linear_hdr" : "game_tonemapped_unknown_transfer");
     }
@@ -3446,6 +3563,7 @@ void EvaluateAtSeam(ID3D12GraphicsCommandList* cmdList, NVSDK_NGX_Parameter* par
                 if (entry.second->editCache)
                     entry.second->editCache->Invalidate();
                 entry.second->cacheJitterValid = false;
+                entry.second->motionJitter.Invalidate();
                 entry.second->cacheCachedLastFrame = false;
                 for (bool& resetPass : entry.second->nr.passReset)
                     resetPass = true;
@@ -3454,8 +3572,20 @@ void EvaluateAtSeam(ID3D12GraphicsCommandList* cmdList, NVSDK_NGX_Parameter* par
         return;
     }
 
+    const auto missingInput = []()
+    {
+        for (const auto& entry : g_contexts)
+            if (!g_srIdentity || entry.first.second == g_srIdentity)
+            {
+                entry.second->motionJitter.Invalidate();
+                entry.second->nr.reset = true;
+                for (bool& resetPass : entry.second->nr.passReset)
+                    resetPass = true;
+            }
+    };
     if (cmdList == nullptr || params == nullptr)
     {
+        missingInput();
         ReportSkipOnce("no command list or no parameter block");
         return;
     }
@@ -3487,6 +3617,7 @@ void EvaluateAtSeam(ID3D12GraphicsCommandList* cmdList, NVSDK_NGX_Parameter* par
     // carry none of it -- so it stays quiet and tries again next frame.
     if (target == nullptr || depth == nullptr || motion == nullptr)
     {
+        missingInput();
         ReportSkipOnce(target == nullptr  ? (preUpscale ? "the parameters carried no colour texture"
                                                         : "the parameters carried no output texture")
                        : depth == nullptr ? "the parameters carried no depth"
@@ -3504,6 +3635,7 @@ void EvaluateAtSeam(ID3D12GraphicsCommandList* cmdList, NVSDK_NGX_Parameter* par
         ReportSkipOnce("NR context limit reached; leaving this SR feature unchanged");
         return;
     }
+    ++Context().inputSerial;
     if (Context().nr.placement.has_value() && Context().nr.placement.value() != preUpscale)
         ResetAllHistories();
     Context().nr.placement = preUpscale;
@@ -3518,6 +3650,7 @@ void EvaluateAtSeam(ID3D12GraphicsCommandList* cmdList, NVSDK_NGX_Parameter* par
     frame.JitterValid = params->Get(NVSDK_NGX_Parameter_Jitter_Offset_X, &frame.JitterX) == NVSDK_NGX_Result_Success &&
                         params->Get(NVSDK_NGX_Parameter_Jitter_Offset_Y, &frame.JitterY) == NVSDK_NGX_Result_Success &&
                         std::isfinite(frame.JitterX) && std::isfinite(frame.JitterY);
+    frame.MotionJittered = (createFlags & NVSDK_NGX_DLSS_Feature_Flags_MVJittered) != 0;
     frame.DepthInverted = (createFlags & NVSDK_NGX_DLSS_Feature_Flags_DepthInverted) != 0;
     frame.ColourIsLinearHdr = (createFlags & NVSDK_NGX_DLSS_Feature_Flags_IsHDR) != 0;
 
@@ -4186,6 +4319,9 @@ void ShutdownContext()
     }
 
     ParkNrResource(Context().nr.preOut);
+    ParkNrResource(Context().nr.motionUnjittered);
+    ParkNrResource(Context().nr.depthPlane);
+    Context().motionJitter.Invalidate();
     ParkNrResource(Context().nr.depthConstant);
     Context().nr.lastRecording.reset();
     Context().capture.fail("context_shutdown");

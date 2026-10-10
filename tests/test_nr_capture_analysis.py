@@ -47,6 +47,17 @@ class CaptureAnalysis(unittest.TestCase):
             item = self.image(root, 0, 'packed', packed, 24)
             np.testing.assert_allclose(analysis.decode(root, item)[0, 0], [1/1023, 511/1023, 1, 1])
 
+    def test_depth_stencil_depth_only_plane(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            values = np.array([[[.125], [.5]], [[.75], [1]]], '<f4')
+            item = self.image(root, 0, 'depth', values, 21, 'depth')
+            item['copy_format'] = 39
+            np.testing.assert_array_equal(analysis.decode(root, item), values)
+            del item['copy_format']
+            with self.assertRaises(ValueError):
+                analysis.decode(root, item)
+
     def test_r11g11b10_hdr(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

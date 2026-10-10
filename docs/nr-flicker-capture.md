@@ -124,3 +124,80 @@ frames and the manifest records decode/copy/resource formats separately. The
 GPU fixture now captures an actual D32 depth texture across two frames and
 checks its values. No NR rendering or white-point algorithm changes accompany
 this correction.
+
+## DS2 three-condition results and motion-input candidate
+
+Local comparison build `10fd7a5211b829d93c8b17289e513eb814a955c0` produced
+three complete eight-frame batches for each condition (72 frames total). The
+operator reported sustained flicker for post-SR with either game exposure or
+fixed paper white 1.0, and no sustained flicker for pre-SR with fixed white 1.0.
+All recorded effective white points were 1.0. This weakens exposure oscillation
+as an explanation for **these windows**, not every scene.
+
+Candidate light/reflection ROIs already show additional variation in raw model
+output. For example, mean temporal luminance MAE over 21 transitions in the
+post-SR reflection ROI was 0.000081 / 0.000916 for proxy / raw model with game
+exposure, and 0.000082 / 0.000949 with fixed white. Both stages were decoded from
+sRGB to linear for this comparison. The ROIs await operator confirmation.
+Character idle motion is a confounder. Pre-SR captures contain render jitter,
+are lower resolution, and precede SR: their raw pixel MAE is **not** a measurement
+of the final pre-SR screen's visible flicker.
+
+The game declares `MVJittered`. Static-light median vectors multiplied by
+(-640, 360) match **previous jitter minus current jitter**. Across the 42 adjacent
+pairs of the two post-SR conditions, motion RMS was 0.510455 render pixels;
+subtracting this jitter term leaves 0.000649 pixels. See NVIDIA's
+[DLSS programming guide, Motion Vector Flags](https://raw.githubusercontent.com/NVIDIA/DLSS/main/doc/DLSS_Programming_Guide_Release.pdf)
+for the flag's meaning. The NR call supplied neither a jitter flag nor offsets.
+This is evidence of an input-coordinate mismatch with unjittered post-SR colour;
+it is not yet causal proof for the observed flicker.
+
+The candidate D3D12 correction point-loads the game's motion texture into a
+private RG32 float texture and adds `(currentJitter - previousJitter) / MVecScale`.
+The game resource and real motion remain intact. The corrected guide feeds NR,
+Sky accumulation/reprojection and legacy stabilization. Pre-SR model input is
+unchanged; cache/stabilizer reprojection no longer adds jitter again when the
+source vectors already contain it. Missing/invalid inputs, discontinuity,
+discarded recordings, placement/flag/size/scale changes and game resets invalidate
+history. Cache-only input frames still advance the jitter history.
+
+Capture now includes `game_motion` (before correction/accumulation) and
+`game_depth` (before guide cloning), plus the actual model guides and correction
+metadata. Existing 72 model-depth captures contain zero throughout. Since the
+original depth was not recorded by that build, this does **not** establish whether
+the game, guide copy or diagnostic path lost depth. That check remains open.
+
+Local evidence lives outside Git under `testlogs/nr-flicker-10fd7a52/`, including
+`comparison-summary.json`, `motion-jitter-evidence.json`, candidate ROIs, batch
+hashes, logs and per-stage analyses. No game captures or vendor binaries are
+published. The candidate still needs full-DLL build and controlled in-game
+acceptance. Do not call the flicker fixed from synthetic shader tests alone.
+
+
+### Reproduced depth-copy defect
+
+An isolated RTX 4060 / GE-Proton 11-7 test reproduced the existing D32S8 clone
+path: source depth 0.625, `CopyResource` into a non-depth resource with
+`R32_FLOAT_X8X24_TYPELESS`, clone readback 0.0. The failing run is preserved at
+`testlogs/nr-motion-final/`; it is not counted as a passing run. This establishes
+a reproducible integration defect, although original game-depth capture is
+still needed to connect it to the in-game all-zero guides.
+
+The fix explicitly samples plane 0 with a depth SRV into an owned R32_FLOAT UAV.
+It restores the game's resource state, uses the existing recording/fence holds,
+and supplies the extracted texture to NR and both stabilization paths. It rejects
+unsupported multisampled/array/non-readable inputs rather than fabricating depth.
+D3D12's [planar depth specification](https://github.com/microsoft/DirectX-Specs/blob/master/d3d/PlanarDepthStencilDDISpec.md)
+distinguishes the resource, depth SRV and copy-plane formats. The fix keeps those
+roles separate and avoids the base shader helper's incorrect conversion of a
+valid R32_FLOAT_X8X24 depth SRV format back to a DSV format.
+
+Candidate validation: CPU jitter-history tests with ASan/UBSan (LeakSanitizer
+disabled because the execution sandbox uses ptrace), six capture decoder tests,
+and the real NVIDIA GPU suite passed. The GPU suite checks typed/typeless D32S8
+and D24S8 spatial depth patterns, zero/far values, post-SR motion preservation,
+cache intervals/history/lifetime and legacy stabilization. Ten expected outcomes
+include seven deliberately failing controls; restoring the old depth copy and
+reversing the motion correction each trigger the intended assertion. Evidence:
+`testlogs/nr-guide-fix-final/`. No claim of vendor-model or game-image acceptance
+follows from these tests.

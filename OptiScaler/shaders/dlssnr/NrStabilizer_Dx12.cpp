@@ -143,7 +143,7 @@ bool NrStabilizer_Dx12::Run(ID3D12GraphicsCommandList* list, ID3D12Resource* tar
     c.MvScaleX = frame.MvScaleX;
     c.MvScaleY = frame.MvScaleY;
     // Same sign convention as Sky's default JitterSign=-1.
-    if (frame.PreUpscale && frame.JitterValid && jitterValid_)
+    if (frame.PreUpscale && !frame.MotionJittered && frame.JitterValid && jitterValid_)
     {
         c.JitterDeltaX = (jitterX_ - frame.JitterX) / width_;
         c.JitterDeltaY = (jitterY_ - frame.JitterY) / height_;

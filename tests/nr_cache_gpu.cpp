@@ -8,6 +8,9 @@
 #include "../OptiScaler/dlssnr/DlssNr_Capture.h"
 #include "../OptiScaler/shaders/dlssnr/DlssNr_EditCache_Dx12.h"
 #include "../OptiScaler/gpu_time/GpuTime_Dx12.h"
+#include "../OptiScaler/shaders/dlssnr/DlssNr_Common.h"
+#include "../OptiScaler/shaders/dlssnr/DepthPlane_Dx12.h"
+#include "../OptiScaler/shaders/dlssnr/precompile/DlssNr_Shader.h"
 
 namespace
 {
@@ -39,7 +42,7 @@ ID3D12Resource* target = nullptr;
 ID3D12Resource* keep = nullptr;
 ID3D12Resource* depth = nullptr;
 ID3D12Resource* motion = nullptr;
-bool breakFresh = false, breakRegional = false, breakJitter = false;
+bool breakFresh = false, breakRegional = false, breakJitter = false, breakMotion = false, breakDepth = false;
 
 ID3D12Resource* Buffer(UINT64 bytes, D3D12_HEAP_TYPE type, D3D12_RESOURCE_STATES state)
 {
@@ -157,6 +160,8 @@ DlssNrCacheInputs Inputs(float mv = 0.0f, float z = 0.5f)
     in.passthrough = true;
     return in;
 }
+#include "nr_motion_gpu_fixture.h"
+
 void TimingCases()
 {
     GpuTime_Dx12 timer(device, true);
@@ -212,6 +217,69 @@ void TimingCases()
     std::puts(
         "PASS: production GPU timer drains both phases, exact identities, bounded slots, discard and legacy path");
 }
+void DepthStencilCloneTest(bool broken)
+{
+    auto heap = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
+    auto desc = CD3DX12_RESOURCE_DESC::Tex2D(DXGI_FORMAT_R32G8X24_TYPELESS, width, height, 1, 1, 1, 0,
+                                             D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL);
+    ID3D12Resource *source = nullptr, *clone = nullptr;
+    Check(device->CreateCommittedResource(&heap, D3D12_HEAP_FLAG_NONE, &desc, kSrv, nullptr, IID_PPV_ARGS(&source)),
+          "D32S8 source");
+    owners.push_back(source);
+    desc.Format = DXGI_FORMAT_R32_FLOAT_X8X24_TYPELESS;
+    desc.Flags = D3D12_RESOURCE_FLAG_NONE;
+    Check(device->CreateCommittedResource(&heap, D3D12_HEAP_FLAG_NONE, &desc, D3D12_RESOURCE_STATE_COPY_DEST, nullptr,
+                                          IID_PPV_ARGS(&clone)),
+          "D32S8 clone");
+    owners.push_back(clone);
+    Uniform(source, kSrv, 1, 0.625f);
+    Barrier(source, kSrv, D3D12_RESOURCE_STATE_COPY_SOURCE);
+    list->CopyResource(clone, source);
+    Barrier(source, D3D12_RESOURCE_STATE_COPY_SOURCE, kSrv);
+    Barrier(clone, D3D12_RESOURCE_STATE_COPY_DEST, kSrv);
+    const auto a = Read(source, kSrv, 1), b = Read(clone, kSrv, 1);
+    std::printf("D32S8 CopyResource probe: source=%f clone=%f\n", a[0], b[0]);
+    auto* extracted = Texture(DXGI_FORMAT_R32_FLOAT, kUav);
+    MotionShaderFixture shader;
+    shader.Run(source, extracted, 0, 0, DlssNrMode_Depth);
+    const auto actual = Read(extracted, kUav, 1);
+    for (size_t i = 0; i < a.size(); ++i)
+        Require(a[i] == 0.625f && (broken ? b[i] : actual[i]) == a[i],
+                "production depth-plane extraction preserves depth");
+    for (auto format : { DXGI_FORMAT_R32G8X24_TYPELESS, DXGI_FORMAT_D32_FLOAT_S8X24_UINT, DXGI_FORMAT_R24G8_TYPELESS,
+                         DXGI_FORMAT_D24_UNORM_S8_UINT })
+    {
+        desc.Format = format;
+        desc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
+        ID3D12Resource* input = nullptr;
+        Check(device->CreateCommittedResource(&heap, D3D12_HEAP_FLAG_NONE, &desc, kSrv, nullptr, IID_PPV_ARGS(&input)),
+              "depth format matrix source");
+        owners.push_back(input);
+        const bool unorm = format == DXGI_FORMAT_R24G8_TYPELESS || format == DXGI_FORMAT_D24_UNORM_S8_UINT;
+        Fill(input, kSrv, 1,
+             [=](unsigned int x, unsigned int, unsigned int)
+             {
+                 float value = x == 0 ? 0.0f : x == width - 1 ? 1.0f : 0.625f;
+                 if (unorm)
+                 {
+                     const uint32_t bits = static_cast<uint32_t>(double(value) * 16777215.0);
+                     std::memcpy(&value, &bits, sizeof(value));
+                 }
+                 return value;
+             });
+        shader.Run(input, extracted, 0, 0, DlssNrMode_Depth);
+        const auto values = Read(extracted, kUav, 1);
+        for (unsigned int y = 0; y < height; ++y)
+            for (unsigned int x = 0; x < width; ++x)
+            {
+                const float expected = x == 0 ? 0.0f : x == width - 1 ? 1.0f : 0.625f;
+                Require(std::abs(values[y * width + x] - expected) < 1e-6f,
+                        "D32S8/D24S8 depth plane preserves spatial pattern and range");
+            }
+    }
+    std::puts("PASS: production D32S8/D24S8 depth planes, typed/typeless sources and spatial patterns");
+}
+
 void CaptureTest(const std::filesystem::path& root)
 {
     capture::FrameCapture capture;
@@ -375,7 +443,10 @@ int main(int argc, char** argv)
             breakFresh = std::strcmp(argv[3], "--break-fresh") == 0;
             breakRegional = std::strcmp(argv[3], "--break-regional") == 0;
             breakJitter = std::strcmp(argv[3], "--break-jitter") == 0;
-            Require(breakFresh || breakRegional || breakJitter, "unknown negative control");
+            breakMotion = std::strcmp(argv[3], "--break-motion") == 0;
+            breakDepth = std::strcmp(argv[3], "--break-depth") == 0;
+            Require(breakFresh || breakRegional || breakJitter || breakMotion || breakDepth,
+                    "unknown negative control");
         }
         IDXGIFactory1* factory = nullptr;
         Check(CreateDXGIFactory1(IID_PPV_ARGS(&factory)), "factory");
@@ -402,9 +473,13 @@ int main(int argc, char** argv)
         Check(device->CreateCommandAllocator(q.Type, IID_PPV_ARGS(&allocator)), "allocator");
         Check(device->CreateCommandList(0, q.Type, allocator, nullptr, IID_PPV_ARGS(&list)), "list");
         Check(device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence)), "fence");
-        if (!breakFresh && !breakRegional && !breakJitter)
+        if (argc == 3)
             TimingCases();
         AllocateFrames();
+        if (argc == 3 || breakMotion)
+            MotionShaderTest(breakMotion);
+        if (argc == 3 || breakDepth)
+            DepthStencilCloneTest(breakDepth);
         if (argc == 3)
             CaptureTest(std::filesystem::path(argv[2]).parent_path() / "captures");
         Config cfg;
@@ -512,6 +587,8 @@ int main(int argc, char** argv)
             width = 23;
             height = 9;
             AllocateFrames();
+            if (argc == 3 || breakMotion)
+                MotionShaderTest(breakMotion);
             Near(Frame(cache, cfg, true, 1, 1.2f)[0], 1.2f, 0.015f, "resize starts fresh history");
             cfg.DlssNrCacheInterval = 1;
             cfg.DlssNrCacheStabilize = 0.5f;

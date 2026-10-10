@@ -28,7 +28,15 @@ def decode(root, image):
     path = (root / image['file']).resolve()
     if path.parent != root.resolve():
         raise ValueError('Image path escapes capture directory')
-    dtype, channels = FORMATS[image['format']]
+    storage_format = image['format']
+    # Depth/stencil SRVs may expose a depth-only copy plane. Its raw stride is
+    # 32 bits even when the resource/view format includes an unused stencil word.
+    if (image['colour_space'] == 'depth' and image.get('copy_format') == 39 and
+            storage_format in (19, 20, 21, 39, 40, 41)):
+        storage_format = 41
+    if storage_format not in FORMATS:
+        raise ValueError(f"Unsupported capture format {image['format']}, copy plane {image.get('copy_format')}")
+    dtype, channels = FORMATS[storage_format]
     dtype = np.dtype(dtype)
     w, h = image['width'], image['height']
     pitch, offset = image['row_pitch'], image['offset']

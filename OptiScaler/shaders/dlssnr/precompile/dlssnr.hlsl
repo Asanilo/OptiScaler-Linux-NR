@@ -25,6 +25,8 @@ cbuffer Params : register(b0)
     uint  gCompareSwap;  // put the edited frame on the other side
     uint  gTransfer;     // 0 classic, 1 matched residual -- how a below-size model comes back
     float gDebugScale;   // what the debug views are scaled by, held still while the meter moves
+    float gMotionOffsetX;
+    float gMotionOffsetY;
 };
 
 // Bringing an impossible colour back into a possible one.
@@ -335,6 +337,19 @@ void CSMain(uint3 id : SV_DispatchThreadID)
 {
     if (id.x >= gWidth || id.y >= gHeight)
         return;
+
+    if (gMode == 6)
+    {
+        gTarget[id.xy] = float4(gSource.Load(int3(id.xy, 0)).r, 0, 0, 0);
+        return;
+    }
+
+    if (gMode == 5)
+    {
+        // Point-load: preserve real object/camera motion and the guide's raster.
+        gTarget[id.xy] = float4(gSource.Load(int3(id.xy, 0)).xy + float2(gMotionOffsetX, gMotionOffsetY), 0, 0);
+        return;
+    }
 
     // Normalised, so the source may be any size relative to this dispatch.
     float2 uv = (float2(id.xy) + 0.5) / float2(gWidth, gHeight);

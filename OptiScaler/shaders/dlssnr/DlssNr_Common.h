@@ -20,6 +20,8 @@ enum DlssNrMode : uint32_t
     DlssNrMode_Resolve = 1,    // proxy + the model's answer + the untouched copy -> the edited frame
     DlssNrMode_Downsample = 2, // the proxy -> a smaller proxy, when the model works below full size
     DlssNrMode_Meter = 3,      // the exposure texture -> tile (0,0), for the white point
+    DlssNrMode_Depth = 6,      // sample the depth plane into a model-readable R32 texture
+    DlssNrMode_Motion = 5,     // remove render jitter from post-SR motion guides
     DlssNrMode_Calibrate = 4   // the untouched frame -> a grid of tile peak luminances
 };
 
@@ -55,6 +57,7 @@ struct DlssNrFrameInfo
 {
     bool PreUpscale = false;
     bool JitterValid = false;
+    bool MotionJittered = false;
     float JitterX = 0.0f, JitterY = 0.0f;
     // Which way round depth runs. The game states this when it creates its own upscaler.
     bool DepthInverted = false;
@@ -167,6 +170,8 @@ struct alignas(256) DlssNrConstants
     // two captures at different exposures then differ by the exposure, whatever the edit did. This
     // is the user's own multiplier, which holds still while the meter works.
     float DebugScale;
+    float MotionOffsetX;
+    float MotionOffsetY;
 };
 
 class DlssNr_Common
