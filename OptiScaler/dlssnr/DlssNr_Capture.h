@@ -24,6 +24,8 @@ struct Shot
     D3D12_PLACED_SUBRESOURCE_FOOTPRINT layout = {};
     unsigned long long bytes = 0;
     unsigned int frame = 0;
+    DXGI_FORMAT resourceFormat = DXGI_FORMAT_UNKNOWN;
+    DXGI_FORMAT interpretation = DXGI_FORMAT_UNKNOWN;
     std::string stage, colour;
 };
 class FrameCapture
@@ -108,29 +110,36 @@ class FrameCapture
             fail("unsupported_resource_layout");
             return;
         }
-        // Typeless copies retain their bit layout; declare the interpretation explicitly.
+        // Resource format, copy-plane format and SRV interpretation may differ.
+        // Preserve the original descriptor for GetCopyableFootprints. In particular,
+        // a depth plane can be returned as R32_TYPELESS for a D32_FLOAT resource.
+        auto interpretation = desc.Format;
         switch (desc.Format)
         {
         case DXGI_FORMAT_R16G16B16A16_TYPELESS:
-            desc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
+            interpretation = DXGI_FORMAT_R16G16B16A16_FLOAT;
             break;
         case DXGI_FORMAT_R32G32B32A32_TYPELESS:
-            desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+            interpretation = DXGI_FORMAT_R32G32B32A32_FLOAT;
             break;
         case DXGI_FORMAT_R10G10B10A2_TYPELESS:
-            desc.Format = DXGI_FORMAT_R10G10B10A2_UNORM;
+            interpretation = DXGI_FORMAT_R10G10B10A2_UNORM;
             break;
         case DXGI_FORMAT_R8G8B8A8_TYPELESS:
-            desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+            interpretation = DXGI_FORMAT_R8G8B8A8_UNORM;
             break;
         case DXGI_FORMAT_B8G8R8A8_TYPELESS:
-            desc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+            interpretation = DXGI_FORMAT_B8G8R8A8_UNORM;
             break;
+        case DXGI_FORMAT_D32_FLOAT:
         case DXGI_FORMAT_R32_TYPELESS:
-            desc.Format = DXGI_FORMAT_R32_FLOAT;
+            interpretation = DXGI_FORMAT_R32_FLOAT;
             break;
         case DXGI_FORMAT_R32G32_TYPELESS:
-            desc.Format = DXGI_FORMAT_R32G32_FLOAT;
+            interpretation = DXGI_FORMAT_R32G32_FLOAT;
+            break;
+        case DXGI_FORMAT_R16G16_TYPELESS:
+            interpretation = DXGI_FORMAT_R16G16_FLOAT;
             break;
         default:
             break;
@@ -138,7 +147,7 @@ class FrameCapture
         for (const auto& previous : shots_)
             if (previous.stage == stage &&
                 (previous.layout.Footprint.Width != desc.Width || previous.layout.Footprint.Height != desc.Height ||
-                 previous.layout.Footprint.Format != desc.Format))
+                 previous.resourceFormat != desc.Format))
             {
                 fail("resource_layout_changed");
                 return;
@@ -147,6 +156,8 @@ class FrameCapture
         shot.frame = static_cast<unsigned int>(frames_.size() - 1);
         shot.stage = stage;
         shot.colour = colour;
+        shot.resourceFormat = desc.Format;
+        shot.interpretation = interpretation;
         device->GetCopyableFootprints(&desc, 0, 1, 0, &shot.layout, nullptr, nullptr, &shot.bytes);
         if (!shot.bytes || shot.bytes > budget_ - bytes_)
         {
@@ -251,9 +262,10 @@ class FrameCapture
                                     : discarded ? "discarded"
                                                 : "failed")
                      << ",\"colour_space\":" << std::quoted(shot.colour) << ",\"width\":" << fp.Width
-                     << ",\"height\":" << fp.Height << ",\"format\":" << static_cast<int>(fp.Format)
-                     << ",\"row_pitch\":" << fp.RowPitch << ",\"offset\":" << shot.layout.Offset
-                     << ",\"bytes\":" << shot.bytes << "}";
+                     << ",\"height\":" << fp.Height << ",\"format\":" << static_cast<int>(shot.interpretation)
+                     << ",\"resource_format\":" << static_cast<int>(shot.resourceFormat)
+                     << ",\"copy_format\":" << static_cast<int>(fp.Format) << ",\"row_pitch\":" << fp.RowPitch
+                     << ",\"offset\":" << shot.layout.Offset << ",\"bytes\":" << shot.bytes << "}";
             first = false;
         }
         manifest << "],\"status\":" << std::quoted(error_.empty() ? "complete" : error_) << "}\n";

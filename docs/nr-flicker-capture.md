@@ -35,7 +35,9 @@ when NR is disabled/skipped. If the seam stops being called, the pending batch w
 a shutdown with still-pending recordings is explicitly logged rather than mapped.
 
 Each request creates a unique `dlssnr-capture/batch-*` directory beside the DLL,
-with `manifest.json` schema 2 and raw images. Limits: eight NR recordings and
+with `manifest.json` schema 2 and raw images. Image `format` is the decoding
+interpretation; `resource_format` and `copy_format` record the distinct resource
+and copy-plane formats. A D32 resource may expose an R32 typeless copy plane. Limits: eight NR recordings and
 768 MiB readback per batch, including guide sidecars. A failed batch can contain
 partial data. Old batches are never automatically removed. Capturing and writing
 large raw files affects timing; measure performance with capture disabled.
@@ -110,3 +112,15 @@ Acceptance must compare the same save/scene in three repeated stationary and
 slow-turn runs, preserve NR detail/strength, check the three affected ROIs and
 new ghosting, and cover pre-SR, Sky interval 1/2, toggles and Alt-Tab. A long-session
 Linux acceptance claim remains separate from this focused experiment.
+
+## First DS2 capture and diagnostic correction
+
+The first 63dc524a DS2 batch stopped on frame 2 with `resource_layout_changed`.
+The guard compared the previous copy footprint format with the next resource
+format; a depth-plane format difference is valid and does not indicate a resize.
+This was a diagnostic bug, not evidence of an in-game resource change. The
+partial batch is preserved. The guard now compares resource formats across
+frames and the manifest records decode/copy/resource formats separately. The
+GPU fixture now captures an actual D32 depth texture across two frames and
+checks its values. No NR rendering or white-point algorithm changes accompany
+this correction.

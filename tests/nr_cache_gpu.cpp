@@ -216,6 +216,16 @@ void CaptureTest(const std::filesystem::path& root)
 {
     capture::FrameCapture capture;
     auto* texture = Texture(DXGI_FORMAT_R32G32B32A32_FLOAT, kSrv);
+    auto heap = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
+    auto depthDesc = CD3DX12_RESOURCE_DESC::Tex2D(DXGI_FORMAT_D32_FLOAT, width, height, 1, 1, 1, 0,
+                                                  D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL);
+    ID3D12Resource* depthSurface = nullptr;
+    Check(device->CreateCommittedResource(&heap, D3D12_HEAP_FLAG_NONE, &depthDesc, kSrv, nullptr,
+                                          IID_PPV_ARGS(&depthSurface)),
+          "capture depth allocation");
+    owners.push_back(depthSurface);
+    // A D32 resource's copy plane can be R32_TYPELESS. Both must remain distinct
+    // from the R32_FLOAT interpretation used to decode the captured depth.
     capture.request(2);
     capture.request(8); // Duplicate request must not replace the active batch.
     for (unsigned int f = 0; f < 2; ++f)
@@ -228,6 +238,8 @@ void CaptureTest(const std::filesystem::path& root)
             capture.record(list, device, stage, texture, kSrv,
                            stage[0] == 'p' || stage[0] == 'm' ? "srgb_encoded" : "linear_hdr");
         }
+        Uniform(depthSurface, kSrv, 1, 0.625f);
+        capture.record(list, device, "depth", depthSurface, kSrv, "depth");
         capture.endFrame();
         Require(capture.poll(root).empty(), "capture cannot map unsubmitted GPU copies");
     }
@@ -243,6 +255,13 @@ void CaptureTest(const std::filesystem::path& root)
         input.read(reinterpret_cast<char*>(&actual), sizeof(actual));
         const float expected = stage[0] == 'o' ? 0 : stage[0] == 'p' ? 0.5f : stage[0] == 'm' ? 0.75f : 2;
         Require(input.good() && actual == expected, "stage copied before subsequent overwrite");
+    }
+    for (int f = 0; f < 2; ++f)
+    {
+        std::ifstream input(directory / (std::to_string(f) + "-depth.raw"), std::ios::binary);
+        float actual = -1;
+        input.read(reinterpret_cast<char*>(&actual), sizeof(actual));
+        Require(input.good() && actual == 0.625f, "D32 depth plane survives capture across frames");
     }
     capture.request(1);
     capture.beginFrame("{\"nr_frame\":3}");
