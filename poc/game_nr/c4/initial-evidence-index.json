@@ -1,0 +1,183 @@
+{
+  "scope": "READ_ONLY_ROOT_RUNTIME_EVIDENCE_INDEX_NO_RUNTIME_OR_PIXELS_INCLUDED",
+  "baseline_artifact_sha256": "9af794e38883e789c5beade0480216f53d3fb25dbf9f072b419b36d6049dcd1d",
+  "baseline_build_sha256": "935ece101cdbc2c1f7fb56e77ec41d89a6b3b05a03a7e3a0ea6bd39f682065b1",
+  "records": [
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/baselines/c4-first-hot-20261011/manifest.json",
+      "bytes": 3116,
+      "sha256": "c80d76957b7075b72bfb8d0421ded25aa29188b96f0276d973f062282dcf39c1"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/integration/C4-CONTRACT.md",
+      "bytes": 10425,
+      "sha256": "18af8d771d22577e5b7806ed36213762a61bdb3db1b38d49324955e57fb8e0f6"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/integration/c4-helper-approved.json",
+      "bytes": 22196,
+      "sha256": "9b6db674ad335eced7e4b27214006765f253ce9e10c371cb416625a64410a28c"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c4-game-c4-diag-20261011/root-acceptance.json",
+      "bytes": 218,
+      "sha256": "b92ec3bc4212d365dd074aa7a8b120901b6d8132d606b210d313ef77c1a339b9"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c4-game-c4-diag-20261011/wine-result.json",
+      "bytes": 443,
+      "sha256": "37717c71611256be790887f334256ca5da7268877e4221cd28459bfb1ebd5718"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c4-game-c4-diag-20261011/native-helper-exit.json",
+      "bytes": 40,
+      "sha256": "cc72ad80141837f404d6716c8281c4e5c095dac581e230a2aaddf86bf5e81d42"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c4-game-c4-diag2-20261011/root-acceptance.json",
+      "bytes": 177,
+      "sha256": "b7b6af4ab2dc52ae433351698142b756089c95e563c53c1b535a2c1ea4f40b93"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c4-game-c4-diag2-20261011/wine-result.json",
+      "bytes": 445,
+      "sha256": "a99c9e0ac2a6aa7421f2eaad32119c17770345269cc507f4f070d25e229eca18"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c4-game-c4-diag2-20261011/native-helper-exit.json",
+      "bytes": 40,
+      "sha256": "cc72ad80141837f404d6716c8281c4e5c095dac581e230a2aaddf86bf5e81d42"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c4-game-c4-diag3-20261011/root-acceptance.json",
+      "bytes": 786,
+      "sha256": "9805a25d05755a9b3b29f13cd4f34101f95e415d7f0580387d16a55c4666f9cd"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c4-game-c4-diag3-20261011/root-wire-audit.json",
+      "bytes": 13831,
+      "sha256": "26a0fa76687b5e3e34c13e37decf519f8664eb82d4b2a238d241ee52c3c03035"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c4-game-c4-diag3-20261011/root-present-audit.json",
+      "bytes": 3408,
+      "sha256": "fbbb069344caca693564cec25a5347e4a7cc7124ce744dba37d2e5bc1a1fcb28"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c4-game-c4-diag3-20261011/wine-result.json",
+      "bytes": 634,
+      "sha256": "e01efd681565067d5eec36f0675372008c78c755e3887d96c93822b0ea872ab7"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c4-game-c4-diag3-20261011/native-helper-exit.json",
+      "bytes": 37,
+      "sha256": "13177d9996d1e6161fc33da3906bd4c1eb9238bc33cb70fb8b267751b063884e"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c4-game-c4-skip-20261011/root-acceptance.json",
+      "bytes": 449,
+      "sha256": "77c2d94ca1697797ed9f01b22904d5e26f358a7548ca356a37b80fc9e9bf9192"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c4-game-c4-skip-20261011/root-wire-audit.json",
+      "bytes": 13770,
+      "sha256": "a6457970c5164dfb0b3a9918d7fb25893e61b4f8a243776797ae244ca87dafe3"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c4-game-c4-skip-20261011/root-present-audit.json",
+      "bytes": 3411,
+      "sha256": "62ba1346a68cf92d52d0eef61d87bde6751208ad02ddadfa9ba99b1629bcff07"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c4-game-c4-skip-20261011/wine-result.json",
+      "bytes": 638,
+      "sha256": "1b1927af4020a00f6d7924211d49db674484e0e1662439ae2ff8f56d32dac95e"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c4-game-c4-skip-20261011/native-helper-exit.json",
+      "bytes": 37,
+      "sha256": "13177d9996d1e6161fc33da3906bd4c1eb9238bc33cb70fb8b267751b063884e"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c4-game-c4-hot4-20261011/root-acceptance.json",
+      "bytes": 617,
+      "sha256": "7f5e394a4cac936ef05dfa0faf10693e4d518325a47b6c8fe1250f972af1287a"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c4-game-c4-hot4-20261011/root-wire-audit.json",
+      "bytes": 8052,
+      "sha256": "5a6562c416ec50720866422e572766753c68433235974928e80b19ac6544518a"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c4-game-c4-hot4-20261011/root-present-audit.json",
+      "bytes": 2195,
+      "sha256": "0bc4afa46bb7f28e7d01fe24de9f9744a72a74f9b199321b68109f84db8c497e"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c4-game-c4-hot4-20261011/wine-result.json",
+      "bytes": 709,
+      "sha256": "fae5294a1038054e5dc71faf5d571613d33fe106ebc1df785a6e5dc984d29efd"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c4-game-c4-hot4-20261011/native-helper-exit.json",
+      "bytes": 37,
+      "sha256": "13177d9996d1e6161fc33da3906bd4c1eb9238bc33cb70fb8b267751b063884e"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c4-game-c4-hot120-20261011/root-acceptance.json",
+      "bytes": 673,
+      "sha256": "a72f89e7dac56a8626cff42528f7ce4d879abee0c668464f9077426ed1056d55"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c4-game-c4-hot120-20261011/root-wire-audit.json",
+      "bytes": 185720,
+      "sha256": "d1e14d508f45116e67810a8b12d91dab2890b865d98f0ca0baba87051c7238f1"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c4-game-c4-hot120-20261011/root-present-audit.json",
+      "bytes": 50471,
+      "sha256": "e2d8501883daa1870f64b7d953f1d1d12501d3e331d7a81dec7b21509fb8fc4b"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c4-game-c4-hot120-20261011/root-performance.json",
+      "bytes": 69584,
+      "sha256": "28790134e21001155b0c71fabca68ba2bb610a24d45f208e67475777ab73dc48"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c4-game-c4-hot120-20261011/wine-result.json",
+      "bytes": 721,
+      "sha256": "277611f508140ea39a2e96ed14cc4b19cf6111d01e99eeb8dbfc6a90aff8c177"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c4-game-c4-hot120-20261011/native-helper-exit.json",
+      "bytes": 37,
+      "sha256": "13177d9996d1e6161fc33da3906bd4c1eb9238bc33cb70fb8b267751b063884e"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c4-game-c4-sr90-20261011/root-acceptance.json",
+      "bytes": 413,
+      "sha256": "e789bf0bafd56ad1d69abb92a73e431c7cecc6d51a7146343023b603b31b3f3d"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c4-game-c4-sr90-20261011/root-performance.json",
+      "bytes": 949,
+      "sha256": "c7f3a75a431b26ba09812676e615fa1dfb5e8f569dcf6a4ab9bb5cd05fb3401f"
+    }
+  ],
+  "independent_A_review": {
+    "diagnostic4": "four raw RGB finite+written, resolved RGBA finite/non-sentinel, source alpha bits and byte-transport/SHA+mix32 signatures independently matched",
+    "hot120": "120 real calls/result1/resolves/exact contiguous sources2195..2314; independent all119 Present interval cadence22.006110354555318; native guard0; hot full pixels/signature NOT_RUN",
+    "lifecycle": "diagnostic3/hot4 read-only all-readable Wine83/native136 complete inventories equal and normal wait0; runtime records for other cases retained",
+    "clock": "actual GE kernelbase GetTickCount64 disassembly reads shared 0x7ffe0320/324/328; wineserver get_next_timeout defaults16ms; QPC measured actual waits;81/120 frame_elapsed_ms zero excluded from performance interpretation, not exclusion from frame cadence"
+  },
+  "prior_attempts_preserved": [
+    "c4-game-c4-diag-20261011",
+    "c4-game-c4-diag2-20261011"
+  ],
+  "scope_limits": [
+    "quality not evaluated",
+    "exposure unknown manual WhitePoint1",
+    "hot numeric/alpha/coverage not checked",
+    "60FPS target failed; sustained/load/recovery not run"
+  ]
+}
