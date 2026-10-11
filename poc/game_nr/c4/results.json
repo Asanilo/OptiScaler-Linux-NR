@@ -1,5 +1,5 @@
 {
-  "scope": "C4_INITIAL_BASELINE_9af794_CORRECTNESS_AND_PERFORMANCE",
+  "scope": "C4_QPC_ACTIVE_CONTROL_POLL_REVISION_BUILD_ONLY",
   "compile": {
     "status": "PASS",
     "exit_code": 0,
@@ -7,81 +7,106 @@
       {
         "name": "glsl-compile",
         "exit_code": 0,
-        "log": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/c4/out/build-history/20261011T140830.086189Z/glsl-compile.log"
+        "log": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/c4/out/build-history/20261011T144120.287256Z/glsl-compile.log"
       },
       {
         "name": "spirv-validation",
         "exit_code": 0,
-        "log": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/c4/out/build-history/20261011T140830.086189Z/spirv-validation.log"
+        "log": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/c4/out/build-history/20261011T144120.287256Z/spirv-validation.log"
       },
       {
         "name": "helper-compile",
         "exit_code": 0,
-        "log": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/c4/out/build-history/20261011T140830.086189Z/helper-compile.log"
+        "log": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/c4/out/build-history/20261011T144120.287256Z/helper-compile.log"
       }
     ],
     "build": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/c4/out/build.json",
-    "build_sha256": "935ece101cdbc2c1f7fb56e77ec41d89a6b3b05a03a7e3a0ea6bd39f682065b1",
+    "build_sha256": "10d341e30be75b5f78b1762fc28a6316bc0b05087df63f3636a48f54a08e538a",
     "source_pre_post_equal": true,
     "artifact": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/c4/out/wine_game_nr_hot.exe",
-    "artifact_sha256": "9af794e38883e789c5beade0480216f53d3fb25dbf9f072b419b36d6049dcd1d",
-    "artifact_bytes": 1141760,
+    "artifact_sha256": "6d0039a3548d6378444db107a22f18d2a4d3a60803f4e3cdc7570497c6a13df5",
+    "artifact_bytes": 1148928,
     "sources": {
-      "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/c4/wine_game_nr_hot.cpp": "4e51af4932b57932d8568c15d14bc3ca763659378e8b944f5c13183a3f971747",
+      "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/c4/wine_game_nr_hot.cpp": "8533017eb3351db8c51b85ad6749b43463b5cc7e9e66c5fa440a46357eb3ceed",
       "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/c4/c4_production_adapter.h": "2642905752af7ae4fa6b2516c957cb42a74c7f6c0eab1038e4e8f3e3f5952366",
       "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/c4/gpu_validation.h": "86f004560d44e7785f2c2e583e1eb6164444333f2b7b4a597876630de399f118",
       "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/c4/validate_frame.comp": "a0d9cd5621b4991337598dc83c9d578f099ff073d8edf618c02599141b970d7d",
-      "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/c4/build_c4.py": "24944f178ddd7a3fb989b3200f88873d5fd8b6ddd95ac7be6a5257d147427a28"
+      "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/c4/build_c4.py": "c81bc435eb3e200fac2d0ccbae1a63df1f6603f32e017b1eb9fa1d5987b0f64f"
     }
   },
   "runtime": {
-    "status": "PASS_NARROW_CORRECTNESS",
-    "diagnostic4_normal": "PASS",
-    "diagnostic4_skip": "PASS",
-    "hot4": "PASS_API_GPU_TUPLE_GUARD_LIFECYCLE",
-    "hot120": "PASS_120_UNIQUE_ACTUAL_EVALUATE_RESOLVE_PRESENT",
-    "matched_SR_NR_performance": "MEASURED_TARGET_FAIL",
-    "sustained_play_load_exit_recovery": "NOT_RUN",
+    "status": "NOT_RUN",
+    "hot120": "NOT_RUN",
+    "matched_performance": "NOT_RUN",
+    "sustained_load_recovery": "NOT_RUN",
     "GPU_executed_by_A": false,
-    "GPU_executor": "Integration serial host execution",
-    "failed_attempts": [
-      {
-        "case": "c4-game-c4-diag-20261011",
-        "status": "BLOCKED_CONTROL_WAIT",
-        "evaluate_calls": 0,
-        "model_frames": "NOT_RUN"
-      },
-      {
-        "case": "c4-game-c4-diag2-20261011",
-        "status": "BLOCKED_CONTROL_WAIT",
-        "evaluate_calls": 0,
-        "model_frames": "NOT_RUN"
-      }
-    ]
+    "executor": "Integration serial only"
   },
-  "C3_archive_commits": {
-    "A": "1df65cd61395aba56aae07c0a0b1c7ed84accf5a",
-    "B": "f9132dff6027d080bd15aafaccad3bcabb026a1b"
+  "revision": {
+    "QPC_source_commit": "e2d75645c13f6b456a73f35a74b8a4ce8aa98e19",
+    "contract_sha256": "18af8d771d22577e5b7806ed36213762a61bdb3db1b38d49324955e57fb8e0f6",
+    "additive_revision_sha256": "5b71aeb2d8007c8c284a202d3e026d28719e852c5f4789592d6c565d6f7d311f",
+    "active_frame_poll_interval_ms": 1,
+    "frame_elapsed_clock": "QueryPerformanceCounter",
+    "setup_terminal_shared_reader": "UNCHANGED_SLEEP5",
+    "GPU_model_shaders_atomic_publish": "UNCHANGED",
+    "performance_improvement": "NOT_MEASURED"
   },
-  "contract": "/home/arinp/Code/nrbridge-design/game-poc-20261011/integration/C4-CONTRACT.md",
-  "contract_sha256": "18af8d771d22577e5b7806ed36213762a61bdb3db1b38d49324955e57fb8e0f6",
-  "hot_scope": "actual API/GPU/tuple only; numerical/alpha/poison coverage/signature NOT_CHECKED",
-  "diagnostic_scope": "C3 all-pixel GPU+full independent CPU, separate run excluded from hot performance window",
-  "quality": "NOT_EVALUATED",
-  "performance": {
-    "status": "FAIL_NEAR_60_FPS_TARGET",
-    "NR_present_cadence_fps": 22.006110354555318,
-    "NR_present_frames": 120,
-    "NR_intervals": 119,
-    "excluded_interior_stalls": 0,
-    "bypassed_source_gaps": 0,
-    "matched_SR_only_fps": 65.36621941884157,
-    "scope": "NR selected Present call completions vs matched SR VideoOut flip intervals; no pure model or input-to-photon claim",
-    "invalid_clock_field": "frame_elapsed_ms uses GetTickCount64 sampled shared TickCount; zeros are not zero wall duration",
+  "initial_baseline": {
+    "text_commit": "75a5d6c94ce6eed1d474d7dae634dae42d3f2acc",
+    "artifact_sha256": "9af794e38883e789c5beade0480216f53d3fb25dbf9f072b419b36d6049dcd1d",
+    "build_sha256": "935ece101cdbc2c1f7fb56e77ec41d89a6b3b05a03a7e3a0ea6bd39f682065b1",
+    "runtime": {
+      "status": "PASS_NARROW_CORRECTNESS",
+      "diagnostic4_normal": "PASS",
+      "diagnostic4_skip": "PASS",
+      "hot4": "PASS_API_GPU_TUPLE_GUARD_LIFECYCLE",
+      "hot120": "PASS_120_UNIQUE_ACTUAL_EVALUATE_RESOLVE_PRESENT",
+      "matched_SR_NR_performance": "MEASURED_TARGET_FAIL",
+      "sustained_play_load_exit_recovery": "NOT_RUN",
+      "GPU_executed_by_A": false,
+      "GPU_executor": "Integration serial host execution",
+      "failed_attempts": [
+        {
+          "case": "c4-game-c4-diag-20261011",
+          "status": "BLOCKED_CONTROL_WAIT",
+          "evaluate_calls": 0,
+          "model_frames": "NOT_RUN"
+        },
+        {
+          "case": "c4-game-c4-diag2-20261011",
+          "status": "BLOCKED_CONTROL_WAIT",
+          "evaluate_calls": 0,
+          "model_frames": "NOT_RUN"
+        }
+      ]
+    },
+    "performance": {
+      "status": "FAIL_NEAR_60_FPS_TARGET",
+      "NR_present_cadence_fps": 22.006110354555318,
+      "NR_present_frames": 120,
+      "NR_intervals": 119,
+      "excluded_interior_stalls": 0,
+      "bypassed_source_gaps": 0,
+      "matched_SR_only_fps": 65.36621941884157,
+      "scope": "NR selected Present call completions vs matched SR VideoOut flip intervals; no pure model or input-to-photon claim",
+      "invalid_clock_field": "frame_elapsed_ms uses GetTickCount64 sampled shared TickCount; zeros are not zero wall duration",
+      "evidence_index": "initial-evidence-index.json"
+    },
+    "archive_manifest": "/home/arinp/Code/nrbridge-design/game-poc-20261011/baselines/c4-first-hot-20261011/manifest.json",
     "evidence_index": "initial-evidence-index.json"
   },
-  "playable": "NOT_ACCEPTED_TARGET_FAILED",
-  "C3_C2_stable_changed": false,
-  "previous_build_history_preserved": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/c4/out/build-history",
-  "evidence_index": "initial-evidence-index.json"
+  "B_readonly_cross_review": {
+    "status": "PASS_NO_IDENTIFIED_STATIC_BLOCKER",
+    "build": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c4-build-20261011T143927Z/build-result.json",
+    "changed_compile_inputs": [
+      "gpu/shadps4/video_core/renderer_vulkan/c4_game_bridge.cpp"
+    ],
+    "source_live_snapshot_pre_post": "41_EXACT",
+    "artifacts": "4_EXACT",
+    "runtime": "NOT_RUN"
+  },
+  "quality": "NOT_EVALUATED",
+  "playable": "NOT_ACCEPTED",
+  "stable_C2_C3_changed": false
 }

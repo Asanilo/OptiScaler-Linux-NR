@@ -1,43 +1,36 @@
 {
-  "scope": "C4_BUILD_AND_STATIC_CROSS_REVIEW_ONLY",
-  "status": "PASS_NO_IDENTIFIED_FIRST_RUN_BLOCKER",
+  "scope": "C4_POLL_REVISION_STATIC_ONLY",
+  "status": "PASS_NO_IDENTIFIED_STATIC_BLOCKER",
   "runtime": "NOT_RUN",
-  "GPU_executed_by_A": false,
   "helper_build": {
     "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/c4/out/build.json",
-    "sha256": "935ece101cdbc2c1f7fb56e77ec41d89a6b3b05a03a7e3a0ea6bd39f682065b1"
+    "sha256": "10d341e30be75b5f78b1762fc28a6316bc0b05087df63f3636a48f54a08e538a"
   },
   "native_build": {
-    "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c4-build-20261011T140430Z/build-result.json",
-    "sha256": "f8918cabf9000cda879cb3f5f665bd19cddf1c7ae67236a9f5540b2512d796ed",
-    "source_manifest_sha256": "c42dc2b1faa4be88654920e4d569c4ba045de03d4b1bdca2cc79b3e0f4c93a03",
-    "source_snapshot_live_pre_post": "MATCH_41_FILES",
-    "artifact_manifest_sha256": "3a51807394457e18f2116bb3122037bea9de16d0042747c75404af298aa17d1b",
-    "live_artifacts_match": 4
+    "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c4-build-20261011T143927Z/build-result.json",
+    "sha256": "381c51fc29f7e2c9a6ad607f24c92c54c8c73a18b8ae8fc1e27d26525bc02876",
+    "source_manifest_sha256": "aebc633c3356b593a5eb85c6184a73d72eb4672ce66bd0027206b7661a0654af",
+    "artifact_manifest_sha256": "14cea712b922fbe259b3a6a42d0356d224472be4e08ea8c7dd13966c20b9771b",
+    "source_pre_post_exact": true,
+    "live_snapshot_match": 41,
+    "artifacts_match": 4
   },
-  "root_scripts": {
-    "/home/arinp/Code/nrbridge-design/game-poc-20261011/integration/run_hot_nr.py": "3521a96b8a944afa03360638046c0d496c1e3bb5555d2650cb7953d9de52191f",
-    "/home/arinp/Code/nrbridge-design/game-poc-20261011/integration/input_hot_nr.py": "380e14b7b6832003b6ff9ae91194fac87708c24fb4dcd9e2d0f30ea46495a1ae",
-    "/home/arinp/Code/nrbridge-design/game-poc-20261011/integration/mark_hot_window.py": "f89890cf0737c27fb803407def4b260793761c48e0b61262d5558961258ae083",
-    "/home/arinp/Code/nrbridge-design/game-poc-20261011/integration/audit_hot_nr.py": "91010f6d7ba6c944f7517337ebf430f54f60333d71720f44abf4e528008f1e84",
-    "/home/arinp/Code/nrbridge-design/game-poc-20261011/integration/audit_c4_present.py": "ff897c727b0450fc6379289b8018373ae5badeabfba81100862db10cb66fb8f7"
-  },
-  "reviewed_paths": [
-    "C4Process config/Unix64 posix_spawn/actual PE identity/reap",
-    "four descriptors/DMA_BUF import/raw FD consume handshake",
-    "native input acquire4/release4, helper GPU fence, return hot Output only vs diagnostic Color+Output",
-    "hot scope with no C3 stats; diagnostic independent numerical/FNV/sentinel",
-    "fused finite/range guard Clear TRANSFER+COMPUTE visibility, fenced 4B Host read, whole-return reject",
-    "actual prior merge GPU last use before next descriptor/image/slot reuse",
-    "terminal GPU-safe release/audit; abnormal quarantine retains resources",
-    "strict dynamic reset/epoch tuple and unique nonreuse Present source+1 guard",
-    "5parameter launcher/srOnly no helper/private env/pins/ownPG/watchdog",
-    "timing availability/wrap/noWAIT, independent CPU/GPU scopes; scripts do not grant whole playable/FPS/quality PASS"
+  "narrow_delta": [
+    "QPC frame start/deadline/elapsed only, unchanged30s budget",
+    "C4-local active INPUT/CONSUMED Sleep5->1, 60s/control limits unchanged",
+    "B active completion Sleep2->1 and monotonic poll subset telemetry",
+    "no extra successful-loop printf; no shader/model/guide/ownership/guard/fence/merge/atomic publication change"
   ],
-  "limitations": [
-    "Static source/build review is not runtime acceptance",
-    "Root must independently verify actual helper/model/GPU/exits/FD payloads and visible presentation",
-    "Hot does not inspect full numerical/alpha/poison/signature pixels",
-    "Diagnostic excluded from hot performance windows; existing C3 failed attempts and unreadable FD sampling slot remain documented"
-  ]
+  "preserved": [
+    "C2/C3 frozen shared headers and runtime pins",
+    "original two blocked attempts and failed60FPS baseline",
+    "all full1080 source frames must actually Evaluate/resolve",
+    "hot NOT_CHECKED pixels not promoted to full validation"
+  ],
+  "limits": [
+    "new runtime/performance NOT_RUN",
+    "sleep1 requested interval is not measured wake guarantee",
+    "peer/input/consumed waits overlap producer/consumer work; do not add durations across processes"
+  ],
+  "GPU_executed_by_A": false
 }

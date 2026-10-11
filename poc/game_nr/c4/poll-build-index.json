@@ -1,0 +1,38 @@
+{
+  "status": "PASS",
+  "exit_code": 0,
+  "artifact": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/c4/out/wine_game_nr_hot.exe",
+  "artifact_sha256": "6d0039a3548d6378444db107a22f18d2a4d3a60803f4e3cdc7570497c6a13df5",
+  "artifact_bytes": 1148928,
+  "sources": {
+    "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/c4/wine_game_nr_hot.cpp": "8533017eb3351db8c51b85ad6749b43463b5cc7e9e66c5fa440a46357eb3ceed",
+    "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/c4/c4_production_adapter.h": "2642905752af7ae4fa6b2516c957cb42a74c7f6c0eab1038e4e8f3e3f5952366",
+    "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/c4/gpu_validation.h": "86f004560d44e7785f2c2e583e1eb6164444333f2b7b4a597876630de399f118",
+    "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/c4/validate_frame.comp": "a0d9cd5621b4991337598dc83c9d578f099ff073d8edf618c02599141b970d7d",
+    "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/c4/build_c4.py": "c81bc435eb3e200fac2d0ccbae1a63df1f6603f32e017b1eb9fa1d5987b0f64f"
+  },
+  "generated": {
+    "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/c4/out/validate_frame.spv": "e251ca43d1e7b8a6afa7904bc5f87fa8933a2a3a94bf68156adfd0ba3dc70684",
+    "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/c4/out/validate_spv.h": "ce7e61c607aa73453ff9e88777dc7ecf5a2fe891b0ff1c4b8f5e07530adfe5c1"
+  },
+  "build_tools": {
+    "/usr/bin/glslangValidator": "91e9980c4120008bb319b052e9194bc5a5d09b2a0a34a47c79676ad589ac4fc0",
+    "/usr/bin/spirv-val": "92d62dbae134b979c5a1781675d584cb9c4e13106ff9ac0b67a1203a1325a354",
+    "/home/arinp/Code/dlss5_linux/build/toolchain/llvm-mingw-20261006-ucrt-ubuntu-22.04-x86_64/bin/x86_64-w64-mingw32-clang++": "c9b86311ade81d53235c93fafabdf98328d094de344ea9a9038e0dab6695ee9f"
+  },
+  "contract": "/home/arinp/Code/nrbridge-design/game-poc-20261011/integration/C4-CONTRACT.md",
+  "contract_sha256": "18af8d771d22577e5b7806ed36213762a61bdb3db1b38d49324955e57fb8e0f6",
+  "additive_revision": "/home/arinp/Code/nrbridge-design/game-poc-20261011/integration/C4-POLL-REVISION.md",
+  "additive_revision_sha256": "5b71aeb2d8007c8c284a202d3e026d28719e852c5f4789592d6c565d6f7d311f",
+  "git_head": "e2d75645c13f6b456a73f35a74b8a4ce8aa98e19",
+  "git_branch": "poc/game-nr-20261011",
+  "sources_pre_post_equal": true,
+  "runtime": "NOT_RUN",
+  "build_manifest": {
+    "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/c4/out/build.json",
+    "sha256": "10d341e30be75b5f78b1762fc28a6316bc0b05087df63f3636a48f54a08e538a"
+  },
+  "build_history": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/c4/out/build-history/20261011T144120.287256Z",
+  "unchanged_GPU_vs_initial": true,
+  "GPU_executed_by_A": false
+}

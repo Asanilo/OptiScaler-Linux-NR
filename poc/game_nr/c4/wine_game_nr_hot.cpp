@@ -60,6 +60,24 @@ struct GameNrHelper:C2Transport {
   atomic_text(dir+"\\"+name(file,f,numbered),envelope(f,op,status,valid).dump()+"\n");
  }
  Json read_control(const std::string&filename){return parse_control(read_bounded(dir,filename,control_timeout_ms));}
+ struct ActiveControlTiming {uint64_t poll_count=0,sleep_calls=0;double sleep_wall_ms=0,elapsed_ms=0;};
+ ActiveControlTiming input_poll{},consumed_poll{};
+ Json read_active_control(const std::string&filename,ActiveControlTiming&timing){
+  // C4 frame input/consumed only. Frozen setup/shared-header reader stays at Sleep(5).
+  timing={};const auto start_tick=GetTickCount64();const auto start_cpu=cpu_now_ms();
+  while(GetTickCount64()-start_tick<control_timeout_ms){
+   if(GetFileAttributesA((dir+"\\native.abort").c_str())!=INVALID_FILE_ATTRIBUTES)throw Stop(3,"native abort/quarantine; no normal release");
+   ++timing.poll_count;FILE*f=fopen((dir+"\\"+filename).c_str(),"rb");
+   if(f){
+    std::string text;char b[4096];size_t n;
+    while((n=fread(b,1,sizeof b,f))){text.append(b,n);if(text.size()>65536){fclose(f);throw Stop(2,"control exceeds bounded bytes");}}
+    const bool ok=!ferror(f);fclose(f);require(ok,"read control");
+    auto j=parse_control(text);timing.elapsed_ms=cpu_now_ms()-start_cpu;return j;
+   }
+   ++timing.sleep_calls;const auto sleep_start=cpu_now_ms();Sleep(1);timing.sleep_wall_ms+=cpu_now_ms()-sleep_start;
+  }
+  throw Stop(3,"bounded control timeout "+filename+"; hold resources/no normal release");
+ }
  void validate_tuple(const Json&j,uint64_t f,const char*op,const char*status,bool match_source=true){
   require(uint_value(j,"protocol_version")==4&&string_value(j,"execution_mode")==execution_mode,"C4 protocol/execution_mode mismatch; C3 peers rejected",3);
   require(string_value(j,"session")==session&&uint_value(j,"generation")==0&&uint_value(j,"frame")==f&&string_value(j,"resource_set")==resource_set(),"C4 exact session/generation/frame/resource_set mismatch",3);
@@ -116,7 +134,7 @@ struct GameNrHelper:C2Transport {
   wait_control(0,"imported","imported","IMPORTED",false);retire_fds();auto fd=envelope(0,"fd_retired","FD_RETIRED");fd["closed_fd"]=Json::parse(closed_fds);atomic_text(dir+"\\"+name("fd-retired",0,false),fd.dump()+"\n");
  }
  void input(){
-  const auto control_start=cpu_now_ms();auto j=read_control(name("input",frame_index));control_input_read_ms=cpu_now_ms()-control_start;validate_tuple(j,frame_index,"input","INPUT_READY",false);
+  const auto control_start=cpu_now_ms();auto j=read_active_control(name("input",frame_index),input_poll);control_input_read_ms=cpu_now_ms()-control_start;validate_tuple(j,frame_index,"input","INPUT_READY",false);
   prev_source_game_frame=source_game_frame;source_game_frame=uint_value(j,"source_game_frame");require(source_game_frame>prev_source_game_frame,"C4 duplicate/backwards source frame rejected",3);
   const bool source_reset=bool_value(j,"source_reset");nr_reset=(frame_index==0||source_reset||source_game_frame!=prev_source_game_frame+1)?1u:0u;
   reset_reason=frame_index==0?"first":source_reset?"sr_reset":source_game_frame!=prev_source_game_frame+1?"source_gap":"continuous";
@@ -230,7 +248,7 @@ struct GameNrHelper:C2Transport {
   printf("C4_DIAGNOSTIC_CHECK frame=%u raw_finite=%u raw_written=%u out_finite=%u out_written=%u alpha_equal=%u visited=%u GPU_complete=1 audit_kind=full\n",frame_index,stats[0],stats[1],stats[2],stats[3],stats[6],stats[11]);
   }
   e["cpu_stats_readback_ms"]=diagnostic?Json(cpu_now_ms()-cpu_stats_start):Json(nullptr);
-  e["evaluate_cpu_call_ms"]=evaluate_cpu_ms;e["gpu_fence_wait_ms"]=gpu_wait_ms;e["gpu_submit_and_wait_ms"]=submit_and_wait_ms;e["control_input_read_ms"]=control_input_read_ms;e["cpu_timing_clock"]="QueryPerformanceCounter monotonic wall clock";
+  e["evaluate_cpu_call_ms"]=evaluate_cpu_ms;e["gpu_fence_wait_ms"]=gpu_wait_ms;e["gpu_submit_and_wait_ms"]=submit_and_wait_ms;e["control_input_read_ms"]=control_input_read_ms;e["control_input_poll_count"]=input_poll.poll_count;e["control_input_sleep_calls"]=input_poll.sleep_calls;e["control_input_poll_interval_ms"]=1;e["control_input_sleep_wall_ms"]=input_poll.sleep_wall_ms;e["control_input_wait_scope"]="active input file wait/read/parse includes producer idle/work; not GPU-only or isolated IPC delay";e["cpu_timing_clock"]="QueryPerformanceCounter monotonic wall clock";
   e["gpu_timestamps"]=gpu_times();e["query_readback_bytes"]=timestamps?query_count*16u:0u;
   e["sentinel"]=-1234;e["nr_exposure"]=1;e["nr_pre_exposure"]=1;e["frame_elapsed_ms"]=cpu_now_ms()-frame_start;e["frame_elapsed_clock"]="QueryPerformanceCounter";e["frame_elapsed_scope"]="input accepted through completion record snapshot; excludes input wait, complete publication and consumed wait";
   e["helper_pixel_readback_bytes"]=diagnostic?82944000u:0u;e["audit_readback_bytes"]=diagnostic?82944064u:0u;e["gpu_validator_readback_bytes"]=diagnostic?64u:0u;
@@ -238,8 +256,8 @@ struct GameNrHelper:C2Transport {
   printf("C4_FRAME_COMPLETE frame=%u actual_Evaluate=%u result=%d actual_resolve=%u GPU_complete=1 execution_mode=%s validation_profile=%s pixel_readback_bytes=%u acceptance_scope=%s\n",frame_index,negative?0u:1u,er,negative?0u:1u,execution_mode.c_str(),validation_profile(),diagnostic?82944000u:0u,diagnostic?"full_diagnostic":"API_GPU_tuple_only");
   const auto publish_start=cpu_now_ms();
   atomic_text(dir+"\\"+name("complete",frame_index),e.dump()+"\n");const auto publish_ms=cpu_now_ms()-publish_start;
-  const auto consumed_start=cpu_now_ms();wait_control(frame_index,"consumed","consumed","CONSUMED");
-  printf("CONTROL_TIMING frame=%u input_read_ms=%.6f complete_publish_ms=%.6f consumed_wait_ms=%.6f cpu_clock=QueryPerformanceCounter publication_scope=JSON_serialize_and_atomic_write\n",frame_index,control_input_read_ms,publish_ms,cpu_now_ms()-consumed_start);++frames_done;
+  const auto consumed_start=cpu_now_ms();validate_tuple(read_active_control(name("consumed",frame_index),consumed_poll),frame_index,"consumed","CONSUMED");
+  printf("CONTROL_TIMING frame=%u input_read_ms=%.6f complete_publish_ms=%.6f consumed_wait_ms=%.6f cpu_clock=QueryPerformanceCounter publication_scope=JSON_serialize_and_atomic_write active_poll_interval_ms=1 input_poll_count=%llu input_sleep_calls=%llu input_sleep_wall_ms=%.6f consumed_poll_count=%llu consumed_sleep_calls=%llu consumed_sleep_wall_ms=%.6f control_wait_scope=producer_or_consumer_work_plus_file_poll_read_parse\n",frame_index,control_input_read_ms,publish_ms,cpu_now_ms()-consumed_start,(unsigned long long)input_poll.poll_count,(unsigned long long)input_poll.sleep_calls,input_poll.sleep_wall_ms,(unsigned long long)consumed_poll.poll_count,(unsigned long long)consumed_poll.sleep_calls,consumed_poll.sleep_wall_ms);++frames_done;
  }
  void retire_shared(){
   wait_control(frame_count,"native-released","release","NATIVE_RELEASED",false);require(!in_flight&&nr&&nr->safe,"shared retirement requires actual GPU completion");
