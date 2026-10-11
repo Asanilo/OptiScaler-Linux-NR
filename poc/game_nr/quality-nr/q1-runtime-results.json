@@ -1,0 +1,1713 @@
+{
+  "schema_version": 1,
+  "scope": "Q1 actual normal DLSS Quality HDR/jitter1 Wine Vulkan NR-only initial diagnostic gates; text archive only",
+  "status": "PASS_Q1_INITIAL_DIAGNOSTIC_GATES",
+  "archived_at_utc": "2026-10-11T18:07:56.154452+00:00",
+  "branch": "poc/game-nr-20261011",
+  "archive_parent_commit": "da6a50a4237cf5147d441844185793b797bf9b9d",
+  "compile": {
+    "status": "PASS_BUILD_ONLY",
+    "original_build_manifest": {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/quality-nr/out/build.json",
+      "bytes": 90737,
+      "sha256": "20dc61593a4f801262d0f618abdcfd323dd06e98570f7db0645dca0ecf793257"
+    },
+    "helper_artifact": {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/quality-nr/out/wine_game_nr_quality.exe",
+      "bytes": 1199104,
+      "sha256": "4d770cf04bd04ac5ad99bd5ccbd7fd5abafcc5f27e1d4b0ec580aa787ae8db14"
+    },
+    "original_steps": [
+      {
+        "name": "routing-compile",
+        "command": [
+          "/usr/bin/c++",
+          "-std=c++17",
+          "-O2",
+          "-Wall",
+          "-Wextra",
+          "-Werror",
+          "-I/home/arinp/Code/dlss5_linux/OptiScaler-Linux-NR/external/nlohmann",
+          "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/quality-nr/path_check.cpp",
+          "-o",
+          "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/quality-nr/out/path_check"
+        ],
+        "exit_code": 0,
+        "log": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/quality-nr/out/build-history/20261011T171729.175725Z/routing-compile.log"
+      },
+      {
+        "name": "native-CPU-routing",
+        "command": [
+          "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/quality-nr/out/path_check",
+          "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/quality-nr/out/build-history/20261011T171729.175725Z/synthetic-routing"
+        ],
+        "exit_code": 0,
+        "log": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/quality-nr/out/build-history/20261011T171729.175725Z/native-CPU-routing.log"
+      },
+      {
+        "name": "wire-compile",
+        "command": [
+          "/usr/bin/c++",
+          "-std=c++17",
+          "-O2",
+          "-Wall",
+          "-Wextra",
+          "-Werror",
+          "-I/home/arinp/Code/dlss5_linux/OptiScaler-Linux-NR/external/nlohmann",
+          "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/quality-nr/wire_check.cpp",
+          "-o",
+          "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/quality-nr/out/wire_check"
+        ],
+        "exit_code": 0,
+        "log": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/quality-nr/out/build-history/20261011T171729.175725Z/wire-compile.log"
+      },
+      {
+        "name": "native-CPU-wire",
+        "command": [
+          "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/quality-nr/out/wire_check"
+        ],
+        "exit_code": 0,
+        "log": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/quality-nr/out/build-history/20261011T171729.175725Z/native-CPU-wire.log"
+      },
+      {
+        "name": "glsl-compile",
+        "command": [
+          "/usr/bin/glslangValidator",
+          "-V",
+          "--target-env",
+          "vulkan1.2",
+          "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/quality-nr/validate_frame.comp",
+          "-o",
+          "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/quality-nr/out/validate_frame.spv"
+        ],
+        "exit_code": 0,
+        "log": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/quality-nr/out/build-history/20261011T171729.175725Z/glsl-compile.log"
+      },
+      {
+        "name": "spirv-validation",
+        "command": [
+          "/usr/bin/spirv-val",
+          "--target-env",
+          "vulkan1.2",
+          "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/quality-nr/out/validate_frame.spv"
+        ],
+        "exit_code": 0,
+        "log": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/quality-nr/out/build-history/20261011T171729.175725Z/spirv-validation.log"
+      },
+      {
+        "name": "helper-compile",
+        "command": [
+          "/home/arinp/Code/dlss5_linux/build/toolchain/llvm-mingw-20261006-ucrt-ubuntu-22.04-x86_64/bin/x86_64-w64-mingw32-clang++",
+          "-std=c++17",
+          "-static",
+          "-O1",
+          "-Wall",
+          "-Wextra",
+          "-Wno-missing-field-initializers",
+          "-Wno-unused-function",
+          "-I/home/arinp/Code/bloodborne_pc/out/deps/root/usr/include",
+          "-I/home/arinp/Code/dlss5_linux/OptiScaler-Linux-NR/build_out/nr-runtime-poc-20261010/external/nvngx_dlss_sdk",
+          "-I/home/arinp/Code/dlss5_linux/OptiScaler-Linux-NR/external/nlohmann",
+          "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/quality-nr/wine_game_nr_quality.cpp",
+          "-o",
+          "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/quality-nr/out/wine_game_nr_quality.exe"
+        ],
+        "exit_code": 0,
+        "log": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/quality-nr/out/build-history/20261011T171729.175725Z/helper-compile.log"
+      }
+    ],
+    "new_build_in_this_archive_turn": false,
+    "source_inputs_preserved": {
+      "README.md": {
+        "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/quality-nr/README.md",
+        "bytes": 4107,
+        "sha256": "0bd95a77cd3caebe0d984b29eb23260feac2f96bdfafdb837e7c4ddc6ec10038"
+      },
+      "build_quality.py": {
+        "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/quality-nr/build_quality.py",
+        "bytes": 7138,
+        "sha256": "c653a71b0ce3abef1d206d86642b4023a53ea48a794d1666bf2de0bd4d91a05b"
+      },
+      "cross-review-final.json": {
+        "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/quality-nr/cross-review-final.json",
+        "bytes": 5808,
+        "sha256": "dbcde15914688d1b1c007c84b54e0fbadd61887c8e7f0d1b970da6828aa89527"
+      },
+      "frame_paths.h": {
+        "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/quality-nr/frame_paths.h",
+        "bytes": 1698,
+        "sha256": "c6db4e35e07d305afcb82c1c93f5277e81c3f2bd4cc0c9d3018305bd5c26c994"
+      },
+      "gpu_validation.h": {
+        "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/quality-nr/gpu_validation.h",
+        "bytes": 5556,
+        "sha256": "86f004560d44e7785f2c2e583e1eb6164444333f2b7b4a597876630de399f118"
+      },
+      "path_check.cpp": {
+        "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/quality-nr/path_check.cpp",
+        "bytes": 5583,
+        "sha256": "45be0ea2f032e01dd92eb8d5a343c1f33db0b95cfa4203643f842ca918950fd1"
+      },
+      "quality_game_control.h": {
+        "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/quality-nr/quality_game_control.h",
+        "bytes": 2266,
+        "sha256": "925a07404accc016961b6d4bfcf4691fefd227d95f08df4bc0a877450b96dd9e"
+      },
+      "quality_game_transport.h": {
+        "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/quality-nr/quality_game_transport.h",
+        "bytes": 13934,
+        "sha256": "cc3de147285aca779888c5eb66d1ecbf9aec3c508a2e089df8b39dd5ab37f796"
+      },
+      "quality_production_adapter.h": {
+        "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/quality-nr/quality_production_adapter.h",
+        "bytes": 19574,
+        "sha256": "1bf194a4f37202e50398b3eb394d37afc95cc01bc43a2195046522271e3c0ae5"
+      },
+      "quality_wire.h": {
+        "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/quality-nr/quality_wire.h",
+        "bytes": 2433,
+        "sha256": "6f094abc35e3c1a700e777a650cea44e124b3403dc6f338670bb914d9637d756"
+      },
+      "results.json": {
+        "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/quality-nr/results.json",
+        "bytes": 29532,
+        "sha256": "bcd9ec66a1469d46c4e71c2a8c503433f562b35de33e8b7f6626f183c08da743"
+      },
+      "validate_frame.comp": {
+        "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/quality-nr/validate_frame.comp",
+        "bytes": 1981,
+        "sha256": "a0d9cd5621b4991337598dc83c9d578f099ff073d8edf618c02599141b970d7d"
+      },
+      "wine_game_nr_quality.cpp": {
+        "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/quality-nr/wine_game_nr_quality.cpp",
+        "bytes": 56819,
+        "sha256": "9dd35c7c764035ab4d391bb6b61a556f88b63cd6735f45b173b186f0f3334a45"
+      },
+      "wire_check.cpp": {
+        "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/quality-nr/wire_check.cpp",
+        "bytes": 2563,
+        "sha256": "fcba3483a503cd258c6c9a7a12e2fa0286b3ee87bfbcdad47aecd350422be39e"
+      }
+    }
+  },
+  "runtime": {
+    "model_runtime_identity": {
+      "path": "/home/arinp/Code/dlss5_linux/dll/runtime/nvngx_dlssnr.dll",
+      "bytes": 165830144,
+      "sha256": "6eb209e764f39872625debd6abaf45e2bb6322f6f270f781f70c059ae30b3927"
+    },
+    "contract": {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/integration/QUALITY-NR-CONTRACT.md",
+      "bytes": 20545,
+      "sha256": "482a5bccba778445efbcc2023e07a998e545fcd66c54ecb72d98c2514b9af7b0"
+    },
+    "profile_id": "quality-hdr-direct720-raw-renderpx-v1",
+    "protocol_version": 5,
+    "transport_layout": "frame-buckets-64-v1",
+    "cases": [
+      {
+        "id": "noop_entry_blocked",
+        "status": "BLOCKED",
+        "case_path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-20261012",
+        "invocation_path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/runs/quality-nr-20261011T172822.934152Z",
+        "root_acceptance_status": "BLOCKED_BEFORE_Q1_HELPER",
+        "root_acceptance": {
+          "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-20261012/root-acceptance.json",
+          "bytes": 2918,
+          "sha256": "e0bd801e8d1e7779c311ef2e44dc39a24f85d535fefdf55d3f4a1d34ca9813b0"
+        },
+        "outer_result": {
+          "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/runs/quality-nr-20261011T172822.934152Z/result.json",
+          "bytes": 1801,
+          "sha256": "b51e39126e18c8fd4de034688baabfebba638e305ac31e484a8503468bd5d48c"
+        },
+        "actual_outer_exit_code": 0,
+        "outer_end_reason": "CONTROLLED_STOP",
+        "outer_elapsed_seconds": 201.26248147099977,
+        "cleanup_group_empty": true,
+        "cleanup_private_prefix_empty": true,
+        "frames": [],
+        "model_execution": "NOT_RUN",
+        "shared_transport": "NOT_RUN",
+        "helper_started": false,
+        "failure_status_preserved": "BLOCKED_BEFORE_Q1_HELPER",
+        "cause": "q1_profile tests camera_motion.RenderSize() (guest camera dimensions) against reduced w/h; Q0 actual evidence guest1920x1080 while motion1280x720; awaiting peer confirmation"
+      },
+      {
+        "id": "noop",
+        "status": "PASS",
+        "case_path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012",
+        "invocation_path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/runs/quality-nr-20261011T173450.340959Z",
+        "root_acceptance_status": "PASS_Q1_NOOP_TRANSPORT_PRESENT_LIFECYCLE",
+        "root_acceptance": {
+          "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012/root-acceptance.json",
+          "bytes": 2136,
+          "sha256": "4960b8a21da2d15fe53e386afc007e494c40d8271ba017825c15a55bc324f58c"
+        },
+        "outer_result": {
+          "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/runs/quality-nr-20261011T173450.340959Z/result.json",
+          "bytes": 1809,
+          "sha256": "b2292af1efa304619ccb4d8051d94c9e81ed329e0d33cf2c9f4e3573be25ca34"
+        },
+        "actual_outer_exit_code": 0,
+        "outer_end_reason": "CONTROLLED_STOP",
+        "outer_elapsed_seconds": 199.56231462399592,
+        "cleanup_group_empty": true,
+        "cleanup_private_prefix_empty": true,
+        "frames": [
+          {
+            "frame": 0,
+            "source_game_frame": 11769,
+            "prev_source_game_frame": 0,
+            "reset": 1,
+            "nr_reset": 1,
+            "reset_reason": "first",
+            "evaluate_calls": 0,
+            "evaluate_calls_total": 0,
+            "evaluate_result": 0,
+            "resolve_calls": 0,
+            "resolve_calls_total": 0,
+            "copy_calls": 1,
+            "completed_GPU": true,
+            "status": "NOOP_VALID",
+            "output_valid": true,
+            "model_valid": false,
+            "input_digest": "9f95a60b4ba22e64",
+            "input_digest_algorithm": "fnv1a64_rgba32f_bytes",
+            "input_digest_bytes": 33177600,
+            "output_digest": "9f95a60b4ba22e64",
+            "output_digest_algorithm": "fnv1a64_rgba32f_bytes",
+            "output_digest_bytes": 33177600,
+            "guide_validation": {
+              "depth": {
+                "algorithm": "fnv1a64_r32f_bytes",
+                "bytes": 3686400,
+                "device_z_in_0_1": 921600,
+                "digest": "e7c7c3f3c4172f89",
+                "finite": 921600,
+                "samples": 921600,
+                "source_digest_match": true
+              },
+              "mv": {
+                "algorithm": "fnv1a64_rg32f_bytes",
+                "bytes": 7372800,
+                "components": 1843200,
+                "digest": "dc516b63b443789e",
+                "finite": 1843200,
+                "source_digest_match": true
+              },
+              "scope": "same_texel_transport_only_NR_phase_UNVERIFIED"
+            },
+            "resolved_rgba_finite": 8294400,
+            "resolved_rgba_written": 8294400,
+            "output_sentinel_count": 0,
+            "source_alpha_preserved": 2073600,
+            "source_alpha_total": 2073600,
+            "frame_elapsed_ms": 15530.9076000005,
+            "frame_elapsed_clock": "QueryPerformanceCounter",
+            "frame_elapsed_scope": "input accepted through completion snapshot; excludes publication and consumed wait",
+            "cpu_stats_readback_ms": 15524.21859999746,
+            "gpu_fence_wait_ms": 6.222399994730949,
+            "gpu_submit_and_wait_ms": 6.354000002145767,
+            "gpu_timestamps": {
+              "acquire_poison_ms": null,
+              "available": false,
+              "encode_ms": null,
+              "evaluate_commands_ms": null,
+              "query_count": 0,
+              "query_readback_bytes": 0,
+              "readbacks_ms": null,
+              "release_ms": null,
+              "resolve_ms": null,
+              "scope": "same Helper queue durations; Evaluate recorded commands include dependencies/scheduling, not pure model benchmark",
+              "status": "NOT_AVAILABLE",
+              "timestamp_period_ns": 1.0,
+              "timestamp_valid_bits": 64,
+              "total_ms": null,
+              "validation_ms": null,
+              "wait_bit": false,
+              "wrap_handling": "unsigned delta masked to timestampValidBits"
+            },
+            "actual_jitter": {
+              "viewport_jitter_x": 0.4375,
+              "viewport_jitter_y": -0.24074074625968933,
+              "previous_viewport_jitter_x": -0.0625,
+              "previous_viewport_jitter_y": 0.31481480598449707,
+              "sr_jitter_x": 0.4375,
+              "sr_jitter_y": -0.24074074625968933,
+              "previous_sr_jitter_x": -0.0625,
+              "previous_sr_jitter_y": 0.31481480598449707
+            },
+            "SR_history": {
+              "source_reset": false,
+              "sr_initial_reset_observed": true,
+              "sr_initial_source_game_frame": 6982,
+              "sr_history_jitter_enabled_from_start": true
+            },
+            "native_status": "ACCEPTED",
+            "selected_output": true,
+            "complete_evidence": {
+              "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012/frames/bucket-000000/complete-q1-noop-gatefix-20261012-g0-f0.json",
+              "bytes": 5547,
+              "sha256": "63bc936a85eadd198b60805d796728049f7fbcca5a2754719b38c2646bb32aea"
+            },
+            "native_evidence": {
+              "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012/frames/bucket-000000/native-frame-q1-noop-gatefix-20261012-g0-f0.json",
+              "bytes": 4626,
+              "sha256": "facf98985cff65771f95e6e88d3d51eefeb10d20a6cdfec36130606441bd8d75"
+            },
+            "independent_numeric_scope": "original Depth bits and independent IEEE half MV decode vs both converted endpoints; raw/source/output/guide bytes and numeric gates; NR outputs not required equal inputs",
+            "output_readback": {
+              "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012/frames/bucket-000000/resolve-f0.rgba32f",
+              "bytes": 33177600,
+              "sha256": "b3c85af877269d20709626dea0bd43c36e5277d2540f7560cdd7cade69573509"
+            }
+          }
+        ],
+        "A_independent_readback_audit": "PASS",
+        "B_independent_review": "PASS",
+        "root_pixel_status": "PASS_READBACK_ONLY",
+        "root_present_status": "PASS_PRESENT_LEDGER_ONLY",
+        "actual_helper_wait_status": 0,
+        "actual_helper_normal_exit": true,
+        "helper_model_init": false,
+        "feature_created": false,
+        "Evaluate_total": 0,
+        "resolve_total": 0,
+        "copy_total": 1,
+        "model_execution": "NOT_RUN",
+        "negative_rejection": "NOT_APPLICABLE",
+        "FD_retirement": {
+          "wine_counts": [
+            72,
+            72
+          ],
+          "native_counts": [
+            136,
+            136
+          ],
+          "all_snapshots_readable": true,
+          "wine_full_inventory_equal": true,
+          "native_full_inventory_equal": true,
+          "raw_payload_remaining": 0,
+          "raw_payloads": [
+            {
+              "role": "color",
+              "device": 12,
+              "fd": 67,
+              "inode": 12396,
+              "stat_ok": true,
+              "target": "/dmabuf:"
+            },
+            {
+              "role": "depth",
+              "device": 12,
+              "fd": 68,
+              "inode": 12397,
+              "stat_ok": true,
+              "target": "/dmabuf:"
+            },
+            {
+              "role": "mv",
+              "device": 12,
+              "fd": 69,
+              "inode": 12398,
+              "stat_ok": true,
+              "target": "/dmabuf:"
+            },
+            {
+              "role": "output",
+              "device": 12,
+              "fd": 70,
+              "inode": 12399,
+              "stat_ok": true,
+              "target": "/dmabuf:"
+            }
+          ]
+        },
+        "actual_present_count": 1,
+        "selected_NR_present_count": 0,
+        "selected_shared_return_present_count": 1,
+        "presentation": [
+          {
+            "frame": 0,
+            "source_game_frame": 11769,
+            "selected_output": true,
+            "merge_tick": 23544,
+            "prepare_tick": 23544,
+            "ready_tick": 23544,
+            "present_frame": 11770,
+            "present_submit_tick": 11812,
+            "separate_scheduler_ticks_not_compared": true,
+            "lines": {
+              "merge": 5876,
+              "bound": 5879,
+              "prepared": 5882,
+              "submitted": 5892
+            },
+            "dump": {
+              "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012/dump/f002_present_1920x1080_bgra.raw",
+              "sha256": "da72837f9f8bf56788ab2ac616519be957abd5a19d6bc12ff7af7973344b2793",
+              "bytes": 8294400,
+              "line": 5905
+            }
+          }
+        ],
+        "visual_scope": "Root inspected actual Clinic/HUD screenshots; A independently checked ledger and dump identities, not quality"
+      },
+      {
+        "id": "single",
+        "status": "PASS",
+        "case_path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012",
+        "invocation_path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/runs/quality-nr-20261011T174022.744666Z",
+        "root_acceptance_status": "PASS_Q1_SINGLE_MODEL_TRANSPORT_PRESENT_LIFECYCLE",
+        "root_acceptance": {
+          "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012/root-acceptance.json",
+          "bytes": 2387,
+          "sha256": "9a59e3922f5fd5f73bfd9d8ebaa2038232b14cdc6017df4e84edce5541bf0084"
+        },
+        "outer_result": {
+          "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/runs/quality-nr-20261011T174022.744666Z/result.json",
+          "bytes": 1807,
+          "sha256": "8fe13489370b3e25970786122b453e25a0b09d8dd372bc5bf2f9682275f3e285"
+        },
+        "actual_outer_exit_code": 0,
+        "outer_end_reason": "CONTROLLED_STOP",
+        "outer_elapsed_seconds": 319.85477847600123,
+        "cleanup_group_empty": true,
+        "cleanup_private_prefix_empty": true,
+        "frames": [
+          {
+            "frame": 0,
+            "source_game_frame": 8684,
+            "prev_source_game_frame": 0,
+            "reset": 1,
+            "nr_reset": 1,
+            "reset_reason": "first",
+            "evaluate_calls": 1,
+            "evaluate_calls_total": 1,
+            "evaluate_result": 1,
+            "resolve_calls": 1,
+            "resolve_calls_total": 1,
+            "copy_calls": 0,
+            "completed_GPU": true,
+            "status": "OUTPUT_VALID",
+            "output_valid": true,
+            "model_valid": true,
+            "input_digest": "ef55fb949a8ceeed",
+            "input_digest_algorithm": "fnv1a64_rgba32f_bytes",
+            "input_digest_bytes": 33177600,
+            "output_digest": "d0401659b936d2f4",
+            "output_digest_algorithm": "fnv1a64_rgba32f_bytes",
+            "output_digest_bytes": 33177600,
+            "guide_validation": {
+              "depth": {
+                "algorithm": "fnv1a64_r32f_bytes",
+                "bytes": 3686400,
+                "device_z_in_0_1": 921600,
+                "digest": "03adc51c109470c9",
+                "finite": 921600,
+                "samples": 921600,
+                "source_digest_match": true
+              },
+              "mv": {
+                "algorithm": "fnv1a64_rg32f_bytes",
+                "bytes": 7372800,
+                "components": 1843200,
+                "digest": "7891b136496e3f0c",
+                "finite": 1843200,
+                "source_digest_match": true
+              },
+              "scope": "same_texel_transport_only_NR_phase_UNVERIFIED"
+            },
+            "raw_rgb_finite": 6220800,
+            "raw_rgb_written": 6220800,
+            "raw_rgb_nan": 0,
+            "resolved_rgba_finite": 8294400,
+            "resolved_rgba_written": 8294400,
+            "output_sentinel_count": 0,
+            "source_alpha_preserved": 2073600,
+            "source_alpha_total": 2073600,
+            "frame_elapsed_ms": 15614.869099996984,
+            "frame_elapsed_clock": "QueryPerformanceCounter",
+            "frame_elapsed_scope": "input accepted through completion snapshot; excludes publication and consumed wait",
+            "cpu_stats_readback_ms": 15558.111800000072,
+            "gpu_fence_wait_ms": 54.76690000295639,
+            "gpu_submit_and_wait_ms": 54.9054000005126,
+            "gpu_timestamps": {
+              "acquire_poison_ms": 0.052192,
+              "available": true,
+              "encode_ms": 0.376832,
+              "evaluate_commands_ms": 13.027904,
+              "query_availability": [
+                true,
+                true,
+                true,
+                true,
+                true,
+                true,
+                true,
+                true
+              ],
+              "query_count": 8,
+              "query_readback_bytes": 128,
+              "readbacks_ms": 7.011776,
+              "release_ms": 0.01392,
+              "resolve_ms": 0.458976,
+              "scope": "same Helper queue durations; Evaluate recorded commands include dependencies/scheduling, not pure model benchmark",
+              "status": "AVAILABLE",
+              "timestamp_period_ns": 1.0,
+              "timestamp_valid_bits": 64,
+              "total_ms": 54.658624,
+              "validation_ms": 33.717024,
+              "vk_result": 0,
+              "wait_bit": false,
+              "wrap_handling": "unsigned delta masked to timestampValidBits"
+            },
+            "actual_jitter": {
+              "viewport_jitter_x": -0.4375,
+              "viewport_jitter_y": 0.3888888955116272,
+              "previous_viewport_jitter_x": 0.375,
+              "previous_viewport_jitter_y": 0.05555558204650879,
+              "sr_jitter_x": -0.4375,
+              "sr_jitter_y": 0.3888888955116272,
+              "previous_sr_jitter_x": 0.375,
+              "previous_sr_jitter_y": 0.05555558204650879
+            },
+            "SR_history": {
+              "source_reset": false,
+              "sr_initial_reset_observed": true,
+              "sr_initial_source_game_frame": 8261,
+              "sr_history_jitter_enabled_from_start": true
+            },
+            "native_status": "ACCEPTED",
+            "selected_output": true,
+            "complete_evidence": {
+              "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012/frames/bucket-000000/complete-q1-single-20261012-g0-f0.json",
+              "bytes": 5732,
+              "sha256": "0605cf1ef3067cfc7830b13d4290154326522ea6b7bed88facbbd03821bff6b2"
+            },
+            "native_evidence": {
+              "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012/frames/bucket-000000/native-frame-q1-single-20261012-g0-f0.json",
+              "bytes": 4614,
+              "sha256": "8742c0292d5579963a7c8f43327d14c5379c5e69fd557316f6f2ca72280d7896"
+            },
+            "independent_numeric_scope": "original Depth bits and independent IEEE half MV decode vs both converted endpoints; raw/source/output/guide bytes and numeric gates; NR outputs not required equal inputs",
+            "output_readback": {
+              "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012/frames/bucket-000000/resolve-f0.rgba32f",
+              "bytes": 33177600,
+              "sha256": "66250c9a02f893786fc805df44b57dbaa026264185dc81845c0aa8cb8763b6a9"
+            }
+          }
+        ],
+        "A_independent_readback_audit": "PASS",
+        "B_independent_review": "PASS",
+        "root_pixel_status": "PASS_READBACK_ONLY",
+        "root_present_status": "PASS_PRESENT_LEDGER_ONLY",
+        "actual_helper_wait_status": 0,
+        "actual_helper_normal_exit": true,
+        "helper_model_init": true,
+        "feature_created": true,
+        "Evaluate_total": 1,
+        "resolve_total": 1,
+        "copy_total": 0,
+        "model_execution": "PASS_API_GPU_POISON_FINITE",
+        "negative_rejection": "NOT_APPLICABLE",
+        "FD_retirement": {
+          "wine_counts": [
+            83,
+            83
+          ],
+          "native_counts": [
+            136,
+            136
+          ],
+          "all_snapshots_readable": true,
+          "wine_full_inventory_equal": true,
+          "native_full_inventory_equal": true,
+          "raw_payload_remaining": 0,
+          "raw_payloads": [
+            {
+              "role": "color",
+              "device": 12,
+              "fd": 80,
+              "inode": 12429,
+              "stat_ok": true,
+              "target": "/dmabuf:"
+            },
+            {
+              "role": "depth",
+              "device": 12,
+              "fd": 81,
+              "inode": 12430,
+              "stat_ok": true,
+              "target": "/dmabuf:"
+            },
+            {
+              "role": "mv",
+              "device": 12,
+              "fd": 82,
+              "inode": 12431,
+              "stat_ok": true,
+              "target": "/dmabuf:"
+            },
+            {
+              "role": "output",
+              "device": 12,
+              "fd": 83,
+              "inode": 12432,
+              "stat_ok": true,
+              "target": "/dmabuf:"
+            }
+          ]
+        },
+        "actual_present_count": 1,
+        "selected_NR_present_count": 1,
+        "selected_shared_return_present_count": 1,
+        "presentation": [
+          {
+            "frame": 0,
+            "source_game_frame": 8684,
+            "selected_output": true,
+            "merge_tick": 17374,
+            "prepare_tick": 17374,
+            "ready_tick": 17374,
+            "present_frame": 8685,
+            "present_submit_tick": 8727,
+            "separate_scheduler_ticks_not_compared": true,
+            "lines": {
+              "merge": 1654,
+              "bound": 1656,
+              "prepared": 1659,
+              "submitted": 1669
+            },
+            "dump": {
+              "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012/dump/f001_present_1920x1080_bgra.raw",
+              "sha256": "937626a9b1e8efb73b8e854d1ed922716bd3103a2911a828c60266e9f7eb5ce6",
+              "bytes": 8294400,
+              "line": 1689
+            }
+          }
+        ],
+        "visual_scope": "Root inspected actual Clinic/HUD screenshots; A independently checked ledger and dump identities, not quality"
+      },
+      {
+        "id": "skip_load_failure",
+        "status": "BLOCKED",
+        "case_path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip-20261012",
+        "invocation_path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/runs/quality-nr-20261011T174815.106547Z",
+        "root_acceptance_status": "BLOCKED_PM4_ASSERT_BEFORE_Q1_HELPER",
+        "root_acceptance": {
+          "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip-20261012/root-acceptance.json",
+          "bytes": 1342,
+          "sha256": "6297ae0e18928f45f381dc890539b37fa2bb24b7a32b8b04436877bcad9152a6"
+        },
+        "outer_result": {
+          "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/runs/quality-nr-20261011T174815.106547Z/result.json",
+          "bytes": 882,
+          "sha256": "fbda556af9fd3b8080676ff7a7de0a5134a47f2b154980e29e615dc5a0b6326c"
+        },
+        "actual_outer_exit_code": 23,
+        "outer_end_reason": "PROCESS_EXIT",
+        "outer_elapsed_seconds": 72.4089548569973,
+        "cleanup_group_empty": true,
+        "cleanup_private_prefix_empty": true,
+        "frames": [],
+        "model_execution": "NOT_RUN",
+        "shared_transport": "NOT_RUN",
+        "helper_started": false,
+        "failure_status_preserved": "BLOCKED_PM4_ASSERT_BEFORE_Q1_HELPER",
+        "cause": "UNPROVEN; prior Q0 PM4 failure retained; no assertion bypass"
+      },
+      {
+        "id": "skipEvaluate",
+        "status": "PASS",
+        "case_path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012",
+        "invocation_path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/runs/quality-nr-20261011T175219.450696Z",
+        "root_acceptance_status": "PASS_Q1_SKIP_REJECTION_SR_PRESENT_LIFECYCLE",
+        "root_acceptance": {
+          "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012/root-acceptance.json",
+          "bytes": 2430,
+          "sha256": "c968af22fb5403ae93ab92587bbdab83e5894d749f66bcf8de1896565c04fe91"
+        },
+        "outer_result": {
+          "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/runs/quality-nr-20261011T175219.450696Z/result.json",
+          "bytes": 1818,
+          "sha256": "7d067d23bc09c4b2a4bd13eef2178b65b318ab29fea4b895d2d6af1440a80ff5"
+        },
+        "actual_outer_exit_code": 0,
+        "outer_end_reason": "CONTROLLED_STOP",
+        "outer_elapsed_seconds": 140.88389347699558,
+        "cleanup_group_empty": true,
+        "cleanup_private_prefix_empty": true,
+        "frames": [
+          {
+            "frame": 0,
+            "source_game_frame": 7113,
+            "prev_source_game_frame": 0,
+            "reset": 1,
+            "nr_reset": 1,
+            "reset_reason": "first",
+            "evaluate_calls": 0,
+            "evaluate_calls_total": 0,
+            "evaluate_result": 0,
+            "resolve_calls": 0,
+            "resolve_calls_total": 0,
+            "copy_calls": 0,
+            "completed_GPU": true,
+            "status": "INVALID",
+            "output_valid": false,
+            "model_valid": false,
+            "input_digest": "deacd707dce6fc70",
+            "input_digest_algorithm": "fnv1a64_rgba32f_bytes",
+            "input_digest_bytes": 33177600,
+            "output_digest": "bdaa6cda0dada325",
+            "output_digest_algorithm": "fnv1a64_rgba32f_bytes",
+            "output_digest_bytes": 33177600,
+            "guide_validation": {
+              "depth": {
+                "algorithm": "fnv1a64_r32f_bytes",
+                "bytes": 3686400,
+                "device_z_in_0_1": 921600,
+                "digest": "1e791b548920ea25",
+                "finite": 921600,
+                "samples": 921600,
+                "source_digest_match": true
+              },
+              "mv": {
+                "algorithm": "fnv1a64_rg32f_bytes",
+                "bytes": 7372800,
+                "components": 1843200,
+                "digest": "bc135056216108fe",
+                "finite": 1843200,
+                "source_digest_match": true
+              },
+              "scope": "same_texel_transport_only_NR_phase_UNVERIFIED"
+            },
+            "raw_rgb_finite": 0,
+            "raw_rgb_written": 0,
+            "raw_rgb_nan": 6220800,
+            "resolved_rgba_finite": 8294400,
+            "resolved_rgba_written": 0,
+            "output_sentinel_count": 8294400,
+            "source_alpha_preserved": 0,
+            "source_alpha_total": 2073600,
+            "frame_elapsed_ms": 16202.514699995518,
+            "frame_elapsed_clock": "QueryPerformanceCounter",
+            "frame_elapsed_scope": "input accepted through completion snapshot; excludes publication and consumed wait",
+            "cpu_stats_readback_ms": 16159.150299996138,
+            "gpu_fence_wait_ms": 42.56149999797344,
+            "gpu_submit_and_wait_ms": 42.80140000581741,
+            "gpu_timestamps": {
+              "acquire_poison_ms": 0.046624,
+              "available": true,
+              "encode_ms": 0.373056,
+              "evaluate_commands_ms": 0.0,
+              "query_availability": [
+                true,
+                true,
+                true,
+                true,
+                true,
+                true,
+                true,
+                true
+              ],
+              "query_count": 8,
+              "query_readback_bytes": 128,
+              "readbacks_ms": 7.21248,
+              "release_ms": 0.020256,
+              "resolve_ms": 0.001696,
+              "scope": "same Helper queue durations; Evaluate recorded commands include dependencies/scheduling, not pure model benchmark",
+              "status": "AVAILABLE",
+              "timestamp_period_ns": 1.0,
+              "timestamp_valid_bits": 64,
+              "total_ms": 42.421376,
+              "validation_ms": 34.767264,
+              "vk_result": 0,
+              "wait_bit": false,
+              "wrap_handling": "unsigned delta masked to timestampValidBits"
+            },
+            "actual_jitter": {
+              "viewport_jitter_x": 0.25,
+              "viewport_jitter_y": -0.3888888955116272,
+              "previous_viewport_jitter_x": -0.25,
+              "previous_viewport_jitter_y": 0.1666666865348816,
+              "sr_jitter_x": 0.25,
+              "sr_jitter_y": -0.3888888955116272,
+              "previous_sr_jitter_x": -0.25,
+              "previous_sr_jitter_y": 0.1666666865348816
+            },
+            "SR_history": {
+              "source_reset": false,
+              "sr_initial_reset_observed": true,
+              "sr_initial_source_game_frame": 6695,
+              "sr_history_jitter_enabled_from_start": true
+            },
+            "native_status": "INVALID_REJECTED",
+            "selected_output": false,
+            "complete_evidence": {
+              "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012/frames/bucket-000000/complete-q1-skip2-20261012-g0-f0.json",
+              "bytes": 5696,
+              "sha256": "876b2d45bbb3a8ef7dea294de1ab7579d37918601c9fcd8f930d51a6d86f9a1c"
+            },
+            "native_evidence": {
+              "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012/frames/bucket-000000/native-frame-q1-skip2-20261012-g0-f0.json",
+              "bytes": 4610,
+              "sha256": "faf77f15650c0bed847392e736cdab8d63e8ba3311f57d5e60a1e8a00a24cd82"
+            },
+            "independent_numeric_scope": "original Depth bits and independent IEEE half MV decode vs both converted endpoints; raw/source/output/guide bytes and numeric gates; NR outputs not required equal inputs",
+            "output_readback": {
+              "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012/frames/bucket-000000/resolve-f0.rgba32f",
+              "bytes": 33177600,
+              "sha256": "8b90314df28902785dc24a4ae737af4a37b32d2d19fb3cb7ab0b03fdae7bb2c8"
+            }
+          }
+        ],
+        "A_independent_readback_audit": "PASS",
+        "B_independent_review": "PASS",
+        "root_pixel_status": "PASS_READBACK_ONLY",
+        "root_present_status": "PASS_PRESENT_LEDGER_ONLY",
+        "actual_helper_wait_status": 0,
+        "actual_helper_normal_exit": true,
+        "helper_model_init": true,
+        "feature_created": true,
+        "Evaluate_total": 0,
+        "resolve_total": 0,
+        "copy_total": 0,
+        "model_execution": "NOT_RUN",
+        "negative_rejection": "PASS",
+        "FD_retirement": {
+          "wine_counts": [
+            83,
+            83
+          ],
+          "native_counts": [
+            136,
+            136
+          ],
+          "all_snapshots_readable": true,
+          "wine_full_inventory_equal": true,
+          "native_full_inventory_equal": true,
+          "raw_payload_remaining": 0,
+          "raw_payloads": [
+            {
+              "role": "color",
+              "device": 12,
+              "fd": 80,
+              "inode": 12484,
+              "stat_ok": true,
+              "target": "/dmabuf:"
+            },
+            {
+              "role": "depth",
+              "device": 12,
+              "fd": 81,
+              "inode": 12485,
+              "stat_ok": true,
+              "target": "/dmabuf:"
+            },
+            {
+              "role": "mv",
+              "device": 12,
+              "fd": 82,
+              "inode": 12486,
+              "stat_ok": true,
+              "target": "/dmabuf:"
+            },
+            {
+              "role": "output",
+              "device": 12,
+              "fd": 83,
+              "inode": 12487,
+              "stat_ok": true,
+              "target": "/dmabuf:"
+            }
+          ]
+        },
+        "actual_present_count": 1,
+        "selected_NR_present_count": 0,
+        "selected_shared_return_present_count": 0,
+        "presentation": [
+          {
+            "frame": 0,
+            "source_game_frame": 7113,
+            "selected_output": false,
+            "merge_tick": 14232,
+            "prepare_tick": 14232,
+            "ready_tick": 14232,
+            "present_frame": 7114,
+            "present_submit_tick": 7158,
+            "separate_scheduler_ticks_not_compared": true,
+            "lines": {
+              "merge": 1594,
+              "bound": 1596,
+              "prepared": 1599,
+              "submitted": 1609
+            },
+            "dump": {
+              "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012/dump/f001_present_1920x1080_bgra.raw",
+              "sha256": "d9eadd2e30f9859b9a0eb010bf8fbc86cbaae4df8542c6f117b3f31888292d64",
+              "bytes": 8294400,
+              "line": 1624
+            }
+          }
+        ],
+        "visual_scope": "Root inspected actual Clinic/HUD screenshots; A independently checked ledger and dump identities, not quality"
+      },
+      {
+        "id": "resident4",
+        "status": "PASS",
+        "case_path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012",
+        "invocation_path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/runs/quality-nr-20261011T175614.007075Z",
+        "root_acceptance_status": "PASS_Q1_RESIDENT4_MODEL_TRANSPORT_PRESENT_LIFECYCLE",
+        "root_acceptance": {
+          "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/root-acceptance.json",
+          "bytes": 3770,
+          "sha256": "77c0b2d25837f1bf808b6aef9f8f46ce55f8d6769c12ad1a9240af6d3c78ec0b"
+        },
+        "outer_result": {
+          "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/runs/quality-nr-20261011T175614.007075Z/result.json",
+          "bytes": 1811,
+          "sha256": "1fd6152efb4599fdfebcae5a46ce2821acb53c1a8712980f892ac202c1061c73"
+        },
+        "actual_outer_exit_code": 0,
+        "outer_end_reason": "CONTROLLED_STOP",
+        "outer_elapsed_seconds": 217.84648490600375,
+        "cleanup_group_empty": true,
+        "cleanup_private_prefix_empty": true,
+        "frames": [
+          {
+            "frame": 0,
+            "source_game_frame": 9541,
+            "prev_source_game_frame": 0,
+            "reset": 1,
+            "nr_reset": 1,
+            "reset_reason": "first",
+            "evaluate_calls": 1,
+            "evaluate_calls_total": 1,
+            "evaluate_result": 1,
+            "resolve_calls": 1,
+            "resolve_calls_total": 1,
+            "copy_calls": 0,
+            "completed_GPU": true,
+            "status": "OUTPUT_VALID",
+            "output_valid": true,
+            "model_valid": true,
+            "input_digest": "becec826007a1801",
+            "input_digest_algorithm": "fnv1a64_rgba32f_bytes",
+            "input_digest_bytes": 33177600,
+            "output_digest": "7aeab27829acf595",
+            "output_digest_algorithm": "fnv1a64_rgba32f_bytes",
+            "output_digest_bytes": 33177600,
+            "guide_validation": {
+              "depth": {
+                "algorithm": "fnv1a64_r32f_bytes",
+                "bytes": 3686400,
+                "device_z_in_0_1": 921600,
+                "digest": "3e8013f526c86e70",
+                "finite": 921600,
+                "samples": 921600,
+                "source_digest_match": true
+              },
+              "mv": {
+                "algorithm": "fnv1a64_rg32f_bytes",
+                "bytes": 7372800,
+                "components": 1843200,
+                "digest": "e80144ffe95c6086",
+                "finite": 1843200,
+                "source_digest_match": true
+              },
+              "scope": "same_texel_transport_only_NR_phase_UNVERIFIED"
+            },
+            "raw_rgb_finite": 6220800,
+            "raw_rgb_written": 6220800,
+            "raw_rgb_nan": 0,
+            "resolved_rgba_finite": 8294400,
+            "resolved_rgba_written": 8294400,
+            "output_sentinel_count": 0,
+            "source_alpha_preserved": 2073600,
+            "source_alpha_total": 2073600,
+            "frame_elapsed_ms": 15594.815600000322,
+            "frame_elapsed_clock": "QueryPerformanceCounter",
+            "frame_elapsed_scope": "input accepted through completion snapshot; excludes publication and consumed wait",
+            "cpu_stats_readback_ms": 15536.067199997604,
+            "gpu_fence_wait_ms": 56.51369999349117,
+            "gpu_submit_and_wait_ms": 56.665899999439716,
+            "gpu_timestamps": {
+              "acquire_poison_ms": 0.057952,
+              "available": true,
+              "encode_ms": 0.36368,
+              "evaluate_commands_ms": 13.041216,
+              "query_availability": [
+                true,
+                true,
+                true,
+                true,
+                true,
+                true,
+                true,
+                true
+              ],
+              "query_count": 8,
+              "query_readback_bytes": 128,
+              "readbacks_ms": 7.28608,
+              "release_ms": 0.025824,
+              "resolve_ms": 0.473824,
+              "scope": "same Helper queue durations; Evaluate recorded commands include dependencies/scheduling, not pure model benchmark",
+              "status": "AVAILABLE",
+              "timestamp_period_ns": 1.0,
+              "timestamp_valid_bits": 64,
+              "total_ms": 56.349792,
+              "validation_ms": 35.101216,
+              "vk_result": 0,
+              "wait_bit": false,
+              "wrap_handling": "unsigned delta masked to timestampValidBits"
+            },
+            "actual_jitter": {
+              "viewport_jitter_x": 0.0,
+              "viewport_jitter_y": -0.1666666567325592,
+              "previous_viewport_jitter_x": -0.21875,
+              "previous_viewport_jitter_y": -0.4259259104728699,
+              "sr_jitter_x": 0.0,
+              "sr_jitter_y": -0.1666666567325592,
+              "previous_sr_jitter_x": -0.21875,
+              "previous_sr_jitter_y": -0.4259259104728699
+            },
+            "SR_history": {
+              "source_reset": false,
+              "sr_initial_reset_observed": true,
+              "sr_initial_source_game_frame": 9121,
+              "sr_history_jitter_enabled_from_start": true
+            },
+            "native_status": "ACCEPTED",
+            "selected_output": true,
+            "complete_evidence": {
+              "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/complete-q1-resident4-20261012-g0-f0.json",
+              "bytes": 5742,
+              "sha256": "48f2403ad3627ef958e713f61b92eaca4eb13832b67f868a2eb979fe9f42dcb6"
+            },
+            "native_evidence": {
+              "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/native-frame-q1-resident4-20261012-g0-f0.json",
+              "bytes": 4621,
+              "sha256": "da3a1cc524a8d3ee6754610b7e65a4fb49de96304ed5fb5771d930e05488a95e"
+            },
+            "independent_numeric_scope": "original Depth bits and independent IEEE half MV decode vs both converted endpoints; raw/source/output/guide bytes and numeric gates; NR outputs not required equal inputs",
+            "output_readback": {
+              "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/resolve-f0.rgba32f",
+              "bytes": 33177600,
+              "sha256": "6723dbf1e90cba747f77d930e61c7935b02dea3b88a9b6a7d785bf566b235437"
+            }
+          },
+          {
+            "frame": 1,
+            "source_game_frame": 9542,
+            "prev_source_game_frame": 9541,
+            "reset": 0,
+            "nr_reset": 0,
+            "reset_reason": "continuous",
+            "evaluate_calls": 1,
+            "evaluate_calls_total": 2,
+            "evaluate_result": 1,
+            "resolve_calls": 1,
+            "resolve_calls_total": 2,
+            "copy_calls": 0,
+            "completed_GPU": true,
+            "status": "OUTPUT_VALID",
+            "output_valid": true,
+            "model_valid": true,
+            "input_digest": "becbdb5e06b70f03",
+            "input_digest_algorithm": "fnv1a64_rgba32f_bytes",
+            "input_digest_bytes": 33177600,
+            "output_digest": "88a26916839b4f8f",
+            "output_digest_algorithm": "fnv1a64_rgba32f_bytes",
+            "output_digest_bytes": 33177600,
+            "guide_validation": {
+              "depth": {
+                "algorithm": "fnv1a64_r32f_bytes",
+                "bytes": 3686400,
+                "device_z_in_0_1": 921600,
+                "digest": "38aa8c8f0ee3320c",
+                "finite": 921600,
+                "samples": 921600,
+                "source_digest_match": true
+              },
+              "mv": {
+                "algorithm": "fnv1a64_rg32f_bytes",
+                "bytes": 7372800,
+                "components": 1843200,
+                "digest": "28b9436dca54bebf",
+                "finite": 1843200,
+                "source_digest_match": true
+              },
+              "scope": "same_texel_transport_only_NR_phase_UNVERIFIED"
+            },
+            "raw_rgb_finite": 6220800,
+            "raw_rgb_written": 6220800,
+            "raw_rgb_nan": 0,
+            "resolved_rgba_finite": 8294400,
+            "resolved_rgba_written": 8294400,
+            "output_sentinel_count": 0,
+            "source_alpha_preserved": 2073600,
+            "source_alpha_total": 2073600,
+            "frame_elapsed_ms": 16085.42989999801,
+            "frame_elapsed_clock": "QueryPerformanceCounter",
+            "frame_elapsed_scope": "input accepted through completion snapshot; excludes publication and consumed wait",
+            "cpu_stats_readback_ms": 16025.0590999946,
+            "gpu_fence_wait_ms": 59.28790000081062,
+            "gpu_submit_and_wait_ms": 59.44319999963045,
+            "gpu_timestamps": {
+              "acquire_poison_ms": 0.044448,
+              "available": true,
+              "encode_ms": 0.39216,
+              "evaluate_commands_ms": 14.664736,
+              "query_availability": [
+                true,
+                true,
+                true,
+                true,
+                true,
+                true,
+                true,
+                true
+              ],
+              "query_count": 8,
+              "query_readback_bytes": 128,
+              "readbacks_ms": 7.228608,
+              "release_ms": 0.014112,
+              "resolve_ms": 0.462048,
+              "scope": "same Helper queue durations; Evaluate recorded commands include dependencies/scheduling, not pure model benchmark",
+              "status": "AVAILABLE",
+              "timestamp_period_ns": 1.0,
+              "timestamp_valid_bits": 64,
+              "total_ms": 59.194688,
+              "validation_ms": 36.388576,
+              "vk_result": 0,
+              "wait_bit": false,
+              "wrap_handling": "unsigned delta masked to timestampValidBits"
+            },
+            "actual_jitter": {
+              "viewport_jitter_x": -0.25,
+              "viewport_jitter_y": 0.1666666865348816,
+              "previous_viewport_jitter_x": 0.0,
+              "previous_viewport_jitter_y": -0.1666666567325592,
+              "sr_jitter_x": -0.25,
+              "sr_jitter_y": 0.1666666865348816,
+              "previous_sr_jitter_x": 0.0,
+              "previous_sr_jitter_y": -0.1666666567325592
+            },
+            "SR_history": {
+              "source_reset": false,
+              "sr_initial_reset_observed": true,
+              "sr_initial_source_game_frame": 9121,
+              "sr_history_jitter_enabled_from_start": true
+            },
+            "native_status": "ACCEPTED",
+            "selected_output": true,
+            "complete_evidence": {
+              "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/complete-q1-resident4-20261012-g0-f1.json",
+              "bytes": 5740,
+              "sha256": "b48e0c02e8ff11ef917ded104b13cf4b69c9065e39fb778da25af1a8b2d9f75b"
+            },
+            "native_evidence": {
+              "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/native-frame-q1-resident4-20261012-g0-f1.json",
+              "bytes": 4636,
+              "sha256": "e6059000025e0a0dd0f14934a4bcf5c857b542a801b0f6bede959f34a1b31a1b"
+            },
+            "independent_numeric_scope": "original Depth bits and independent IEEE half MV decode vs both converted endpoints; raw/source/output/guide bytes and numeric gates; NR outputs not required equal inputs",
+            "output_readback": {
+              "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/resolve-f1.rgba32f",
+              "bytes": 33177600,
+              "sha256": "ac54dccde2dcc8e627e0b5aa1f9bf0225f8844b1b5cdf6a5444a2b7a85a12e57"
+            }
+          },
+          {
+            "frame": 2,
+            "source_game_frame": 9543,
+            "prev_source_game_frame": 9542,
+            "reset": 0,
+            "nr_reset": 0,
+            "reset_reason": "continuous",
+            "evaluate_calls": 1,
+            "evaluate_calls_total": 3,
+            "evaluate_result": 1,
+            "resolve_calls": 1,
+            "resolve_calls_total": 3,
+            "copy_calls": 0,
+            "completed_GPU": true,
+            "status": "OUTPUT_VALID",
+            "output_valid": true,
+            "model_valid": true,
+            "input_digest": "3da0609d82eb84ee",
+            "input_digest_algorithm": "fnv1a64_rgba32f_bytes",
+            "input_digest_bytes": 33177600,
+            "output_digest": "ffb0bdecb89f694d",
+            "output_digest_algorithm": "fnv1a64_rgba32f_bytes",
+            "output_digest_bytes": 33177600,
+            "guide_validation": {
+              "depth": {
+                "algorithm": "fnv1a64_r32f_bytes",
+                "bytes": 3686400,
+                "device_z_in_0_1": 921600,
+                "digest": "6e1cec6e89d35825",
+                "finite": 921600,
+                "samples": 921600,
+                "source_digest_match": true
+              },
+              "mv": {
+                "algorithm": "fnv1a64_rg32f_bytes",
+                "bytes": 7372800,
+                "components": 1843200,
+                "digest": "aa7fdcd3ea1623bc",
+                "finite": 1843200,
+                "source_digest_match": true
+              },
+              "scope": "same_texel_transport_only_NR_phase_UNVERIFIED"
+            },
+            "raw_rgb_finite": 6220800,
+            "raw_rgb_written": 6220800,
+            "raw_rgb_nan": 0,
+            "resolved_rgba_finite": 8294400,
+            "resolved_rgba_written": 8294400,
+            "output_sentinel_count": 0,
+            "source_alpha_preserved": 2073600,
+            "source_alpha_total": 2073600,
+            "frame_elapsed_ms": 16048.135499998927,
+            "frame_elapsed_clock": "QueryPerformanceCounter",
+            "frame_elapsed_scope": "input accepted through completion snapshot; excludes publication and consumed wait",
+            "cpu_stats_readback_ms": 15986.816399998963,
+            "gpu_fence_wait_ms": 59.97820000350475,
+            "gpu_submit_and_wait_ms": 60.16210000216961,
+            "gpu_timestamps": {
+              "acquire_poison_ms": 0.042912,
+              "available": true,
+              "encode_ms": 0.370048,
+              "evaluate_commands_ms": 14.763744,
+              "query_availability": [
+                true,
+                true,
+                true,
+                true,
+                true,
+                true,
+                true,
+                true
+              ],
+              "query_count": 8,
+              "query_readback_bytes": 128,
+              "readbacks_ms": 7.160352,
+              "release_ms": 0.01408,
+              "resolve_ms": 0.480032,
+              "scope": "same Helper queue durations; Evaluate recorded commands include dependencies/scheduling, not pure model benchmark",
+              "status": "AVAILABLE",
+              "timestamp_period_ns": 1.0,
+              "timestamp_valid_bits": 64,
+              "total_ms": 59.88208,
+              "validation_ms": 37.050912,
+              "vk_result": 0,
+              "wait_bit": false,
+              "wrap_handling": "unsigned delta masked to timestampValidBits"
+            },
+            "actual_jitter": {
+              "viewport_jitter_x": 0.25,
+              "viewport_jitter_y": -0.3888888955116272,
+              "previous_viewport_jitter_x": -0.25,
+              "previous_viewport_jitter_y": 0.1666666865348816,
+              "sr_jitter_x": 0.25,
+              "sr_jitter_y": -0.3888888955116272,
+              "previous_sr_jitter_x": -0.25,
+              "previous_sr_jitter_y": 0.1666666865348816
+            },
+            "SR_history": {
+              "source_reset": false,
+              "sr_initial_reset_observed": true,
+              "sr_initial_source_game_frame": 9121,
+              "sr_history_jitter_enabled_from_start": true
+            },
+            "native_status": "ACCEPTED",
+            "selected_output": true,
+            "complete_evidence": {
+              "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/complete-q1-resident4-20261012-g0-f2.json",
+              "bytes": 5746,
+              "sha256": "4fbae7002cb9954949929b9a0bebf342cc4b4f03c9fdae6356c5c278265eefe6"
+            },
+            "native_evidence": {
+              "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/native-frame-q1-resident4-20261012-g0-f2.json",
+              "bytes": 4639,
+              "sha256": "ef3f63f08749d4bdad86d31038881995c849991305298a26ba8ef7426b14bda9"
+            },
+            "independent_numeric_scope": "original Depth bits and independent IEEE half MV decode vs both converted endpoints; raw/source/output/guide bytes and numeric gates; NR outputs not required equal inputs",
+            "output_readback": {
+              "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/resolve-f2.rgba32f",
+              "bytes": 33177600,
+              "sha256": "7a2677265bf1d62fe29172c230136abe21429e3898bd93d05075e7fd0de712d5"
+            }
+          },
+          {
+            "frame": 3,
+            "source_game_frame": 9544,
+            "prev_source_game_frame": 9543,
+            "reset": 0,
+            "nr_reset": 0,
+            "reset_reason": "continuous",
+            "evaluate_calls": 1,
+            "evaluate_calls_total": 4,
+            "evaluate_result": 1,
+            "resolve_calls": 1,
+            "resolve_calls_total": 4,
+            "copy_calls": 0,
+            "completed_GPU": true,
+            "status": "OUTPUT_VALID",
+            "output_valid": true,
+            "model_valid": true,
+            "input_digest": "e463b1c787e05e04",
+            "input_digest_algorithm": "fnv1a64_rgba32f_bytes",
+            "input_digest_bytes": 33177600,
+            "output_digest": "584fd2574d19dbbd",
+            "output_digest_algorithm": "fnv1a64_rgba32f_bytes",
+            "output_digest_bytes": 33177600,
+            "guide_validation": {
+              "depth": {
+                "algorithm": "fnv1a64_r32f_bytes",
+                "bytes": 3686400,
+                "device_z_in_0_1": 921600,
+                "digest": "1e0d3d86fbb4bc02",
+                "finite": 921600,
+                "samples": 921600,
+                "source_digest_match": true
+              },
+              "mv": {
+                "algorithm": "fnv1a64_rg32f_bytes",
+                "bytes": 7372800,
+                "components": 1843200,
+                "digest": "5a7b66b9c3ce9a75",
+                "finite": 1843200,
+                "source_digest_match": true
+              },
+              "scope": "same_texel_transport_only_NR_phase_UNVERIFIED"
+            },
+            "raw_rgb_finite": 6220800,
+            "raw_rgb_written": 6220800,
+            "raw_rgb_nan": 0,
+            "resolved_rgba_finite": 8294400,
+            "resolved_rgba_written": 8294400,
+            "output_sentinel_count": 0,
+            "source_alpha_preserved": 2073600,
+            "source_alpha_total": 2073600,
+            "frame_elapsed_ms": 16236.680599994957,
+            "frame_elapsed_clock": "QueryPerformanceCounter",
+            "frame_elapsed_scope": "input accepted through completion snapshot; excludes publication and consumed wait",
+            "cpu_stats_readback_ms": 16175.397500000894,
+            "gpu_fence_wait_ms": 60.222600005567074,
+            "gpu_submit_and_wait_ms": 60.384800001978874,
+            "gpu_timestamps": {
+              "acquire_poison_ms": 0.050688,
+              "available": true,
+              "encode_ms": 0.362688,
+              "evaluate_commands_ms": 14.634592,
+              "query_availability": [
+                true,
+                true,
+                true,
+                true,
+                true,
+                true,
+                true,
+                true
+              ],
+              "query_count": 8,
+              "query_readback_bytes": 128,
+              "readbacks_ms": 7.216352,
+              "release_ms": 0.014144,
+              "resolve_ms": 0.475776,
+              "scope": "same Helper queue durations; Evaluate recorded commands include dependencies/scheduling, not pure model benchmark",
+              "status": "AVAILABLE",
+              "timestamp_period_ns": 1.0,
+              "timestamp_valid_bits": 64,
+              "total_ms": 60.09552,
+              "validation_ms": 37.34128,
+              "vk_result": 0,
+              "wait_bit": false,
+              "wrap_handling": "unsigned delta masked to timestampValidBits"
+            },
+            "actual_jitter": {
+              "viewport_jitter_x": -0.375,
+              "viewport_jitter_y": -0.0555555522441864,
+              "previous_viewport_jitter_x": 0.25,
+              "previous_viewport_jitter_y": -0.3888888955116272,
+              "sr_jitter_x": -0.375,
+              "sr_jitter_y": -0.0555555522441864,
+              "previous_sr_jitter_x": 0.25,
+              "previous_sr_jitter_y": -0.3888888955116272
+            },
+            "SR_history": {
+              "source_reset": false,
+              "sr_initial_reset_observed": true,
+              "sr_initial_source_game_frame": 9121,
+              "sr_history_jitter_enabled_from_start": true
+            },
+            "native_status": "ACCEPTED",
+            "selected_output": true,
+            "complete_evidence": {
+              "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/complete-q1-resident4-20261012-g0-f3.json",
+              "bytes": 5749,
+              "sha256": "27502bcc786579b7d4d85bbb3b2510e7620c49d84733de05ed6aa01e88042b51"
+            },
+            "native_evidence": {
+              "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/native-frame-q1-resident4-20261012-g0-f3.json",
+              "bytes": 4638,
+              "sha256": "72900c7662c3ac52ae91c542429838da47167bb059f6d460a6b8f32d2229f3b4"
+            },
+            "independent_numeric_scope": "original Depth bits and independent IEEE half MV decode vs both converted endpoints; raw/source/output/guide bytes and numeric gates; NR outputs not required equal inputs",
+            "output_readback": {
+              "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/resolve-f3.rgba32f",
+              "bytes": 33177600,
+              "sha256": "f672e7c436ac437c1e6f8efc2d0d514a02f6df80dbd09c02864e2a03a0a4ff90"
+            }
+          }
+        ],
+        "A_independent_readback_audit": "PASS",
+        "B_independent_review": "PASS",
+        "root_pixel_status": "PASS_READBACK_ONLY",
+        "root_present_status": "PASS_PRESENT_LEDGER_ONLY",
+        "actual_helper_wait_status": 0,
+        "actual_helper_normal_exit": true,
+        "helper_model_init": true,
+        "feature_created": true,
+        "Evaluate_total": 4,
+        "resolve_total": 4,
+        "copy_total": 0,
+        "model_execution": "PASS_API_GPU_POISON_FINITE",
+        "negative_rejection": "NOT_APPLICABLE",
+        "FD_retirement": {
+          "wine_counts": [
+            83,
+            83
+          ],
+          "native_counts": [
+            136,
+            136
+          ],
+          "all_snapshots_readable": true,
+          "wine_full_inventory_equal": true,
+          "native_full_inventory_equal": true,
+          "raw_payload_remaining": 0,
+          "raw_payloads": [
+            {
+              "role": "color",
+              "device": 12,
+              "fd": 80,
+              "inode": 12517,
+              "stat_ok": true,
+              "target": "/dmabuf:"
+            },
+            {
+              "role": "depth",
+              "device": 12,
+              "fd": 81,
+              "inode": 12518,
+              "stat_ok": true,
+              "target": "/dmabuf:"
+            },
+            {
+              "role": "mv",
+              "device": 12,
+              "fd": 82,
+              "inode": 12519,
+              "stat_ok": true,
+              "target": "/dmabuf:"
+            },
+            {
+              "role": "output",
+              "device": 12,
+              "fd": 83,
+              "inode": 12520,
+              "stat_ok": true,
+              "target": "/dmabuf:"
+            }
+          ]
+        },
+        "actual_present_count": 4,
+        "selected_NR_present_count": 4,
+        "selected_shared_return_present_count": 4,
+        "presentation": [
+          {
+            "frame": 0,
+            "source_game_frame": 9541,
+            "selected_output": true,
+            "merge_tick": 19088,
+            "prepare_tick": 19088,
+            "ready_tick": 19088,
+            "present_frame": 9542,
+            "present_submit_tick": 9584,
+            "separate_scheduler_ticks_not_compared": true,
+            "lines": {
+              "merge": 1658,
+              "bound": 1660,
+              "prepared": 1663,
+              "submitted": 1673
+            },
+            "dump": {
+              "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/dump/f001_present_1920x1080_bgra.raw",
+              "sha256": "f343540e71f932aed1067a917bdbaab92c9d5044f6946a586f11dd811324217b",
+              "bytes": 8294400,
+              "line": 1695
+            }
+          },
+          {
+            "frame": 1,
+            "source_game_frame": 9542,
+            "selected_output": true,
+            "merge_tick": 19092,
+            "prepare_tick": 19092,
+            "ready_tick": 19092,
+            "present_frame": 9543,
+            "present_submit_tick": 9585,
+            "separate_scheduler_ticks_not_compared": true,
+            "lines": {
+              "merge": 1701,
+              "bound": 1703,
+              "prepared": 1706,
+              "submitted": 1722
+            },
+            "dump": {
+              "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/dump/f002_present_1920x1080_bgra.raw",
+              "sha256": "d66e757c4633c724d9d150e5dfd9b9c620f545b1407b9b7e3c54ff22d7adbecd",
+              "bytes": 8294400,
+              "line": 1737
+            }
+          },
+          {
+            "frame": 2,
+            "source_game_frame": 9543,
+            "selected_output": true,
+            "merge_tick": 19096,
+            "prepare_tick": 19096,
+            "ready_tick": 19096,
+            "present_frame": 9544,
+            "present_submit_tick": 9586,
+            "separate_scheduler_ticks_not_compared": true,
+            "lines": {
+              "merge": 1742,
+              "bound": 1744,
+              "prepared": 1747,
+              "submitted": 1757
+            },
+            "dump": {
+              "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/dump/f003_present_1920x1080_bgra.raw",
+              "sha256": "32ae3119f08229335cc03492cfc79344872478b388071151be55d4cb0f6cd0de",
+              "bytes": 8294400,
+              "line": 1779
+            }
+          },
+          {
+            "frame": 3,
+            "source_game_frame": 9544,
+            "selected_output": true,
+            "merge_tick": 19100,
+            "prepare_tick": 19100,
+            "ready_tick": 19100,
+            "present_frame": 9545,
+            "present_submit_tick": 9587,
+            "separate_scheduler_ticks_not_compared": true,
+            "lines": {
+              "merge": 1784,
+              "bound": 1786,
+              "prepared": 1789,
+              "submitted": 1805
+            },
+            "dump": {
+              "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/dump/f004_present_1920x1080_bgra.raw",
+              "sha256": "69366b7d101e4fca76cb6f0edf4e057446a2bcc0a60405e0c81dc4fd48c764b5",
+              "bytes": 8294400,
+              "line": 1813
+            }
+          }
+        ],
+        "visual_scope": "Root inspected actual Clinic/HUD screenshots; A independently checked ledger and dump identities, not quality"
+      }
+    ],
+    "prior_separate_load_failures": [
+      {
+        "id": "prior_Q0_PM4_load_failure",
+        "status": "BLOCKED",
+        "root_acceptance": {
+          "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q0-game-q0-quality-visible-20261011/root-acceptance.json",
+          "bytes": 1384,
+          "sha256": "d9b41171bd01e2826d8a14c2c9a02fcb9ab83872e6a6f779c2652b777f9f9da2"
+        },
+        "outer_result": {
+          "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/runs/quality-capture-20261011T162436.494348Z/result.json",
+          "bytes": 785,
+          "sha256": "e46daa76db4bc1bb0d0f20b4c2f0ddaf747305b082108f8819081e76c49296e9"
+        },
+        "game_log": {
+          "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/runs/quality-capture-20261011T162436.494348Z/game.log",
+          "bytes": 76801,
+          "sha256": "4cc826d60a48937f6ca16343fef334e941db01404023a8f9f59b42850fb4fd02"
+        },
+        "actual_outer_exit_code": 23,
+        "capture": "NOT_RUN",
+        "NR": "NOT_RUN",
+        "cause": "UNPROVEN; separate pre-scene PM4 assert, no helper/NR path",
+        "assertion": "PM4 type0/base535/size1 at0x41bc0c34, dword0x217, submission50616",
+        "Q1_scope": "historical failure reference only; no Q0 source or runtime copied"
+      }
+    ]
+  },
+  "limitations": {
+    "NR_phase": "UNVERIFIED",
+    "NR_MVecScale": "production_candidate_UNVERIFIED",
+    "NR_MVecScale_value": [
+      1.0,
+      1.0
+    ],
+    "k_output": "NOT_IDENTIFIED",
+    "phase_correction": "none",
+    "stored_MV_units": "render_pixels_previous_minus_current",
+    "manual_white_point": 1.0,
+    "exposure": "manual_unknown_game_exposure",
+    "exposure_valid": false,
+    "working_scale": 1.0,
+    "guide_extent": [
+      1280,
+      720
+    ],
+    "model_and_output_extent": [
+      1920,
+      1080
+    ],
+    "quality": "NOT_ASSESSED",
+    "performance": "NOT_SCORED",
+    "120_or_1800_Quality_NR": "NOT_RUN",
+    "motion_quality_phase_or_units_verification": "NOT_RUN",
+    "Quality_NR_resize_restart_late_timeout": "NOT_RUN",
+    "external_GPU_semaphore": "NOT_RUN",
+    "native_Linux_NR_ELF": "NOT_RUN",
+    "FG": "NOT_RUN"
+  },
+  "independent_extra_audit_observation": {
+    "single_numpy_nearest_float32_to_half_bit_identity": "NOT_A_CONTRACT_GATE; 3102435 RGB components differed from GPU half conversion, alpha had zero differences; actual contract finite/range/alpha checks passed; specific rounding cause not proven"
+  },
+  "preservation": {
+    "old_compile_results_json_unchanged": {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/quality-nr/results.json",
+      "bytes": 29532,
+      "sha256": "bcd9ec66a1469d46c4e71c2a8c503433f562b35de33e8b7f6626f183c08da743"
+    },
+    "old_README_unchanged": {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/quality-nr/README.md",
+      "bytes": 4107,
+      "sha256": "0bd95a77cd3caebe0d984b29eb23260feac2f96bdfafdb837e7c4ddc6ec10038"
+    },
+    "build_inputs_and_artifacts_unchanged": true,
+    "frozen_live_build_pin_count": 126,
+    "additional_loader_pin_count": 2,
+    "all_frozen_live_pins_MATCH_before_archive": true,
+    "stable_branch": "linux-nr",
+    "stable_HEAD": "eaada4c2667a26947f6b934008870025e3e1cfb5",
+    "stable_clean_before_archive": true,
+    "original_run_evidence_retained_in_place": true,
+    "no_GPU_Wine_game_or_test_started": true
+  }
+}

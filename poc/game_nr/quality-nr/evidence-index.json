@@ -1,0 +1,1694 @@
+{
+  "schema_version": 1,
+  "scope": "absolute original evidence references with bytes/SHA256; no raw/log/runtime copying or file moves",
+  "root_directory": "/home/arinp/Code/nrbridge-design/game-poc-20261011",
+  "case_paths": [
+    {
+      "id": "noop_entry_blocked",
+      "case_path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-20261012",
+      "invocation_path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/runs/quality-nr-20261011T172822.934152Z",
+      "root_acceptance_status": "BLOCKED_BEFORE_Q1_HELPER"
+    },
+    {
+      "id": "noop",
+      "case_path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012",
+      "invocation_path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/runs/quality-nr-20261011T173450.340959Z",
+      "root_acceptance_status": "PASS_Q1_NOOP_TRANSPORT_PRESENT_LIFECYCLE"
+    },
+    {
+      "id": "single",
+      "case_path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012",
+      "invocation_path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/runs/quality-nr-20261011T174022.744666Z",
+      "root_acceptance_status": "PASS_Q1_SINGLE_MODEL_TRANSPORT_PRESENT_LIFECYCLE"
+    },
+    {
+      "id": "skip_load_failure",
+      "case_path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip-20261012",
+      "invocation_path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/runs/quality-nr-20261011T174815.106547Z",
+      "root_acceptance_status": "BLOCKED_PM4_ASSERT_BEFORE_Q1_HELPER"
+    },
+    {
+      "id": "skipEvaluate",
+      "case_path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012",
+      "invocation_path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/runs/quality-nr-20261011T175219.450696Z",
+      "root_acceptance_status": "PASS_Q1_SKIP_REJECTION_SR_PRESENT_LIFECYCLE"
+    },
+    {
+      "id": "resident4",
+      "case_path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012",
+      "invocation_path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/runs/quality-nr-20261011T175614.007075Z",
+      "root_acceptance_status": "PASS_Q1_RESIDENT4_MODEL_TRANSPORT_PRESENT_LIFECYCLE"
+    }
+  ],
+  "prior_Q0_PM4_reference": {
+    "id": "prior_Q0_PM4_load_failure",
+    "status": "BLOCKED",
+    "root_acceptance": {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q0-game-q0-quality-visible-20261011/root-acceptance.json",
+      "bytes": 1384,
+      "sha256": "d9b41171bd01e2826d8a14c2c9a02fcb9ab83872e6a6f779c2652b777f9f9da2"
+    },
+    "outer_result": {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/runs/quality-capture-20261011T162436.494348Z/result.json",
+      "bytes": 785,
+      "sha256": "e46daa76db4bc1bb0d0f20b4c2f0ddaf747305b082108f8819081e76c49296e9"
+    },
+    "game_log": {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/runs/quality-capture-20261011T162436.494348Z/game.log",
+      "bytes": 76801,
+      "sha256": "4cc826d60a48937f6ca16343fef334e941db01404023a8f9f59b42850fb4fd02"
+    },
+    "actual_outer_exit_code": 23,
+    "capture": "NOT_RUN",
+    "NR": "NOT_RUN",
+    "cause": "UNPROVEN; separate pre-scene PM4 assert, no helper/NR path",
+    "assertion": "PM4 type0/base535/size1 at0x41bc0c34, dword0x217, submission50616",
+    "Q1_scope": "historical failure reference only; no Q0 source or runtime copied"
+  },
+  "entries": [
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q0-game-q0-quality-visible-20261011/root-acceptance.json",
+      "bytes": 1384,
+      "sha256": "d9b41171bd01e2826d8a14c2c9a02fcb9ab83872e6a6f779c2652b777f9f9da2"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-20261012/input-events.jsonl",
+      "bytes": 1266,
+      "sha256": "9864508a9041b996657d5462f1ee8a648c3c60adc093aa47c6ffaf6a651723b4"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-20261012/root-acceptance.json",
+      "bytes": 2918,
+      "sha256": "e0bd801e8d1e7779c311ef2e44dc39a24f85d535fefdf55d3f4a1d34ca9813b0"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-20261012/root-window-before.json",
+      "bytes": 4779,
+      "sha256": "422f757cefbeec0fbad934fc5456beb3d0ae3f5b895e6de19f75d9d59005a3f8"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-20261012/root-window-focus.json",
+      "bytes": 6322,
+      "sha256": "99fe621dbce9be004da5b10e14cf658d2c76a9f86dcfcf1e3b3d2348762c5939"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-20261012/seed-provenance.json",
+      "bytes": 3025,
+      "sha256": "4b1689fc00f83adbbb8006f0fcc805d33fea9e24afe7d66031be7e82b6f9d3d9"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012/baseline-q1-noop-gatefix-20261012-g0.json",
+      "bytes": 1351,
+      "sha256": "7ecc2ea8e9f1572b88ef2342d556e0e140b1233bff0d23fe2e1322cc0b413689"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012/dump/f000_present_1920x1080_bgra.png",
+      "bytes": 1749822,
+      "sha256": "5ae27aadf2e7efe477f4473d43919c693e70a098cf44233b8755e9e6c3bcfd41"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012/dump/f000_present_1920x1080_bgra.raw",
+      "bytes": 8294400,
+      "sha256": "3768013203a706d898ac65ef0b459d4e9a90f9495327c0318903a5a0e877a076"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012/dump/f001_present_1920x1080_bgra.png",
+      "bytes": 2129369,
+      "sha256": "7a640bb8a0d24cddba46a80ccc8d36f1c670879a4e4f7495b398be31f0f5c87f"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012/dump/f001_present_1920x1080_bgra.raw",
+      "bytes": 8294400,
+      "sha256": "4e863a9d92c0a1d5364758c08762193ae1f6035bb422cf0d2872aeb96c7c0496"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012/dump/f002_present_1920x1080_bgra.png",
+      "bytes": 2208735,
+      "sha256": "ef64d3e29f2fe60575ab98dc9b83af6af88b5d550794f06f0a71a3c78f38d39d"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012/dump/f002_present_1920x1080_bgra.raw",
+      "bytes": 8294400,
+      "sha256": "da72837f9f8bf56788ab2ac616519be957abd5a19d6bc12ff7af7973344b2793"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012/fd-retired-q1-noop-gatefix-20261012-g0.json",
+      "bytes": 1308,
+      "sha256": "f821ef617d81df306964868a6dfee065e1eb8f77a208bd372e92adf176fdca17"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012/frames/bucket-000000/complete-q1-noop-gatefix-20261012-g0-f0.json",
+      "bytes": 5547,
+      "sha256": "63bc936a85eadd198b60805d796728049f7fbcca5a2754719b38c2646bb32aea"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012/frames/bucket-000000/consumed-q1-noop-gatefix-20261012-g0-f0.json",
+      "bytes": 1283,
+      "sha256": "ce3740bfce4dc0df5661082ebbb885faabae5bc9c4b39d3915dda0cd9688b689"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012/frames/bucket-000000/depth-f0.r32f",
+      "bytes": 3686400,
+      "sha256": "e648f82e21c0600cd8a9f9d7713a2469f701e90c57f6bb39dda7d6aa8df9a0ff"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012/frames/bucket-000000/input-q1-noop-gatefix-20261012-g0-f0.json",
+      "bytes": 2854,
+      "sha256": "9c3b0548c89771de9da6e36bcf89fb30253283bb91b73a4e72a599dfb4cbc733"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012/frames/bucket-000000/mv-f0.rg32f",
+      "bytes": 7372800,
+      "sha256": "7afee806060c491757e83779b504c9cb19e195ffed488cd922109171927ea42f"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012/frames/bucket-000000/native-depth-f0.r32f",
+      "bytes": 3686400,
+      "sha256": "e648f82e21c0600cd8a9f9d7713a2469f701e90c57f6bb39dda7d6aa8df9a0ff"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012/frames/bucket-000000/native-frame-q1-noop-gatefix-20261012-g0-f0.json",
+      "bytes": 4626,
+      "sha256": "facf98985cff65771f95e6e88d3d51eefeb10d20a6cdfec36130606441bd8d75"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012/frames/bucket-000000/native-guide-conversion-f0.json",
+      "bytes": 298,
+      "sha256": "7da22b3f18088b773b577a9d1491b0b10cb31792dd6c97221493ed9ad309a15d"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012/frames/bucket-000000/native-merge-timing-q1-noop-gatefix-20261012-g0-f0.json",
+      "bytes": 429,
+      "sha256": "36314212bcdba3c0ab9834af21db7a4962539b4d55ce7a0983e4ee30b7c38ff2"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012/frames/bucket-000000/native-mv-f0.rg32f",
+      "bytes": 7372800,
+      "sha256": "7afee806060c491757e83779b504c9cb19e195ffed488cd922109171927ea42f"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012/frames/bucket-000000/native-resolve-f0.rgba32f",
+      "bytes": 33177600,
+      "sha256": "b3c85af877269d20709626dea0bd43c36e5277d2540f7560cdd7cade69573509"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012/frames/bucket-000000/native-return-f0.rgba16f",
+      "bytes": 16588800,
+      "sha256": "06f5f43b7461e10e9a9ca33d8af9a4b1069f527c38b53df2d7dbff7629c45571"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012/frames/bucket-000000/native-source-depth-f0.f32",
+      "bytes": 3686400,
+      "sha256": "e648f82e21c0600cd8a9f9d7713a2469f701e90c57f6bb39dda7d6aa8df9a0ff"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012/frames/bucket-000000/native-source-f0.rgba32f",
+      "bytes": 33177600,
+      "sha256": "b3c85af877269d20709626dea0bd43c36e5277d2540f7560cdd7cade69573509"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012/frames/bucket-000000/native-source-mv-f0.rg16f",
+      "bytes": 3686400,
+      "sha256": "2874681b98994a0158fd90c0fb7746b40ac305a72f54fb5b382d1388819baabb"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012/frames/bucket-000000/native-sr-f0.rgba16f",
+      "bytes": 16588800,
+      "sha256": "06f5f43b7461e10e9a9ca33d8af9a4b1069f527c38b53df2d7dbff7629c45571"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012/frames/bucket-000000/resolve-f0.rgba32f",
+      "bytes": 33177600,
+      "sha256": "b3c85af877269d20709626dea0bd43c36e5277d2540f7560cdd7cade69573509"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012/frames/bucket-000000/source-f0.rgba32f",
+      "bytes": 33177600,
+      "sha256": "b3c85af877269d20709626dea0bd43c36e5277d2540f7560cdd7cade69573509"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012/game-config.json",
+      "bytes": 1355,
+      "sha256": "b09693a9cd63f212c42b1969e501f52d3ff80e8835df1a54e8478760339d1712"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012/imported-q1-noop-gatefix-20261012-g0.json",
+      "bytes": 1177,
+      "sha256": "f20961ea7c47d0a0df2134b8c8f869250df869eb4c991087f5affa68bd5f0896"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012/input-events.jsonl",
+      "bytes": 1728,
+      "sha256": "2e2870984fcfcb7250bf2a2787de24acab5159976d318720c863259056b1c6cd"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012/meta-g0.json",
+      "bytes": 3224,
+      "sha256": "83b4e2ed50563aad68e1cf95a218b258589751f979d3a99545e3174f86ee7b06"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012/native-audited-q1-noop-gatefix-20261012-g0.json",
+      "bytes": 1352,
+      "sha256": "5032209c3e01471ffe56fe3b8c2297279ea98afe571246967ce05a03f1471d0d"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012/native-baseline-q1-noop-gatefix-20261012-g0.json",
+      "bytes": 1253,
+      "sha256": "9b64c0543cebfb79e002d4d3cb4cfc5a35ec582c29f18a669b096b86239e63f3"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012/native-exporter-identity.json",
+      "bytes": 304,
+      "sha256": "2864f8694b7348a21696df4398e3d6e29651b302669c1e2cd19660bc58b6f3f5"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012/native-fd-baseline.json",
+      "bytes": 12518,
+      "sha256": "dfca9c2f64f49810fe52832a512ffc4bcc7f3be25e8fd2b2545792843174da3d"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012/native-fd-dup-check.json",
+      "bytes": 12673,
+      "sha256": "08c5bbf5dc65653027218b229849587d7ef1f21146577a73e4ec15cddcb46def"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012/native-fd-final.json",
+      "bytes": 12518,
+      "sha256": "dfca9c2f64f49810fe52832a512ffc4bcc7f3be25e8fd2b2545792843174da3d"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012/native-helper-exit.json",
+      "bytes": 37,
+      "sha256": "13177d9996d1e6161fc33da3906bd4c1eb9238bc33cb70fb8b267751b063884e"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012/native-launch.json",
+      "bytes": 206,
+      "sha256": "98870129b62292eac4e88e538ecb92a8f6b5f0b597075e0c8d6a6309ca36b3a9"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012/native-released-q1-noop-gatefix-20261012-g0.json",
+      "bytes": 1187,
+      "sha256": "5668bc5d0422e2f26f25ba316ec3cb2feb03d933b662d1d27330d19b2a97daa1"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012/pid-request.json",
+      "bytes": 996,
+      "sha256": "589084d85fd20ca5ad0a7a851ff2c9cc746bd70a8fef0d5a4b31245ae3a18342"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012/retired-q1-noop-gatefix-20261012-g0.json",
+      "bytes": 1194,
+      "sha256": "4dc34585c85f500be58627ed980982cdb3862afa149aaba74a48063a80fc220c"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012/root-acceptance.json",
+      "bytes": 2136,
+      "sha256": "4960b8a21da2d15fe53e386afc007e494c40d8271ba017825c15a55bc324f58c"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012/root-fd-audit.json",
+      "bytes": 935,
+      "sha256": "f4b6c22106897dde9c66b06634a5da8bef3b1839a024774b076ae8750f9a126c"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012/root-pixel-audit.json",
+      "bytes": 4955,
+      "sha256": "4df69386b39abb7006d633a26cc8c4db53fe6ea2aa4412b46cb07fb93238c7ee"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012/root-present-audit.json",
+      "bytes": 1403,
+      "sha256": "2c99ba0e3b5707e5979340e568acb1f9dd502ea8a1c4b15d1f9d885d640b3443"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012/root-window-before.json",
+      "bytes": 4779,
+      "sha256": "c67651d4d0b857c99ebdb3147a3c39bb951d50015a981ef9dbedd06e3bbc8260"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012/root-window-focus.json",
+      "bytes": 6351,
+      "sha256": "fba49c951b9d671d8524e05357f4f1a690ae8c9d6a3dc5f9c1b23d2e318fcdb2"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012/root-wire-audit.json",
+      "bytes": 1708,
+      "sha256": "8d122703048df88b50d0202d6ed0e475485bae187e114927c797e9a8ff2c47f9"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012/seed-provenance.json",
+      "bytes": 3033,
+      "sha256": "6ffaefad9313e89b718944f38857b428b35467044ac7aad84de506dc8e3438a0"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012/wine-fd-active-retired.json",
+      "bytes": 6145,
+      "sha256": "188fb7e03b7ceaae58048a2b9a969fad3baca2b985a6ec1dc5808ef9457a6ef5"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012/wine-fd-baseline-final-diff.json",
+      "bytes": 63,
+      "sha256": "45937d3f61f394e03af0655764f03a39dd79dbfaf47c4b334f5fd1d3107cdc77"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012/wine-fd-baseline.json",
+      "bytes": 6145,
+      "sha256": "188fb7e03b7ceaae58048a2b9a969fad3baca2b985a6ec1dc5808ef9457a6ef5"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012/wine-fd-before-import.json",
+      "bytes": 6429,
+      "sha256": "551f5edcac45acc3d3c63b0c4433523cf873893860d6b9f725132b91aa2f2a8b"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012/wine-fd-final.json",
+      "bytes": 6145,
+      "sha256": "188fb7e03b7ceaae58048a2b9a969fad3baca2b985a6ec1dc5808ef9457a6ef5"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012/wine-helper-stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012/wine-helper.log",
+      "bytes": 9822,
+      "sha256": "e97fc4a08d87809701295933d09b22c7b8c4dd2d2ebb6f8286cd3e4834679d90"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-noop-gatefix-20261012/wine-result.json",
+      "bytes": 1467,
+      "sha256": "a52411f16d2c8f4ba66c8576f9fc84c23f646e93883cb97a6d696205bb2b45c2"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/baseline-q1-resident4-20261012-g0.json",
+      "bytes": 1345,
+      "sha256": "ecf718de4e037e0c53914bd499a8b5e6fe822a86da87d20bb41f9aa4aed49c83"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/dump/f000_present_1920x1080_bgra.png",
+      "bytes": 1747837,
+      "sha256": "39a6cbd7b0d373763cfc810e3a0e81ec584bda712fda58e45d64d06253db96cd"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/dump/f000_present_1920x1080_bgra.raw",
+      "bytes": 8294400,
+      "sha256": "6c95b1753baf7546477720ee157d5fd1bc1bd7af03e298053efb5747a8983058"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/dump/f001_present_1920x1080_bgra.png",
+      "bytes": 2435844,
+      "sha256": "29d2067dfcff79e7e95da29c9fbf71cec331d854e0d44d05da16c79bb5b236e5"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/dump/f001_present_1920x1080_bgra.raw",
+      "bytes": 8294400,
+      "sha256": "f343540e71f932aed1067a917bdbaab92c9d5044f6946a586f11dd811324217b"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/dump/f002_present_1920x1080_bgra.png",
+      "bytes": 2363297,
+      "sha256": "e9443d79b1ef204ae1b89c2160899fa5f0b0d5b4031f514549bf5b8f9acea009"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/dump/f002_present_1920x1080_bgra.raw",
+      "bytes": 8294400,
+      "sha256": "d66e757c4633c724d9d150e5dfd9b9c620f545b1407b9b7e3c54ff22d7adbecd"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/dump/f003_present_1920x1080_bgra.png",
+      "bytes": 2323108,
+      "sha256": "4d73f757b16ec68d5deaee13b5e7cc5c1866664305f7aafdaedca309c762c21c"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/dump/f003_present_1920x1080_bgra.raw",
+      "bytes": 8294400,
+      "sha256": "32ae3119f08229335cc03492cfc79344872478b388071151be55d4cb0f6cd0de"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/dump/f004_present_1920x1080_bgra.png",
+      "bytes": 2304855,
+      "sha256": "afc8975096312fbb56b937e532147a2c3a9ccbd206ed0d00e4a272a168ccc3c1"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/dump/f004_present_1920x1080_bgra.raw",
+      "bytes": 8294400,
+      "sha256": "69366b7d101e4fca76cb6f0edf4e057446a2bcc0a60405e0c81dc4fd48c764b5"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/dump/f005_present_1920x1080_bgra.png",
+      "bytes": 2186382,
+      "sha256": "71371fc4b3bffef61a9ba398c6eb5d8198246493343d68432556d5f7b7c6b05d"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/dump/f005_present_1920x1080_bgra.raw",
+      "bytes": 8294400,
+      "sha256": "dc34f209f46ecb89546fdc08374acbfa40d7b4ecf01e6d496c3dc5be7a53090d"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/fd-retired-q1-resident4-20261012-g0.json",
+      "bytes": 1304,
+      "sha256": "5102d340e5ef251e7a1fa4a9e92056f9131bac9e9ff2065abd08bb5d602d648c"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/complete-q1-resident4-20261012-g0-f0.json",
+      "bytes": 5742,
+      "sha256": "48f2403ad3627ef958e713f61b92eaca4eb13832b67f868a2eb979fe9f42dcb6"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/complete-q1-resident4-20261012-g0-f1.json",
+      "bytes": 5740,
+      "sha256": "b48e0c02e8ff11ef917ded104b13cf4b69c9065e39fb778da25af1a8b2d9f75b"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/complete-q1-resident4-20261012-g0-f2.json",
+      "bytes": 5746,
+      "sha256": "4fbae7002cb9954949929b9a0bebf342cc4b4f03c9fdae6356c5c278265eefe6"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/complete-q1-resident4-20261012-g0-f3.json",
+      "bytes": 5749,
+      "sha256": "27502bcc786579b7d4d85bbb3b2510e7620c49d84733de05ed6aa01e88042b51"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/consumed-q1-resident4-20261012-g0-f0.json",
+      "bytes": 1278,
+      "sha256": "e8b4620e49d2340fda181ef7350a8cf17b197d6906197468eb7f3d723f21f81a"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/consumed-q1-resident4-20261012-g0-f1.json",
+      "bytes": 1286,
+      "sha256": "89e2499b7e870adbc0cb06f225f96b58fd7f5e803244952fe6b89557d2ff59e5"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/consumed-q1-resident4-20261012-g0-f2.json",
+      "bytes": 1286,
+      "sha256": "ce59dda4358461ec7f9ea977e66d2f0c337c91da161ddbcef20aaad944e6e02f"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/consumed-q1-resident4-20261012-g0-f3.json",
+      "bytes": 1286,
+      "sha256": "511af17a7a5e022ddf30b4080be8a2883e0647d5e897e9e98e4821d7b4a1eac9"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/depth-f0.r32f",
+      "bytes": 3686400,
+      "sha256": "6c50661292f4436833c0593c1b83c02d698175bd82d64b5a552143a949cf91b8"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/depth-f1.r32f",
+      "bytes": 3686400,
+      "sha256": "04f4c8083928ef900a1047ef4a284af528cef7932c9b46ebefbeb25845775ca1"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/depth-f2.r32f",
+      "bytes": 3686400,
+      "sha256": "22b9fb59e69d64b7185c917f0c4687875d300acd2db6269467c6e4329e8125d2"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/depth-f3.r32f",
+      "bytes": 3686400,
+      "sha256": "92345de6d5ffda9e4539153b4982d7e80970282a98a4c468b72e53293472b8a1"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/input-q1-resident4-20261012-g0-f0.json",
+      "bytes": 2843,
+      "sha256": "882ca63350f904c1205c09a43d8f702975effcb973c4023f7fded4b44209cad4"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/input-q1-resident4-20261012-g0-f1.json",
+      "bytes": 2842,
+      "sha256": "fb76454fd4bcb9c4c8746c1ec5ed1b4ceef50be83ee73762f102f4941e61de5d"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/input-q1-resident4-20261012-g0-f2.json",
+      "bytes": 2845,
+      "sha256": "cc8e0c30d9fb39820cc6a08fe529fe65500a201b1478c2e3daf94813c905126c"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/input-q1-resident4-20261012-g0-f3.json",
+      "bytes": 2849,
+      "sha256": "c3724701a0624fba26b9fe36873f4714f81d478d7bebe9d86ff3099f771233a1"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/mv-f0.rg32f",
+      "bytes": 7372800,
+      "sha256": "4755a6aa95b03833f1b66e772d0e0cceb3de5041bd63020bcaeb0bf3561f4a5c"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/mv-f1.rg32f",
+      "bytes": 7372800,
+      "sha256": "74aa3e8e7378ea8955497bf7a591ee9867c21169a8232d69fe05cd773e67a9a0"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/mv-f2.rg32f",
+      "bytes": 7372800,
+      "sha256": "13b1bd58b335b5ee4c0e0cba93b5d8f53794637daffd5c0541dddba03d9acdc4"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/mv-f3.rg32f",
+      "bytes": 7372800,
+      "sha256": "0aee39136451cb74592e12a46219dba61c5a3fd0111f911a08df6d8cd95f11bc"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/native-depth-f0.r32f",
+      "bytes": 3686400,
+      "sha256": "6c50661292f4436833c0593c1b83c02d698175bd82d64b5a552143a949cf91b8"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/native-depth-f1.r32f",
+      "bytes": 3686400,
+      "sha256": "04f4c8083928ef900a1047ef4a284af528cef7932c9b46ebefbeb25845775ca1"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/native-depth-f2.r32f",
+      "bytes": 3686400,
+      "sha256": "22b9fb59e69d64b7185c917f0c4687875d300acd2db6269467c6e4329e8125d2"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/native-depth-f3.r32f",
+      "bytes": 3686400,
+      "sha256": "92345de6d5ffda9e4539153b4982d7e80970282a98a4c468b72e53293472b8a1"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/native-frame-q1-resident4-20261012-g0-f0.json",
+      "bytes": 4621,
+      "sha256": "da3a1cc524a8d3ee6754610b7e65a4fb49de96304ed5fb5771d930e05488a95e"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/native-frame-q1-resident4-20261012-g0-f1.json",
+      "bytes": 4636,
+      "sha256": "e6059000025e0a0dd0f14934a4bcf5c857b542a801b0f6bede959f34a1b31a1b"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/native-frame-q1-resident4-20261012-g0-f2.json",
+      "bytes": 4639,
+      "sha256": "ef3f63f08749d4bdad86d31038881995c849991305298a26ba8ef7426b14bda9"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/native-frame-q1-resident4-20261012-g0-f3.json",
+      "bytes": 4638,
+      "sha256": "72900c7662c3ac52ae91c542429838da47167bb059f6d460a6b8f32d2229f3b4"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/native-guide-conversion-f0.json",
+      "bytes": 298,
+      "sha256": "ea0374c6b732aafcb3bcff0d3ef0416ac35b5b49147a1a520aa00c3541521575"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/native-guide-conversion-f1.json",
+      "bytes": 298,
+      "sha256": "74fb639cf786802533dd3acdeb48c3994c5118a8e295ac5f3ce03bdc44d699f1"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/native-guide-conversion-f2.json",
+      "bytes": 298,
+      "sha256": "d8093aac9aa2d4a269268930f7111a209aa55c71120e615475f16bdfd87e95b9"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/native-guide-conversion-f3.json",
+      "bytes": 298,
+      "sha256": "f388bea2dcfd9cb4bb51e6ea57db8e7228d67a6dbd1d6b8a66d8b05d2e73a0fc"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/native-merge-timing-q1-resident4-20261012-g0-f0.json",
+      "bytes": 425,
+      "sha256": "f72099f5f357749873da04519a89379d0fb479ef3323f96a3dc436da5d58fa7d"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/native-merge-timing-q1-resident4-20261012-g0-f1.json",
+      "bytes": 425,
+      "sha256": "5c2fdde51cf709e12aaaf66f153dc09dcbe8d4498bdc0f76c37d0352d751a182"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/native-merge-timing-q1-resident4-20261012-g0-f2.json",
+      "bytes": 424,
+      "sha256": "818a0a6cfa1622935f35e82fb54e90e36b27f0b99b47ff13edf0018752d65efa"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/native-merge-timing-q1-resident4-20261012-g0-f3.json",
+      "bytes": 425,
+      "sha256": "3ec9bca2fe1b26bae4bf99e37487034009b5af69cf60b9bb9eed7f1931da30a0"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/native-mv-f0.rg32f",
+      "bytes": 7372800,
+      "sha256": "4755a6aa95b03833f1b66e772d0e0cceb3de5041bd63020bcaeb0bf3561f4a5c"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/native-mv-f1.rg32f",
+      "bytes": 7372800,
+      "sha256": "74aa3e8e7378ea8955497bf7a591ee9867c21169a8232d69fe05cd773e67a9a0"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/native-mv-f2.rg32f",
+      "bytes": 7372800,
+      "sha256": "13b1bd58b335b5ee4c0e0cba93b5d8f53794637daffd5c0541dddba03d9acdc4"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/native-mv-f3.rg32f",
+      "bytes": 7372800,
+      "sha256": "0aee39136451cb74592e12a46219dba61c5a3fd0111f911a08df6d8cd95f11bc"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/native-resolve-f0.rgba32f",
+      "bytes": 33177600,
+      "sha256": "6723dbf1e90cba747f77d930e61c7935b02dea3b88a9b6a7d785bf566b235437"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/native-resolve-f1.rgba32f",
+      "bytes": 33177600,
+      "sha256": "ac54dccde2dcc8e627e0b5aa1f9bf0225f8844b1b5cdf6a5444a2b7a85a12e57"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/native-resolve-f2.rgba32f",
+      "bytes": 33177600,
+      "sha256": "7a2677265bf1d62fe29172c230136abe21429e3898bd93d05075e7fd0de712d5"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/native-resolve-f3.rgba32f",
+      "bytes": 33177600,
+      "sha256": "f672e7c436ac437c1e6f8efc2d0d514a02f6df80dbd09c02864e2a03a0a4ff90"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/native-return-f0.rgba16f",
+      "bytes": 16588800,
+      "sha256": "a78289f7f7ab49276f4d4769b66171fe2e67502c49acf6767ca4f5754c62f594"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/native-return-f1.rgba16f",
+      "bytes": 16588800,
+      "sha256": "f055a1d61f6ccf56a72c855f8ec610bf52e2d81eb2abe34f5e4483ea49008f2c"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/native-return-f2.rgba16f",
+      "bytes": 16588800,
+      "sha256": "f37d406f3333623dac2e7a56134bb3135d78df304540970c748607581354a7a8"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/native-return-f3.rgba16f",
+      "bytes": 16588800,
+      "sha256": "293561d1198cb86d1c3c613d32627191d9a3eadada30753f44fbdc2808c1e013"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/native-source-depth-f0.f32",
+      "bytes": 3686400,
+      "sha256": "6c50661292f4436833c0593c1b83c02d698175bd82d64b5a552143a949cf91b8"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/native-source-depth-f1.f32",
+      "bytes": 3686400,
+      "sha256": "04f4c8083928ef900a1047ef4a284af528cef7932c9b46ebefbeb25845775ca1"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/native-source-depth-f2.f32",
+      "bytes": 3686400,
+      "sha256": "22b9fb59e69d64b7185c917f0c4687875d300acd2db6269467c6e4329e8125d2"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/native-source-depth-f3.f32",
+      "bytes": 3686400,
+      "sha256": "92345de6d5ffda9e4539153b4982d7e80970282a98a4c468b72e53293472b8a1"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/native-source-f0.rgba32f",
+      "bytes": 33177600,
+      "sha256": "93f10d05e4b7a413b7d126dded136674ee32538c294ada04c998e8e414bf3c67"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/native-source-f1.rgba32f",
+      "bytes": 33177600,
+      "sha256": "c258d60e67ca840cbb8aaa1fcecf38c697d66aa074f5ed5f41aeb2757b47b226"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/native-source-f2.rgba32f",
+      "bytes": 33177600,
+      "sha256": "767fedad5620839011ba41222f2ac2a5001c34d89e27260fee34b1291f73df31"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/native-source-f3.rgba32f",
+      "bytes": 33177600,
+      "sha256": "465ec94c20ffebaf3ead64af3bb74036000d7f5acde3ea5d877b5eea19ffcc4d"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/native-source-mv-f0.rg16f",
+      "bytes": 3686400,
+      "sha256": "13a322521866e1eda95d1a395272a6e2d9a9dfc0fec6de615fc5aaa1ddee5dae"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/native-source-mv-f1.rg16f",
+      "bytes": 3686400,
+      "sha256": "4d75e49f0567f3c416168d263ba288e98a9d46737e8a71dd4f9e1ecc765be757"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/native-source-mv-f2.rg16f",
+      "bytes": 3686400,
+      "sha256": "838e9e355b99b87e35921dc44eafbe27acdfd842d07123d5ee660089e16f69cd"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/native-source-mv-f3.rg16f",
+      "bytes": 3686400,
+      "sha256": "dbb65f2badf9274d8ac6a2f6da1e2dbc2bba83773966cde2cd6541a32db43e1e"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/raw-f0.rgba16f",
+      "bytes": 16588800,
+      "sha256": "89fe9d34df8018681fd7ac2474dbaf8095fd80e017419452e22d7e5d6c46149b"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/raw-f1.rgba16f",
+      "bytes": 16588800,
+      "sha256": "1c188f239e5f8d9eecf04c8d90cd5cd4575abe9490d98fc2c05d5e26cef302d6"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/raw-f2.rgba16f",
+      "bytes": 16588800,
+      "sha256": "539538cdd9787296a658d6c59b62727c633a5ddd3d7ff2ed5e953688f7e98dc4"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/raw-f3.rgba16f",
+      "bytes": 16588800,
+      "sha256": "42cb4aed8e877ab86577cdcc86a0702a8f4a06f4ca37f95e521d46d5fc92398b"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/resolve-f0.rgba32f",
+      "bytes": 33177600,
+      "sha256": "6723dbf1e90cba747f77d930e61c7935b02dea3b88a9b6a7d785bf566b235437"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/resolve-f1.rgba32f",
+      "bytes": 33177600,
+      "sha256": "ac54dccde2dcc8e627e0b5aa1f9bf0225f8844b1b5cdf6a5444a2b7a85a12e57"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/resolve-f2.rgba32f",
+      "bytes": 33177600,
+      "sha256": "7a2677265bf1d62fe29172c230136abe21429e3898bd93d05075e7fd0de712d5"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/resolve-f3.rgba32f",
+      "bytes": 33177600,
+      "sha256": "f672e7c436ac437c1e6f8efc2d0d514a02f6df80dbd09c02864e2a03a0a4ff90"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/source-f0.rgba32f",
+      "bytes": 33177600,
+      "sha256": "93f10d05e4b7a413b7d126dded136674ee32538c294ada04c998e8e414bf3c67"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/source-f1.rgba32f",
+      "bytes": 33177600,
+      "sha256": "c258d60e67ca840cbb8aaa1fcecf38c697d66aa074f5ed5f41aeb2757b47b226"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/source-f2.rgba32f",
+      "bytes": 33177600,
+      "sha256": "767fedad5620839011ba41222f2ac2a5001c34d89e27260fee34b1291f73df31"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/frames/bucket-000000/source-f3.rgba32f",
+      "bytes": 33177600,
+      "sha256": "465ec94c20ffebaf3ead64af3bb74036000d7f5acde3ea5d877b5eea19ffcc4d"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/game-config.json",
+      "bytes": 1355,
+      "sha256": "7d7412dc65e463963057fe0e8cf324b6f1209d6e45458f4e63750f0c06f86cc6"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/imported-q1-resident4-20261012-g0.json",
+      "bytes": 1173,
+      "sha256": "82999f97ba35367d522a2524526cc43ccd3f618d0a57942da800fc326a2a75b2"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/input-events.jsonl",
+      "bytes": 1379,
+      "sha256": "7e3cf8b84a551e59dbbf4dc078db95ffce4b3e0d4c5d34cdf8509109de2f65cb"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/meta-g0.json",
+      "bytes": 3220,
+      "sha256": "52f6128d95c7fa0fc2c7b4fe22462c42e92bfae3e1a938e1be6284422a19c29f"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/native-audited-q1-resident4-20261012-g0.json",
+      "bytes": 1347,
+      "sha256": "1bc85c9e50c04f9b3a9be5927f0432220739cc3d52e78c30d0aaca824dc92daf"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/native-baseline-q1-resident4-20261012-g0.json",
+      "bytes": 1249,
+      "sha256": "9f71cc25c7cd51fa4ea59e451b40c20fe0e69ec1ff12fed940376a2fcba93766"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/native-exporter-identity.json",
+      "bytes": 301,
+      "sha256": "0feaf5b9827575914ad8ac36581092d6095578673d18ee23ff9f07c512e26e38"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/native-fd-baseline.json",
+      "bytes": 12506,
+      "sha256": "31ef02a74445ba68f5f014bab5c88d12286ecfccda2ee605407eb98d9eaff49d"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/native-fd-dup-check.json",
+      "bytes": 12661,
+      "sha256": "77fda06afe6ae79afbc63ff6bc153bb2bdabdb686fc7a7def7dcf5be25c506eb"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/native-fd-final.json",
+      "bytes": 12506,
+      "sha256": "31ef02a74445ba68f5f014bab5c88d12286ecfccda2ee605407eb98d9eaff49d"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/native-helper-exit.json",
+      "bytes": 37,
+      "sha256": "13177d9996d1e6161fc33da3906bd4c1eb9238bc33cb70fb8b267751b063884e"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/native-launch.json",
+      "bytes": 206,
+      "sha256": "096e5fd2da815f8a3962925e12b761cba7907ef33ac2aef3133f4984875a8863"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/native-released-q1-resident4-20261012-g0.json",
+      "bytes": 1182,
+      "sha256": "c09cb89b7719559279ff3df3f212ae70a34a428e3dc1a87ddd512b414374dfd2"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/pid-request.json",
+      "bytes": 993,
+      "sha256": "fdae9e84cbdc2c2f3a7a5068cf5c6507e58e39de4ce642469a55983206013a9c"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/retired-q1-resident4-20261012-g0.json",
+      "bytes": 1189,
+      "sha256": "55f65b27545cdc5eb7a7c32cbb5ed8e3d1bf48e93b9462c17e4b396d757c0be5"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/root-acceptance.json",
+      "bytes": 3770,
+      "sha256": "77c0b2d25837f1bf808b6aef9f8f46ce55f8d6769c12ad1a9240af6d3c78ec0b"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/root-fd-audit.json",
+      "bytes": 954,
+      "sha256": "577406b77ff80aa30232c953bcad65b89056a5b28dcb8576c3b8d28881122aa2"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/root-import-trigger-observation.json",
+      "bytes": 158,
+      "sha256": "742c193a6731f58416d8053a51c320ba8aa39ce11b3a241cb1b71fee3ca038ce"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/root-pixel-audit.json",
+      "bytes": 17991,
+      "sha256": "f080b446fd7b38e8244aa2c2f5b120e75488240ffe1a69961635499568608ce4"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/root-present-audit.json",
+      "bytes": 3573,
+      "sha256": "ce6f1186c388ab2a5b08ea02a88e3f98584b0a1e085e9bfe95b2c47473d4b429"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/root-window-before.json",
+      "bytes": 4266,
+      "sha256": "6a3d65581e087aff879a8d5d3de734aa0a4793524091bbf8c050d90b15e371c6"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/root-window-focus.json",
+      "bytes": 16373,
+      "sha256": "3ef8223febe0d8032f1d24e307424501f79df5348379a433d4a0c78fb4de7bb7"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/root-wire-audit.json",
+      "bytes": 4654,
+      "sha256": "7eaff1fce32f05cffc5f9f8e794dd27fe503f748661d29bc39e2f5dc72302252"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/seed-provenance.json",
+      "bytes": 3030,
+      "sha256": "85a7716c04f59204c5357e79e66bc9b508e2657c99381e30d4101021e9265e32"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/wine-fd-active-retired.json",
+      "bytes": 7025,
+      "sha256": "ba999b4397f2c46d5e2744e034d8ed1b9353cd8e0acb6015fe7404615e79bac0"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/wine-fd-baseline-final-diff.json",
+      "bytes": 63,
+      "sha256": "52e4fc7eebac3375ca451374b99789b99cce4b1883906eed51633f6b5b10f41e"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/wine-fd-baseline.json",
+      "bytes": 7025,
+      "sha256": "ba999b4397f2c46d5e2744e034d8ed1b9353cd8e0acb6015fe7404615e79bac0"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/wine-fd-before-import.json",
+      "bytes": 7309,
+      "sha256": "94a477795a5ea6e3770a52cecace118acb890893ffd49d1c70b9d719ad7cc4ec"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/wine-fd-final.json",
+      "bytes": 7025,
+      "sha256": "ba999b4397f2c46d5e2744e034d8ed1b9353cd8e0acb6015fe7404615e79bac0"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/wine-helper-stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/wine-helper.log",
+      "bytes": 24757,
+      "sha256": "0dee17a701ba299cbbe48900b06124503ebeb76a2af5c5b91104131cc0555963"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-resident4-20261012/wine-result.json",
+      "bytes": 1461,
+      "sha256": "cf2d0efa70922d15789ae3f56fc80702b3c5b7920eb0a8624cf3c15f06c0eff8"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012/baseline-q1-single-20261012-g0.json",
+      "bytes": 1337,
+      "sha256": "422b2c82f3946b42c460d96926c5f5fefe71661f66d128282a990d685febd570"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012/dump/f000_present_1920x1080_bgra.png",
+      "bytes": 1748554,
+      "sha256": "bb7f72c8a1aab8a240b1d6ce548a5e06c1869217e05d591e5ba5d39929cc4d31"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012/dump/f000_present_1920x1080_bgra.raw",
+      "bytes": 8294400,
+      "sha256": "2c492e6ba7ea52d98e397be80bedd8cac7a6ca67cb586d99b1dd7d2eb76551d7"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012/dump/f001_present.png",
+      "bytes": 2414454,
+      "sha256": "b4d4f1831af61534d2f658310ad797df4f10ada76d1cb066c23f1aab7480641e"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012/dump/f001_present_1920x1080_bgra.raw",
+      "bytes": 8294400,
+      "sha256": "937626a9b1e8efb73b8e854d1ed922716bd3103a2911a828c60266e9f7eb5ce6"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012/dump/f002_present_1920x1080_bgra.raw",
+      "bytes": 8294400,
+      "sha256": "ea881427c699b84ad9870d305a69d298a915fdb6ca389b6d4ca2ed3fd9a2e10b"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012/fd-retired-q1-single-20261012-g0.json",
+      "bytes": 1296,
+      "sha256": "3bd5b34cef1cbdc9c6811764ce788ebdb703cd7713f540824bc40c8917b7b0ff"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012/frames/bucket-000000/complete-q1-single-20261012-g0-f0.json",
+      "bytes": 5732,
+      "sha256": "0605cf1ef3067cfc7830b13d4290154326522ea6b7bed88facbbd03821bff6b2"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012/frames/bucket-000000/consumed-q1-single-20261012-g0-f0.json",
+      "bytes": 1270,
+      "sha256": "02cfbe325683f73f9abbb75c2651dcd00a6647f43aaafd42edc47a95509b944e"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012/frames/bucket-000000/depth-f0.r32f",
+      "bytes": 3686400,
+      "sha256": "140360844d13550c3dfe02b3cc094b7d36bace2c511d39fc3045479bd5ee7dd8"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012/frames/bucket-000000/input-q1-single-20261012-g0-f0.json",
+      "bytes": 2834,
+      "sha256": "564732aa63e2d91e2b8c745b408a4f7b9d768a779bf74a5eabaa06e4a462773c"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012/frames/bucket-000000/mv-f0.rg32f",
+      "bytes": 7372800,
+      "sha256": "47f88286dbdfc08d3157c61805208528f30e9a6e967a35f8f7288bf9c6b1c974"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012/frames/bucket-000000/native-depth-f0.r32f",
+      "bytes": 3686400,
+      "sha256": "140360844d13550c3dfe02b3cc094b7d36bace2c511d39fc3045479bd5ee7dd8"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012/frames/bucket-000000/native-frame-q1-single-20261012-g0-f0.json",
+      "bytes": 4614,
+      "sha256": "8742c0292d5579963a7c8f43327d14c5379c5e69fd557316f6f2ca72280d7896"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012/frames/bucket-000000/native-guide-conversion-f0.json",
+      "bytes": 298,
+      "sha256": "2800341356f2088cd1510f30e4478502945139fe5f8dbe4d0090aeece1b1145e"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012/frames/bucket-000000/native-merge-timing-q1-single-20261012-g0-f0.json",
+      "bytes": 422,
+      "sha256": "3f46fdb9a9222a332e6aacc7909d9082fa10556dfff2ef7076ca1820bae7d3bd"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012/frames/bucket-000000/native-mv-f0.rg32f",
+      "bytes": 7372800,
+      "sha256": "47f88286dbdfc08d3157c61805208528f30e9a6e967a35f8f7288bf9c6b1c974"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012/frames/bucket-000000/native-resolve-f0.rgba32f",
+      "bytes": 33177600,
+      "sha256": "66250c9a02f893786fc805df44b57dbaa026264185dc81845c0aa8cb8763b6a9"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012/frames/bucket-000000/native-return-f0.rgba16f",
+      "bytes": 16588800,
+      "sha256": "d565c15efbd77016460050af52937ac4f7f6136bb7c04baf55dd4bebb8fbb377"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012/frames/bucket-000000/native-source-depth-f0.f32",
+      "bytes": 3686400,
+      "sha256": "140360844d13550c3dfe02b3cc094b7d36bace2c511d39fc3045479bd5ee7dd8"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012/frames/bucket-000000/native-source-f0.rgba32f",
+      "bytes": 33177600,
+      "sha256": "d8a58bf0724e1d91d1ee110f6f0e4eff0427a0391a7777aeb99ced8fa97bdf7f"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012/frames/bucket-000000/native-source-mv-f0.rg16f",
+      "bytes": 3686400,
+      "sha256": "debc60f8326148a96632c0bff301411f518d180d5393868a5c6cfac65f35b407"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012/frames/bucket-000000/raw-f0.rgba16f",
+      "bytes": 16588800,
+      "sha256": "20a0a4139d35c50e680548fb1c9538f3abc73f2561f12ab99f0f34eddb974ba3"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012/frames/bucket-000000/resolve-f0.rgba32f",
+      "bytes": 33177600,
+      "sha256": "66250c9a02f893786fc805df44b57dbaa026264185dc81845c0aa8cb8763b6a9"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012/frames/bucket-000000/source-f0.rgba32f",
+      "bytes": 33177600,
+      "sha256": "d8a58bf0724e1d91d1ee110f6f0e4eff0427a0391a7777aeb99ced8fa97bdf7f"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012/game-config.json",
+      "bytes": 1351,
+      "sha256": "7a005be40adc2c074724dd5dc8ff9add1576a4d25e7be7219bc656f0da5b6bc3"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012/imported-q1-single-20261012-g0.json",
+      "bytes": 1165,
+      "sha256": "ee1c5ec1ed2dcc595fb06e9d26b0c291c6ea6278ca46e490a7a641678a908abf"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012/input-events.jsonl",
+      "bytes": 1380,
+      "sha256": "a27445b6909cf3e99e018d99636534472bbef13e72c115a3e7dfa5ab8edf6945"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012/meta-g0.json",
+      "bytes": 3212,
+      "sha256": "da617b6d7c3378c30a9e29394c1c2289b6fba831a64281a3e58413940a7b5eab"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012/native-audited-q1-single-20261012-g0.json",
+      "bytes": 1339,
+      "sha256": "429a4578027f9fabf62a2e9b4a3c1480d6264a20472b3e6d3cadda083cb3fcda"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012/native-baseline-q1-single-20261012-g0.json",
+      "bytes": 1241,
+      "sha256": "a64c2a3724b7f3a441dc7b9327e0fb6887f176f1491bf13a3378f487e57e3122"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012/native-exporter-identity.json",
+      "bytes": 298,
+      "sha256": "777225b88eb845905aebd300c77440f39269eed4292e74ef58f82d3263c9057b"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012/native-fd-baseline.json",
+      "bytes": 12494,
+      "sha256": "be97282bea47546754176900723fe27005bd44bd99a06c5142fb01fd72a8cfc2"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012/native-fd-dup-check.json",
+      "bytes": 12649,
+      "sha256": "820c240a776418d84cd2dc799cbe958bc4ac1b2f549aa3537d93d335c0c19c39"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012/native-fd-final.json",
+      "bytes": 12494,
+      "sha256": "be97282bea47546754176900723fe27005bd44bd99a06c5142fb01fd72a8cfc2"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012/native-helper-exit.json",
+      "bytes": 37,
+      "sha256": "13177d9996d1e6161fc33da3906bd4c1eb9238bc33cb70fb8b267751b063884e"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012/native-launch.json",
+      "bytes": 206,
+      "sha256": "89440976b2e4a0ef51e8f455aa7ef2d2639dff5b7acfd6582ebfa2470ec41f1c"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012/native-released-q1-single-20261012-g0.json",
+      "bytes": 1174,
+      "sha256": "532c5478802c681a8739fe36c4edb27c1ddc8559e04df4ee787ae8385fabe70f"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012/pid-request.json",
+      "bytes": 990,
+      "sha256": "ac338ada6a154da59bd9225e1233f34c51e71e59965ff56345e832eac3e31751"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012/retired-q1-single-20261012-g0.json",
+      "bytes": 1181,
+      "sha256": "7ca3819b446fb92924426e757b311a388a6ec0e820495d26b3fd4d2a51fd9d50"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012/root-acceptance.json",
+      "bytes": 2387,
+      "sha256": "9a59e3922f5fd5f73bfd9d8ebaa2038232b14cdc6017df4e84edce5541bf0084"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012/root-bounded-trigger.json",
+      "bytes": 96,
+      "sha256": "411dd2c96c4b026919e1c3f3943ca232facd52b687658ef2355a2ee6a6b6389e"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012/root-fd-audit.json",
+      "bytes": 939,
+      "sha256": "2b3cdb4ebc920127313b0bdd63638fa697c726c0db2bda06fd45a78a014afc0b"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012/root-pixel-audit.json",
+      "bytes": 4907,
+      "sha256": "eed681ccc1676d408c4619d747c6bb1074c9d4c47a65524d1aa94d556e0e55c7"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012/root-present-audit.json",
+      "bytes": 1390,
+      "sha256": "c6e07d262755e803ee87b6efce46dd993077b0993ed633c84658698c7a28e62f"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012/root-window-before.json",
+      "bytes": 4779,
+      "sha256": "68266108d76ff49516139248cf6aef76d44bc6e78c6aef652da2162d98bc8518"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012/root-window-focus.json",
+      "bytes": 6351,
+      "sha256": "174c0b1e09d98cb6b4900d4468057a32a2352927910f96cd75cf2f06e6d2522b"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012/root-wire-audit.json",
+      "bytes": 1667,
+      "sha256": "9ffb978f29ba34793828e4376ee28699964566b610e1ff832ce7f75715a9c730"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012/seed-provenance.json",
+      "bytes": 3027,
+      "sha256": "70131304c9811187152d0d06a14004c1e03e0e94b59035d822c094ae28a5d1b3"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012/wine-fd-active-retired.json",
+      "bytes": 7010,
+      "sha256": "69a2f5a67d845cf3cc4270996fdb6ac331936e9bafd01d19724ba40bff289e51"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012/wine-fd-baseline-final-diff.json",
+      "bytes": 63,
+      "sha256": "52e4fc7eebac3375ca451374b99789b99cce4b1883906eed51633f6b5b10f41e"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012/wine-fd-baseline.json",
+      "bytes": 7010,
+      "sha256": "69a2f5a67d845cf3cc4270996fdb6ac331936e9bafd01d19724ba40bff289e51"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012/wine-fd-before-import.json",
+      "bytes": 7294,
+      "sha256": "9378b518016f3a89abd914e65bdf90ae68ccc2cee5a50c7e768759428746eda8"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012/wine-fd-final.json",
+      "bytes": 7010,
+      "sha256": "69a2f5a67d845cf3cc4270996fdb6ac331936e9bafd01d19724ba40bff289e51"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012/wine-helper-stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012/wine-helper.log",
+      "bytes": 16301,
+      "sha256": "e6ec2bc77c9d4d6f314d3053b4b425b7366d78bb8293698c77a763b3452e9c82"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-single-20261012/wine-result.json",
+      "bytes": 1452,
+      "sha256": "7e651a28f669b893c27467ca0e9e28d7d8c375da148175b24796cfcaa0c48534"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip-20261012/input-events.jsonl",
+      "bytes": 812,
+      "sha256": "c776c15763c6a7ea68d7549412d8f7e243e8b65b28c45473cb7b0a64f6b8229a"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip-20261012/root-acceptance.json",
+      "bytes": 1342,
+      "sha256": "6297ae0e18928f45f381dc890539b37fa2bb24b7a32b8b04436877bcad9152a6"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip-20261012/root-window-before.json",
+      "bytes": 4265,
+      "sha256": "d925652267c989cfc4fe8a3777f9fe367ca48298fcc76e26fe03e1a75dae9b65"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip-20261012/root-window-focus.json",
+      "bytes": 16392,
+      "sha256": "dc7ec16f5c7c95bbc40c31bab5aa7318493cf8a760d239c5e46831d6c164c60a"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip-20261012/seed-provenance.json",
+      "bytes": 3025,
+      "sha256": "d92a5b4e31001fbc6b9190d4942d9723e31b9ed5ec3f41d4638137a975d3b173"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012/baseline-q1-skip2-20261012-g0.json",
+      "bytes": 1341,
+      "sha256": "f71e38040874ab458cbc6239d1353856ec281246386374e49618db8b0562b0e7"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012/dump/f000_present_1920x1080_bgra.png",
+      "bytes": 1748554,
+      "sha256": "bb7f72c8a1aab8a240b1d6ce548a5e06c1869217e05d591e5ba5d39929cc4d31"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012/dump/f000_present_1920x1080_bgra.raw",
+      "bytes": 8294400,
+      "sha256": "2c492e6ba7ea52d98e397be80bedd8cac7a6ca67cb586d99b1dd7d2eb76551d7"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012/dump/f001_present_1920x1080_bgra.png",
+      "bytes": 2204008,
+      "sha256": "2395b82572b9c667504af94757b42062f15f3d7a6eae9e7e42af1fef84771ac6"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012/dump/f001_present_1920x1080_bgra.raw",
+      "bytes": 8294400,
+      "sha256": "d9eadd2e30f9859b9a0eb010bf8fbc86cbaae4df8542c6f117b3f31888292d64"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012/dump/f002_present_1920x1080_bgra.png",
+      "bytes": 2204653,
+      "sha256": "ed8ceee178f21c8132b8f66b3794c138f1678fdbae983590fddd5727a82581a7"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012/dump/f002_present_1920x1080_bgra.raw",
+      "bytes": 8294400,
+      "sha256": "8dfac94a6b200154fc6dfbc0f4c7482e2f5d644a662d44a4a68d671302e3702d"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012/fd-retired-q1-skip2-20261012-g0.json",
+      "bytes": 1300,
+      "sha256": "e272ce821515fc528c9e26ede9c171a7d0cdd5db5c059fd105c094e269522805"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012/frames/bucket-000000/complete-q1-skip2-20261012-g0-f0.json",
+      "bytes": 5696,
+      "sha256": "876b2d45bbb3a8ef7dea294de1ab7579d37918601c9fcd8f930d51a6d86f9a1c"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012/frames/bucket-000000/consumed-q1-skip2-20261012-g0-f0.json",
+      "bytes": 1274,
+      "sha256": "9c79929e3a92dc29184ca35d6b6cf579d093f5b1194345004c103bcb4bdea79c"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012/frames/bucket-000000/depth-f0.r32f",
+      "bytes": 3686400,
+      "sha256": "125d1dfb2ca5f8c99f08af6ada06aaaee12cfe1ea9ae8a58007acf8f8b00406b"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012/frames/bucket-000000/input-q1-skip2-20261012-g0-f0.json",
+      "bytes": 2831,
+      "sha256": "c5676e651f58d9b5846590f33a03ca0efcac22daf2727594b97708c4b60b82e8"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012/frames/bucket-000000/mv-f0.rg32f",
+      "bytes": 7372800,
+      "sha256": "56d0cb257f4db3744e47ee57b60d02f8ec962a1a7ff9d8acf4a4aa817b34e36c"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012/frames/bucket-000000/native-depth-f0.r32f",
+      "bytes": 3686400,
+      "sha256": "125d1dfb2ca5f8c99f08af6ada06aaaee12cfe1ea9ae8a58007acf8f8b00406b"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012/frames/bucket-000000/native-frame-q1-skip2-20261012-g0-f0.json",
+      "bytes": 4610,
+      "sha256": "faf77f15650c0bed847392e736cdab8d63e8ba3311f57d5e60a1e8a00a24cd82"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012/frames/bucket-000000/native-guide-conversion-f0.json",
+      "bytes": 298,
+      "sha256": "b0cbef8de5bfe06988b913a9cf0e888d279ee6dc356f66bdbf59643375dc8277"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012/frames/bucket-000000/native-merge-timing-q1-skip2-20261012-g0-f0.json",
+      "bytes": 421,
+      "sha256": "228bc5935f74c2b749b67c6d22aa1f4b4e4d974afd1d7cec6572faf86af25262"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012/frames/bucket-000000/native-mv-f0.rg32f",
+      "bytes": 7372800,
+      "sha256": "56d0cb257f4db3744e47ee57b60d02f8ec962a1a7ff9d8acf4a4aa817b34e36c"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012/frames/bucket-000000/native-resolve-f0.rgba32f",
+      "bytes": 33177600,
+      "sha256": "8b90314df28902785dc24a4ae737af4a37b32d2d19fb3cb7ab0b03fdae7bb2c8"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012/frames/bucket-000000/native-source-depth-f0.f32",
+      "bytes": 3686400,
+      "sha256": "125d1dfb2ca5f8c99f08af6ada06aaaee12cfe1ea9ae8a58007acf8f8b00406b"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012/frames/bucket-000000/native-source-f0.rgba32f",
+      "bytes": 33177600,
+      "sha256": "0fa98e62bcdaada8094d29d6c9cf532af4d2976d902f963dd6b49db301f64b9c"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012/frames/bucket-000000/native-source-mv-f0.rg16f",
+      "bytes": 3686400,
+      "sha256": "4cc79e5b5043e53ce07b0bd7511d73190507ca83df6808ebe47f7577dc3bfe4b"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012/frames/bucket-000000/raw-f0.rgba16f",
+      "bytes": 16588800,
+      "sha256": "c9b521ef54f376800bfffbd72e30cb425615958b816e88be5cdab676a219cb8f"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012/frames/bucket-000000/resolve-f0.rgba32f",
+      "bytes": 33177600,
+      "sha256": "8b90314df28902785dc24a4ae737af4a37b32d2d19fb3cb7ab0b03fdae7bb2c8"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012/frames/bucket-000000/source-f0.rgba32f",
+      "bytes": 33177600,
+      "sha256": "0fa98e62bcdaada8094d29d6c9cf532af4d2976d902f963dd6b49db301f64b9c"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012/game-config.json",
+      "bytes": 1362,
+      "sha256": "47bd63ed5d5b9395b73ca26e96037c3146a5a1c42cf4d1884ca20cb4c792176e"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012/imported-q1-skip2-20261012-g0.json",
+      "bytes": 1169,
+      "sha256": "c6083747f52268317d6d986df7579eab33e24105f13ae3405094b17bdefb438a"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012/input-events.jsonl",
+      "bytes": 1381,
+      "sha256": "3c775f99f0cd4e793f9ca2e9c71fe6a0cae78d10fc15fa1dfb8ed18ce0d11215"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012/meta-g0.json",
+      "bytes": 3216,
+      "sha256": "06068938cf6a7c9f805d07a199961d11e9d13b4b8ea95082cef699d3644bff3f"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012/native-audited-q1-skip2-20261012-g0.json",
+      "bytes": 1343,
+      "sha256": "61d65b197db681d74f8a17fd51886483f6adfa9a7c9a9dccca36a8bc500b84b3"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012/native-baseline-q1-skip2-20261012-g0.json",
+      "bytes": 1245,
+      "sha256": "24f316d9a1f029ca0dc391a34381991e5de1e34790559e1d692a2a13fc8d6904"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012/native-exporter-identity.json",
+      "bytes": 297,
+      "sha256": "ea818575a2f43d144239d4c30e608d22e94b2af6c897e32316ac4bd61ec79077"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012/native-fd-baseline.json",
+      "bytes": 12490,
+      "sha256": "96d9654873cf6342ee83f74ce4fbdf248378669c3b7120e08bd1076bf095c00b"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012/native-fd-dup-check.json",
+      "bytes": 12645,
+      "sha256": "45721957ca2d6d1873ddbce7d4d4fa5aa0945a0f506010f3d40d97cfc70f2597"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012/native-fd-final.json",
+      "bytes": 12490,
+      "sha256": "96d9654873cf6342ee83f74ce4fbdf248378669c3b7120e08bd1076bf095c00b"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012/native-helper-exit.json",
+      "bytes": 37,
+      "sha256": "13177d9996d1e6161fc33da3906bd4c1eb9238bc33cb70fb8b267751b063884e"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012/native-launch.json",
+      "bytes": 206,
+      "sha256": "a7fa5acddc16a71ed639cd5f286cdc78600b33798066df2a5ea02aecb90a7e23"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012/native-released-q1-skip2-20261012-g0.json",
+      "bytes": 1178,
+      "sha256": "30720f9238fdf3a5627c51277554a36f4c557802c7ff81a23d66bc37da63c245"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012/pid-request.json",
+      "bytes": 989,
+      "sha256": "db206ea98e0e58d87e8174bc5702d229b58385d0cb5a73798caa04233e802d34"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012/retired-q1-skip2-20261012-g0.json",
+      "bytes": 1185,
+      "sha256": "61976a016b66dc3cf7f1245d0e42c153791bda8bef48161dfc63c37c85317aa2"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012/root-acceptance.json",
+      "bytes": 2430,
+      "sha256": "c968af22fb5403ae93ab92587bbdab83e5894d749f66bcf8de1896565c04fe91"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012/root-fd-audit.json",
+      "bytes": 942,
+      "sha256": "7b898a267aa05008cb3bd1c2b78b10b2c57969f710be803846461dee3e041d5e"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012/root-import-trigger-observation.json",
+      "bytes": 158,
+      "sha256": "1d932473206421fae9f511e54fcae89279dc80ac24e6370e2a617d92a3b98726"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012/root-pixel-audit.json",
+      "bytes": 4626,
+      "sha256": "3a2a252c710ee5d92e67f91628b890a6076d1e287ea9f58deee994cf86422180"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012/root-present-audit.json",
+      "bytes": 1395,
+      "sha256": "b982c617b06c06fd33a58eb4af32dd24e329abcacb0a44931e0246b89d015d1f"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012/root-window-before.json",
+      "bytes": 4265,
+      "sha256": "f3c326a3be7b2785f0e60b049c18517ab61d124b2ccdb24edeb1168b6522b779"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012/root-window-focus.json",
+      "bytes": 16368,
+      "sha256": "43291b13ada630575a1371ab3c26fd8e73f147cbbbc98622857c5fa647aed56f"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012/root-wire-audit.json",
+      "bytes": 1666,
+      "sha256": "00d9038fab092861f66cad1934379edec787a1b109f78d09ca70893ae3d1abb5"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012/seed-provenance.json",
+      "bytes": 3026,
+      "sha256": "1734301321a7d69be84a9816f17878ac92f718ab147b38e35d7a1a45c9178a04"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012/wine-fd-active-retired.json",
+      "bytes": 7005,
+      "sha256": "f1caf8e709411ea8a0d7363456b5f901af03846170ca2761c99759a089ce26f2"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012/wine-fd-baseline-final-diff.json",
+      "bytes": 63,
+      "sha256": "52e4fc7eebac3375ca451374b99789b99cce4b1883906eed51633f6b5b10f41e"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012/wine-fd-baseline.json",
+      "bytes": 7005,
+      "sha256": "f1caf8e709411ea8a0d7363456b5f901af03846170ca2761c99759a089ce26f2"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012/wine-fd-before-import.json",
+      "bytes": 7289,
+      "sha256": "17fdb0e064bc76da450976795ef351e25b917ea22a81e138827f5fea27971819"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012/wine-fd-final.json",
+      "bytes": 7005,
+      "sha256": "f1caf8e709411ea8a0d7363456b5f901af03846170ca2761c99759a089ce26f2"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012/wine-helper-stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012/wine-helper.log",
+      "bytes": 16253,
+      "sha256": "9b1ad36169267ac0a6731d7674386c38365c50d5a372f2b19903b2f8bada48c0"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-game-q1-skip2-20261012/wine-result.json",
+      "bytes": 1456,
+      "sha256": "7fefb51c688634118fab030f82790c85cf241b8d8c1056eaf8c001032bfabd0b"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/integration/CONTROL-DIRECTORY-V1.md",
+      "bytes": 4270,
+      "sha256": "e9f5e891d4d63c193c71471b33c59ea1e48c649ab6bd2b877ca2d55c5597281b"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/integration/QUALITY-NR-CONTRACT.md",
+      "bytes": 20545,
+      "sha256": "482a5bccba778445efbcc2023e07a998e545fcd66c54ecb72d98c2514b9af7b0"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/quality-nr/out/build.json",
+      "bytes": 90737,
+      "sha256": "20dc61593a4f801262d0f618abdcfd323dd06e98570f7db0645dca0ecf793257"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/runs/quality-capture-20261011T162436.494348Z/game.log",
+      "bytes": 76801,
+      "sha256": "4cc826d60a48937f6ca16343fef334e941db01404023a8f9f59b42850fb4fd02"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/runs/quality-capture-20261011T162436.494348Z/result.json",
+      "bytes": 785,
+      "sha256": "e46daa76db4bc1bb0d0f20b4c2f0ddaf747305b082108f8819081e76c49296e9"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/runs/quality-nr-20261011T172822.934152Z/game.log",
+      "bytes": 1286449,
+      "sha256": "70ec6b045eee81b33395fcfb93678de52718dbaf556d361a952b2c6feab8c900"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/runs/quality-nr-20261011T172822.934152Z/manifest.json",
+      "bytes": 49132,
+      "sha256": "dab70ce58d571596df8e460b0bc82e46373611f21dbb93f4e40810599020c5a3"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/runs/quality-nr-20261011T172822.934152Z/result.json",
+      "bytes": 1801,
+      "sha256": "b51e39126e18c8fd4de034688baabfebba638e305ac31e484a8503468bd5d48c"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/runs/quality-nr-20261011T173450.340959Z/game.log",
+      "bytes": 1386970,
+      "sha256": "b2702d2ae8f1330f8b569aa1ab5c026b0069d2afa7b445425added860fef7f2b"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/runs/quality-nr-20261011T173450.340959Z/manifest.json",
+      "bytes": 49196,
+      "sha256": "7675f74158c44a1de710053b1fd7d0cad67ed4c901498a0fdd58436bcccbdca0"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/runs/quality-nr-20261011T173450.340959Z/result.json",
+      "bytes": 1809,
+      "sha256": "b2292af1efa304619ccb4d8051d94c9e81ed329e0d33cf2c9f4e3573be25ca34"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/runs/quality-nr-20261011T174022.744666Z/game.log",
+      "bytes": 2858484,
+      "sha256": "a75e298f0a4e6a9938a5e38445fd563f53298b8ef583140921f173d3fdda35c7"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/runs/quality-nr-20261011T174022.744666Z/manifest.json",
+      "bytes": 49156,
+      "sha256": "7a042c0fe805da08206f1be04bc87e72845f7e1b70400b76d7bd0effdfb27d9d"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/runs/quality-nr-20261011T174022.744666Z/result.json",
+      "bytes": 1807,
+      "sha256": "8fe13489370b3e25970786122b453e25a0b09d8dd372bc5bf2f9682275f3e285"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/runs/quality-nr-20261011T174815.106547Z/game.log",
+      "bytes": 51576,
+      "sha256": "046809b3cf5a42f0090632f6fb6abf26eff6f48e36cb28de2536a48bf57f9615"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/runs/quality-nr-20261011T174815.106547Z/manifest.json",
+      "bytes": 49164,
+      "sha256": "d96ff9a8e00f8863bb489b991cdd85895860776052126ce54405426c826f2761"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/runs/quality-nr-20261011T174815.106547Z/result.json",
+      "bytes": 882,
+      "sha256": "fbda556af9fd3b8080676ff7a7de0a5134a47f2b154980e29e615dc5a0b6326c"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/runs/quality-nr-20261011T175219.450696Z/game.log",
+      "bytes": 661525,
+      "sha256": "410f56eebf071778a94050db063c3acd2909a79b7568c86bae31f85b6057578e"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/runs/quality-nr-20261011T175219.450696Z/manifest.json",
+      "bytes": 49172,
+      "sha256": "35730cb524af01bc28489a5f52b6d48d76318e3193a078825eaabb5058f5332c"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/runs/quality-nr-20261011T175219.450696Z/result.json",
+      "bytes": 1818,
+      "sha256": "7d067d23bc09c4b2a4bd13eef2178b65b318ab29fea4b895d2d6af1440a80ff5"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/runs/quality-nr-20261011T175614.007075Z/game.log",
+      "bytes": 707575,
+      "sha256": "d418ca014878ba78687c4e232701c25899ddb8713bbea026e2900df9acc12352"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/runs/quality-nr-20261011T175614.007075Z/manifest.json",
+      "bytes": 49182,
+      "sha256": "255104b0c3704beb098456dfffcdc0f244b80ed0d9335f3cc3b0ce7c5ad9c836"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/runs/quality-nr-20261011T175614.007075Z/result.json",
+      "bytes": 1811,
+      "sha256": "1fd6152efb4599fdfebcae5a46ce2821acb53c1a8712980f892ac202c1061c73"
+    }
+  ],
+  "evidence_does_not_establish": [
+    "NR guide phase",
+    "NR motion-vector scale",
+    "output sampling phase k_output",
+    "image quality",
+    "performance",
+    "long-term runtime stability"
+  ],
+  "live_hashes_verified_before_archive": true
+}

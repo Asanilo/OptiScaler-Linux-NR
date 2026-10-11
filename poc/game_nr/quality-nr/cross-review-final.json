@@ -1,0 +1,94 @@
+{
+  "status": "STATIC_REVIEW_PASS_NO_DEFINITE_FIRST_RUN_BLOCKER",
+  "timestamp_utc": "2026-10-11T17:25:32.748992+00:00",
+  "reviewer": "opti-next",
+  "scope": "Read-only full-path review against canonical 482a5bcc; offline AST and hash reads only. No imports/execution of Root/B scripts. No Wine/game/GPU.",
+  "canonical": {
+    "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/integration/QUALITY-NR-CONTRACT.md",
+    "sha256": "482a5bccba778445efbcc2023e07a998e545fcd66c54ecb72d98c2514b9af7b0"
+  },
+  "B_build": {
+    "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/q1-build-20261011T171820Z/build-result.json",
+    "sha256": "61abfe1f069f0443cde96c07a22808a058d0133d8b637864561090cb9c191678",
+    "status": "PASS_BUILD_ONLY",
+    "source_entries": 60,
+    "artifacts": 4,
+    "snapshot_live_pre_post": "MATCH",
+    "libbbgpu_sha256": "77263d5d8ea5340912eda41105dc76a020963b54727bc279220272657bcf2d87"
+  },
+  "reviewed_paths": [
+    {
+      "path": "q1_nr_process.cpp:341-537",
+      "finding": "Validated exact private PE/run/ancestor/startticks/maps before Unix PID publication; direct64 argv1 absolute Unix ELF; serialized config profile/mode/count; bounded identity gate/reap recorded."
+    },
+    {
+      "path": "q1_game_bridge.cpp:506-854",
+      "finding": "Per-role 720/1080 metadata/CI, UUID, raw/dup payload identity, memory bits/dedicated matching. Native all4 imports precede imported ack; raw FD retirement checks original payload and exact roles."
+    },
+    {
+      "path": "q1_game_bridge.cpp:856-1205 + q1_game_bridge.comp",
+      "finding": "Actual post-SR1080 and source DEPTH130/MV83 720 CIs/TRANSFER_SRC checked. Separate shader dispatch dimensions; independent original DEPTH/MV readback vs converted bytes; no phase/unit arithmetic. Input after actual flush/fence, dynamic reset/source ordering."
+    },
+    {
+      "path": "q1_game_bridge.cpp:1204-1479",
+      "finding": "Separate noop/model/skip acceptance; exact input echo/profile/counters/FNV/guide720 measured counts. Same positive NR predicate rejects skip; acquire Color+Output before return alpha/signature/readback; half finite/range and originalSR noop byte comparison; release/fence before consumed."
+    },
+    {
+      "path": "q1_game_bridge.cpp:1487-1639",
+      "finding": "No WAIT timestamp queries, scopes separate. Prior merge real GPU last-use before reuse; final DeferOperation at merge tick before native imported resource release; bounded retirement audit. Quarantine retains resources and native.abort; abnormal exit is not normal release."
+    },
+    {
+      "path": "vk_temporal_upscaler.cpp:1676-1764,1946-2000,2895-2929 + vk_presenter.cpp:480-488,824-832",
+      "finding": "Normal HDR reduced720/output1080 j1 Run hook only. OriginalSR immutable, command buffer reacquired after Flush; return selected only accepted. Pending source+1/prepare>=merge fail-closed; nonreused actualgame Present ledger separate from visual audit."
+    },
+    {
+      "path": "tools/nr_probe/run_game_q1.sh / build_q1.sh",
+      "finding": "Strict 5arg initial mode/count cases, private seed/prefix and jitter1/preset1/unsetrender; no old Q0 capture or waitdiag. Full manifest includes opt-in source CI changes; old baseline preserved."
+    }
+  ],
+  "root_scripts": {
+    "/home/arinp/Code/nrbridge-design/game-poc-20261011/integration/run_quality_nr.py": {
+      "sha256": "b297ae7255843f330544e54e04576d458fc0ddc49bf4b3b34e31794a47dbcdbb",
+      "bytes": 20249,
+      "AST": "PASS",
+      "static_review": "NO_DEFINITE_FIRST_RUN_BLOCKER",
+      "final_narrow_delta": "Only manifest required coverage expanded to inherited SDK/NGX/frozen/derived/C1/compiler/json_header/wine/preloader. All 128 union pins live match; mode/env/protocol/watchdog unmodified."
+    },
+    "/home/arinp/Code/nrbridge-design/game-poc-20261011/integration/input_quality_nr.py": {
+      "sha256": "17b2863f8cb282ff316a1212f6eabed3222d6d8244b29b8666628dfe599cecb7",
+      "bytes": 6303,
+      "AST": "PASS",
+      "static_review": "NO_DEFINITE_FIRST_RUN_BLOCKER"
+    },
+    "/home/arinp/Code/nrbridge-design/game-poc-20261011/integration/audit_quality_nr.py": {
+      "sha256": "0d5d65a8b5c66e422f682e55d4b678e4ca7bec7e335557687c9601a5239312d6",
+      "bytes": 13586,
+      "AST": "PASS",
+      "static_review": "NO_DEFINITE_FIRST_RUN_BLOCKER"
+    },
+    "/home/arinp/Code/nrbridge-design/game-poc-20261011/integration/audit_quality_present.py": {
+      "sha256": "06dcbfbc45b6bf29182ba36a4218803b853ed72957245a9f998b2a7bf37663f5",
+      "bytes": 8711,
+      "AST": "PASS",
+      "static_review": "NO_DEFINITE_FIRST_RUN_BLOCKER"
+    },
+    "/home/arinp/Code/nrbridge-design/game-poc-20261011/integration/prepare_seed.py": {
+      "sha256": "77796c7e3b40d9c5cce4e85736b85ed48c396df73d6dd4ae16b1b4bd29b930a8",
+      "bytes": 2605,
+      "AST": "PASS",
+      "static_review": "NO_DEFINITE_FIRST_RUN_BLOCKER"
+    }
+  },
+  "limitations": [
+    "Static review/build do not prove transport/model success with unequal extents, GPU/barrier runtime validity, FD fullinventory/exit, or actual Present/visual behavior. Root must run noop1 then single1/skip1/resident4 in order.",
+    "NR phase and MVecScale remain UNVERIFIED; k_output NOT_IDENTIFIED; no correction or jitter setter. Production candidate1 is not SR-unit proof. Model/output remain1080; no WorkingScale downgrade.",
+    "Diagnostic readbacks/dumps and timings are not performance claims. Manual WhitePoint1 is not measured game exposure.",
+    "Root wire auditor PASS_WIRE_ONLY and Present auditor PASS_PRESENT_LEDGER_ONLY require independent actual GPU/readback/visual/FD/reap review."
+  ],
+  "runtime": "NOT_RUN",
+  "GPU": "NOT_RUN",
+  "Wine": "NOT_RUN",
+  "game": "NOT_RUN",
+  "stable_repository": "CLEAN_READ_ONLY",
+  "helper_build_pin_union_count": 128
+}

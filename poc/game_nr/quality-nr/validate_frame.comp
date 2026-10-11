@@ -1,0 +1,41 @@
+#version 450
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Independent diagnostic only: all pixels, not a model substitute or quality metric.
+layout(local_size_x=8,local_size_y=8,local_size_z=1) in;
+layout(binding=0) uniform sampler2D sourceColor;
+layout(binding=1) uniform sampler2D rawModel;
+layout(binding=2) uniform sampler2D resolvedOutput;
+layout(std430,binding=3) buffer Statistics { uint stats[16]; };
+shared uint reduction[16*64];
+uint mix32(uint h) { h ^= h>>16;h *= 0x7feb352du;h ^= h>>15;h *= 0x846ca68bu;h ^= h>>16;return h; }
+bool finiteValue(float v) { return !isnan(v) && !isinf(v); }
+void main() {
+ uint local=gl_LocalInvocationIndex;ivec2 q=ivec2(gl_GlobalInvocationID.xy);ivec2 size=textureSize(sourceColor,0);
+ uint a[16];for(uint i=0;i<16;i++)a[i]=0u;
+ if(all(lessThan(q,size))) {
+  vec4 src=texelFetch(sourceColor,q,0),raw=texelFetch(rawModel,q,0),outv=texelFetch(resolvedOutput,q,0);
+  uint pixel=uint(q.y*size.x+q.x);
+  for(uint c=0;c<4;c++) {
+   a[4]+=finiteValue(src[c])?1u:0u;a[2]+=finiteValue(outv[c])?1u:0u;
+   a[3]+=(finiteValue(outv[c]) && outv[c]!=-1234.0)?1u:0u;a[14]+=outv[c]==-1234.0?1u:0u;
+   if(c<3){a[0]+=finiteValue(raw[c])?1u:0u;a[1]+=finiteValue(raw[c])?1u:0u;a[13]+=isnan(raw[c])?1u:0u;}
+   uint index=4u*pixel+c;
+   uint si=mix32(floatBitsToUint(src[c]) ^ (index*0x9e3779b9u));
+   uint oi=mix32(floatBitsToUint(outv[c]) ^ (index*0x9e3779b9u));
+   a[7]^=si;a[8]+=si;a[9]^=oi;a[10]+=oi;
+  }
+  a[5]=finiteValue(src.a)?1u:0u;a[6]=floatBitsToUint(src.a)==floatBitsToUint(outv.a)?1u:0u;a[11]=1u;
+ }
+ for(uint i=0;i<16;i++)reduction[i*64+local]=a[i];barrier();
+ for(uint stride=32;stride>0;stride>>=1) {
+  if(local<stride)for(uint i=0;i<16;i++) {
+   if(i==7u||i==9u)reduction[i*64+local]^=reduction[i*64+local+stride];
+   else reduction[i*64+local]+=reduction[i*64+local+stride];
+  }
+  barrier();
+ }
+ if(local==0u)for(uint i=0;i<16;i++) {
+  if(i==7u||i==9u)atomicXor(stats[i],reduction[i*64]);
+  else atomicAdd(stats[i],reduction[i*64]);
+ }
+}
