@@ -33,7 +33,7 @@ struct GameNrHelper:C2Transport {
  std::unique_ptr<N> nr;std::unique_ptr<C3GpuValidation> validator;VkQueryPool timestamps{};uint32_t timestamp_bits=0;N::Image proxy{},raw{},keep{},dummy{},shared_color{},shared_depth{},shared_motion{},shared_output{};
  N::Buffer raw_read{},out_read{},source_read{},encode_cb{},resolve_cb{};
  std::string mode,execution_mode,profile="hdr-run-dlaa-1to1-j0-manual-wp1-v1",expected_device,expected_driver,input_digest;
- uint64_t source_game_frame=0,prev_source_game_frame=0,cold_start=0,frame_start=0;
+ uint64_t source_game_frame=0,prev_source_game_frame=0,cold_start=0;double frame_start=0;
  unsigned frame_count=0,frame_index=0,nr_reset=1,query_count=0;bool diagnostic=false,audit_full=false;double control_input_read_ms=0;std::string diagnostic_case,reset_reason;uint32_t input_xor=0,input_sum=0;
  uint32_t control_timeout_ms=60000,cold_init_timeout_ms=120000,frame_completion_timeout_ms=30000;
  unsigned evaluates=0,resolves=0,frames_done=0;bool negative=false,model_initialized=false;
@@ -147,8 +147,9 @@ struct GameNrHelper:C2Transport {
   printf("ACTUAL_FRAME source_game_frame=%llu source_reset=%u NR_reset=%u current_previous_viewport_SR_jitter=0,0 hdr=1 exposure=unknown manual_whitepoint=1 mvscale=1 same_texel_only=1\n",(unsigned long long)source_game_frame,unsigned(bool_value(j,"source_reset")),nr_reset);
  }
  void frame_deadline(const char*stage){
-  const auto elapsed=GetTickCount64()-frame_start;
-  printf("FRAME_PHASE execution_mode=%s stage=%s elapsed_ms=%llu budget_ms=%u failure_upper_bound_not_latency_target=1\n",execution_mode.c_str(),stage,(unsigned long long)elapsed,frame_completion_timeout_ms);
+  const auto elapsed=cpu_now_ms()-frame_start;
+  require(std::isfinite(elapsed)&&elapsed>=0,"C4 monotonic frame clock invalid; quarantine",3);
+  printf("FRAME_PHASE execution_mode=%s stage=%s elapsed_ms=%.6f budget_ms=%u cpu_clock=QueryPerformanceCounter failure_upper_bound_not_latency_target=1\n",execution_mode.c_str(),stage,elapsed,frame_completion_timeout_ms);
   require(elapsed<frame_completion_timeout_ms,"C4 frame completion deadline expired; invalid/quarantine",3);
   require(GetFileAttributesA((dir+"\\native.abort").c_str())==INVALID_FILE_ATTRIBUTES,"native abort/quarantine; no normal release",3);
  }
@@ -175,7 +176,7 @@ struct GameNrHelper:C2Transport {
   j["available"]=true;j["status"]="AVAILABLE";return j;
  }
  void frame(){
-  input();frame_start=GetTickCount64();require(nr->safe,"prior actual GPU fence before persistent reuse",3);begin();nr->reset_frame_descriptors();
+  input();frame_start=cpu_now_ms();require(nr->safe,"prior actual GPU fence before persistent reuse",3);begin();nr->reset_frame_descriptors();
   if(timestamps)D(vkCmdResetQueryPool)(cmd,timestamps,0,query_count);stamp(0);
   for(auto&im:images)barrier(im,VK_IMAGE_LAYOUT_GENERAL,VK_QUEUE_FAMILY_EXTERNAL,family,0,VK_ACCESS_MEMORY_READ_BIT|VK_ACCESS_MEMORY_WRITE_BIT,VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,VK_PIPELINE_STAGE_ALL_COMMANDS_BIT);
   auto&color=shared_color;auto&depth=shared_depth;auto&motion=shared_motion;auto&output=shared_output;
@@ -231,7 +232,7 @@ struct GameNrHelper:C2Transport {
   e["cpu_stats_readback_ms"]=diagnostic?Json(cpu_now_ms()-cpu_stats_start):Json(nullptr);
   e["evaluate_cpu_call_ms"]=evaluate_cpu_ms;e["gpu_fence_wait_ms"]=gpu_wait_ms;e["gpu_submit_and_wait_ms"]=submit_and_wait_ms;e["control_input_read_ms"]=control_input_read_ms;e["cpu_timing_clock"]="QueryPerformanceCounter monotonic wall clock";
   e["gpu_timestamps"]=gpu_times();e["query_readback_bytes"]=timestamps?query_count*16u:0u;
-  e["sentinel"]=-1234;e["nr_exposure"]=1;e["nr_pre_exposure"]=1;e["frame_elapsed_ms"]=GetTickCount64()-frame_start;
+  e["sentinel"]=-1234;e["nr_exposure"]=1;e["nr_pre_exposure"]=1;e["frame_elapsed_ms"]=cpu_now_ms()-frame_start;e["frame_elapsed_clock"]="QueryPerformanceCounter";e["frame_elapsed_scope"]="input accepted through completion record snapshot; excludes input wait, complete publication and consumed wait";
   e["helper_pixel_readback_bytes"]=diagnostic?82944000u:0u;e["audit_readback_bytes"]=diagnostic?82944064u:0u;e["gpu_validator_readback_bytes"]=diagnostic?64u:0u;
   frame_deadline("actual_api_GPU_tuple_and_optional_diagnostic_done");
   printf("C4_FRAME_COMPLETE frame=%u actual_Evaluate=%u result=%d actual_resolve=%u GPU_complete=1 execution_mode=%s validation_profile=%s pixel_readback_bytes=%u acceptance_scope=%s\n",frame_index,negative?0u:1u,er,negative?0u:1u,execution_mode.c_str(),validation_profile(),diagnostic?82944000u:0u,diagnostic?"full_diagnostic":"API_GPU_tuple_only");
