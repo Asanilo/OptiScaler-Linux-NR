@@ -1,0 +1,73 @@
+{
+  "status": "PASS_C3_NARROW_PROFILE",
+  "utc": "2026-10-11T13:51:10.301879+00:00",
+  "scope": "Continuous real-game 1080p DLAA HDR jitter0 manual WP1, experimental diagnostic profile; not playable/performance/quality certification",
+  "gates": {
+    "status": "PASS_C3_NARROW_PROFILE",
+    "utc": "2026-10-11T13:51:10.301879+00:00",
+    "primary_build": "bbport/runs/c3-build-20261011T131247Z",
+    "helper_sha256": "3f77b4b77a807472f3342f314ad6121dbeb790ca33934fb8883d5d4161567f39",
+    "libbbgpu_sha256": "52827a2547bcd3db94af6d74f9120d9420024f80dab26fc5793c1865f7265081",
+    "completed": [
+      {
+        "session": "c3-smoke-20261011",
+        "report": "bbport/runs/c3-game-c3-smoke-20261011/acceptance.json",
+        "status": "PASS"
+      },
+      {
+        "session": "c3-static-20261011",
+        "report": "bbport/runs/c3-game-c3-static-20261011/acceptance.json",
+        "status": "PASS"
+      },
+      {
+        "session": "c3-motion-20261011",
+        "report": "bbport/runs/c3-game-c3-motion-20261011/acceptance.json",
+        "status": "BLOCKED"
+      },
+      {
+        "session": "c3-motion2-20261011",
+        "report": "bbport/runs/c3-game-c3-motion2-20261011/acceptance.json",
+        "status": "BLOCKED_MOTION_NOT_PROVEN"
+      },
+      {
+        "session": "c3-motion3-20261011",
+        "report": "bbport/runs/c3-game-c3-motion3-20261011/acceptance.json",
+        "status": "PASS"
+      },
+      {
+        "session": "c3-skip-20261011",
+        "report": "bbport/runs/c3-game-c3-skip-20261011/acceptance.json",
+        "status": "PASS"
+      },
+      {
+        "session": "c3-timeout-20261011",
+        "report": "bbport/runs/c3-game-c3-timeout-20261011/acceptance.json",
+        "status": "PASS_EXPECTED_TIMEOUT_ISOLATION"
+      },
+      {
+        "session": "c3-exit-20261011",
+        "report": "bbport/runs/c3-game-c3-exit-20261011/acceptance.json",
+        "status": "PASS_EXPECTED_HELPER_EARLY_EXIT"
+      },
+      {
+        "session": "c3-late-20261011",
+        "report": "bbport/runs/c3-game-c3-late-20261011/acceptance.json",
+        "status": "PASS_REAL_LATE_ARRIVAL_EXPIRED_SESSION_NONCONSUMPTION"
+      }
+    ],
+    "remaining": [],
+    "C4": "DRAFT_ONLY_NOT_IMPLEMENTED",
+    "C5": "NOT_RUN",
+    "C6": "NOT_RUN"
+  },
+  "baseline_manifest": "baselines/c3-accepted-20261011/manifest.json",
+  "source_build": "bbport/runs/c3-build-20261011T131247Z",
+  "limitations": [
+    "Static native whole FD identity changes17/17; bridge GPU FD identities stable and owned payloads retired",
+    "Motion Wine cold slot80 unreadable; remaining83 valid identities and active-retired/final equal; all four true export payload identities retired",
+    "Late gate proves actual arrival after permanent quarantine and no consumption, not an explicit late-file parser event",
+    "30s failure budget and expensive diagnostics not interactive performance acceptance",
+    "Nonzero jitter, scaling, exposure calibration, parameter UI, model resize/restart and long play remain unverified"
+  ],
+  "isolated_commits": "PENDING_AGENTS"
+}

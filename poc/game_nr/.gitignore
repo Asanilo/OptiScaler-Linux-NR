@@ -6,3 +6,5 @@ c3/runs/
 *.raw
 *.rgba16f
 *.rgba32f
+c3-fault/out/
+c3-fault/__pycache__/

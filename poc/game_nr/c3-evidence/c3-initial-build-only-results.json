@@ -1,0 +1,43 @@
+{
+  "scope": "C3_HELPER_CANDIDATE",
+  "compile": {
+    "status": "PASS",
+    "exit_code": 0,
+    "build": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/c3/out/build.json",
+    "history": [
+      "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/c3/out/build-history/20261011T125236.042829Z/glsl-compile.log",
+      "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/c3/out/build-history/20261011T125236.042829Z/spirv-validation.log",
+      "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/c3/out/build-history/20261011T125236.042829Z/helper-compile.log"
+    ],
+    "artifact": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/c3/out/wine_game_nr_resident.exe",
+    "artifact_sha256": "3f77b4b77a807472f3342f314ad6121dbeb790ca33934fb8883d5d4161567f39",
+    "artifact_bytes": 1116160,
+    "source_pins": {
+      "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/c3/wine_game_nr_resident.cpp": "2670b6c1e1a491c2d528c14ae4fa8681ea98c94635ab3cbde5ce75569b6903c6",
+      "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/c3/c3_production_adapter.h": "2266b8a3143f0f6b13b620d138fc1efab43f3806e97ee4cf34934f95a67ad37d",
+      "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/c3/gpu_validation.h": "86f004560d44e7785f2c2e583e1eb6164444333f2b7b4a597876630de399f118",
+      "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/c3/validate_frame.comp": "a0d9cd5621b4991337598dc83c9d578f099ff073d8edf618c02599141b970d7d",
+      "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/c3/build_c3.py": "82a038b78be2cc0e441d189c3381a602d6a0675edff8763e1c0af2451f9a50e0"
+    },
+    "contract": "/home/arinp/Code/nrbridge-design/game-poc-20261011/integration/C3-CONTRACT.md",
+    "contract_sha256": "b21bc85e8a4542eb9479f16c5ecc600a3b24f1902cd26a0079fcbf941172d7b5"
+  },
+  "runtime": {
+    "smoke4": "NOT_RUN",
+    "static120": "NOT_RUN",
+    "motion120": "NOT_RUN",
+    "skipEvaluate4": "NOT_RUN",
+    "timeout_late": "NOT_RUN",
+    "helper_exit": "NOT_RUN",
+    "normal_lifecycle": "NOT_RUN",
+    "FD_inventory": "NOT_RUN"
+  },
+  "baseline_commit": "228b5d845e42af1a68ec3201fc524e4cf4407197",
+  "C4": "NOT_RUN",
+  "C5": "NOT_RUN",
+  "C6": "NOT_RUN",
+  "quality": "NOT_EVALUATED",
+  "performance": "NOT_MEASURED",
+  "GPU_executed_by_A": false,
+  "old_baseline_changed": false
+}

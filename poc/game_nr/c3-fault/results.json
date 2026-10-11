@@ -1,0 +1,80 @@
+{
+  "scope": "C3_FAULT_ONLY_BUILD_DELIVERY",
+  "compile": {
+    "status": "PASS",
+    "exit_code": 0,
+    "steps": [
+      {
+        "name": "glsl-compile",
+        "exit_code": 0,
+        "log": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/c3-fault/out/build-history/20261011T132353.986553Z/glsl-compile.log"
+      },
+      {
+        "name": "spirv-validation",
+        "exit_code": 0,
+        "log": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/c3-fault/out/build-history/20261011T132353.986553Z/spirv-validation.log"
+      },
+      {
+        "name": "helper-compile",
+        "exit_code": 0,
+        "log": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/c3-fault/out/build-history/20261011T132353.986553Z/helper-compile.log"
+      }
+    ]
+  },
+  "runtime": {
+    "status": "PASS_REAL_LATE_ARRIVAL_EXPIRED_SESSION_NONCONSUMPTION",
+    "root_serial_execution": true,
+    "evidence_index": "../c3-evidence/index.json",
+    "normal_release": false,
+    "quality": "NOT_CERTIFIED",
+    "performance": "NOT_ACCEPTED"
+  },
+  "build_manifest": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/c3-fault/out/build.json",
+  "build_manifest_sha256": "fb2059059a361f90519ae0a67efda6b9fe70fdb653faed59d370b87fdfb39396",
+  "artifact": {
+    "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/c3-fault/out/wine_game_nr_resident_fault.exe",
+    "sha256": "d8442626591cdc567edaded9fcc905a75d4a3c535920e0f24ffd0742d626380c",
+    "bytes": 1124352
+  },
+  "source": {
+    "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/c3-fault/wine_game_nr_resident_fault.cpp",
+    "sha256": "67ecdac85a18f4baa7fa4849443f2bd5c041153e0348d604e6b841782b957e76"
+  },
+  "exact_source_diff": {
+    "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/c3-fault/fault-source.patch",
+    "sha256": "f6469b29760dbfc538a573e822cc3ef0f56f90bcc523e190197bf3bd5c6837c3",
+    "matches_live_primary_and_fault": true
+  },
+  "fault": {
+    "environment": {
+      "C3_FAULT_DELAY_COMPLETE": "after-fence-f0-35000ms"
+    },
+    "CLI": "resident RUN_DIR_WINDOWS SESSION",
+    "config_mode": "resident",
+    "frame_count": 4,
+    "diagnostic_case": "smoke",
+    "classification": "negative fault case, never positive smoke",
+    "frame": 0,
+    "delay_ms": 35000,
+    "hard_delay_max_ms": 40000,
+    "ready_filename": "fault-publish-ready-SESSION-g0-f0.json",
+    "ready_op": "fault_publish_ready",
+    "ready_status": "FAULT_PUBLISH_READY",
+    "complete_unchanged": true,
+    "absent_expected_abort_exit_code": 2
+  },
+  "pin_review": {
+    "status": "PASS",
+    "unique_pins_checked": 68,
+    "errors": [],
+    "primary_source_sha256": "2670b6c1e1a491c2d528c14ae4fa8681ea98c94635ab3cbde5ce75569b6903c6",
+    "primary_artifact_sha256": "3f77b4b77a807472f3342f314ad6121dbeb790ca33934fb8883d5d4161567f39",
+    "primary_build_sha256": "ca08496eda92f0da0bdca1484a3d7e0166843c1017a3e465380d84e310bffadd",
+    "same_adapter_validator_GLSL_generated_SPIRV": true,
+    "stable_git_status": ""
+  },
+  "GPU_execution": false,
+  "permission_boundary": "Root-only runtime after primary static/motion/skip; no model or PE library copied",
+  "initial_build_only_record": "../c3-evidence/c3-fault-initial-build-only-results.json",
+  "runtime_history_preserved": true
+}

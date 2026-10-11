@@ -1,0 +1,188 @@
+{
+  "status": "PASS_C3_NARROW_PROFILE",
+  "scope": "Root serial actual real-game C3 gates, immutable source/artifact evidence; not quality/performance/playable certification",
+  "root_final_audit": {
+    "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/integration/c3-final-audit.json",
+    "sha256": "60c829d5b9d4ad58834988d309e76ce405d83774bf61f1548af38df9b23e2027",
+    "bytes": 3054
+  },
+  "root_gates": {
+    "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/integration/c3-gates.json",
+    "sha256": "9ee573888c057e3ee4e9a836a807b04c971e341e466a91ecf8489bcb39093a59",
+    "bytes": 1898
+  },
+  "cases": [
+    {
+      "session": "c3-smoke-20261011",
+      "report": "bbport/runs/c3-game-c3-smoke-20261011/acceptance.json",
+      "status": "PASS",
+      "report_identity": {
+        "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c3-game-c3-smoke-20261011/acceptance.json",
+        "sha256": "75d9f94bdc6cf49f037832a2db5aba50fc7273c1820ef1755eaa915b61eece58",
+        "bytes": 3106
+      },
+      "run_dir": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c3-game-c3-smoke-20261011",
+      "actual_report_status": "PASS"
+    },
+    {
+      "session": "c3-static-20261011",
+      "report": "bbport/runs/c3-game-c3-static-20261011/acceptance.json",
+      "status": "PASS",
+      "report_identity": {
+        "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c3-game-c3-static-20261011/acceptance.json",
+        "sha256": "59000eb86634e6b04676c01e0527de1530ee4cd3df248fe2b8d28e5d065e7b0d",
+        "bytes": 2938
+      },
+      "run_dir": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c3-game-c3-static-20261011",
+      "actual_report_status": "PASS"
+    },
+    {
+      "session": "c3-motion-20261011",
+      "report": "bbport/runs/c3-game-c3-motion-20261011/acceptance.json",
+      "status": "BLOCKED",
+      "report_identity": {
+        "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c3-game-c3-motion-20261011/acceptance.json",
+        "sha256": "90c62eec1540c52530e9e7817ab7da39cb0260a8a7e25477fc81c06cd6cbe74c",
+        "bytes": 340
+      },
+      "run_dir": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c3-game-c3-motion-20261011",
+      "actual_report_status": "BLOCKED"
+    },
+    {
+      "session": "c3-motion2-20261011",
+      "report": "bbport/runs/c3-game-c3-motion2-20261011/acceptance.json",
+      "status": "BLOCKED_MOTION_NOT_PROVEN",
+      "report_identity": {
+        "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c3-game-c3-motion2-20261011/acceptance.json",
+        "sha256": "d9ab9491c8543c2e112a7b2627c0fc7cdf4315270057f40b3000e5ceecba59b0",
+        "bytes": 432
+      },
+      "run_dir": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c3-game-c3-motion2-20261011",
+      "actual_report_status": "BLOCKED_MOTION_NOT_PROVEN"
+    },
+    {
+      "session": "c3-motion3-20261011",
+      "report": "bbport/runs/c3-game-c3-motion3-20261011/acceptance.json",
+      "status": "PASS",
+      "report_identity": {
+        "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c3-game-c3-motion3-20261011/acceptance.json",
+        "sha256": "c16e131a38afb45f58ba8a9678fb9ed1ac7c2d1511e392764ea4e5952dc8ded6",
+        "bytes": 3685
+      },
+      "run_dir": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c3-game-c3-motion3-20261011",
+      "actual_report_status": "PASS"
+    },
+    {
+      "session": "c3-skip-20261011",
+      "report": "bbport/runs/c3-game-c3-skip-20261011/acceptance.json",
+      "status": "PASS",
+      "report_identity": {
+        "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c3-game-c3-skip-20261011/acceptance.json",
+        "sha256": "bd363cfa792739507659cae0d1a874ff91792da5fa546743f3f266968d418cd6",
+        "bytes": 2455
+      },
+      "run_dir": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c3-game-c3-skip-20261011",
+      "actual_report_status": "PASS"
+    },
+    {
+      "session": "c3-timeout-20261011",
+      "report": "bbport/runs/c3-game-c3-timeout-20261011/acceptance.json",
+      "status": "PASS_EXPECTED_TIMEOUT_ISOLATION",
+      "report_identity": {
+        "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c3-game-c3-timeout-20261011/acceptance.json",
+        "sha256": "90cafa8cc42ae1058c914a617947af30c5e1529333c47f1b6d87102f3a5f0060",
+        "bytes": 2815
+      },
+      "run_dir": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c3-game-c3-timeout-20261011",
+      "actual_report_status": "PASS_EXPECTED_TIMEOUT_ISOLATION"
+    },
+    {
+      "session": "c3-exit-20261011",
+      "report": "bbport/runs/c3-game-c3-exit-20261011/acceptance.json",
+      "status": "PASS_EXPECTED_HELPER_EARLY_EXIT",
+      "report_identity": {
+        "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c3-game-c3-exit-20261011/acceptance.json",
+        "sha256": "1054b6ea19d8a20ebb11a44f0102742798180a0505baa5ab2490b6c2cfd713a2",
+        "bytes": 2447
+      },
+      "run_dir": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c3-game-c3-exit-20261011",
+      "actual_report_status": "PASS_EXPECTED_HELPER_EARLY_EXIT"
+    },
+    {
+      "session": "c3-late-20261011",
+      "report": "bbport/runs/c3-game-c3-late-20261011/acceptance.json",
+      "status": "PASS_REAL_LATE_ARRIVAL_EXPIRED_SESSION_NONCONSUMPTION",
+      "report_identity": {
+        "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c3-game-c3-late-20261011/acceptance.json",
+        "sha256": "d9b44e685e8197c1d0db7ceb7ab1adb07b147cdce9ad30da2ba81089795a406e",
+        "bytes": 2971
+      },
+      "run_dir": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c3-game-c3-late-20261011",
+      "actual_report_status": "PASS_REAL_LATE_ARRIVAL_EXPIRED_SESSION_NONCONSUMPTION"
+    }
+  ],
+  "root_baseline_binary_backup": {
+    "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/baselines/c3-accepted-20261011/manifest.json",
+    "sha256": "8be1ce9f826f88672a2cc6ecfa5089c4ee5eace91004a4ff59fd2f4f99213912",
+    "bytes": 3441
+  },
+  "independent_A_reviews": [
+    "smoke4 tuple/full readback/signature/finite/alpha/FD/exit",
+    "motion3 all120 model/protocol and five camera/full readbacks, readable FD identities only",
+    "timeout actual expired input30.005s and postCONT exit3",
+    "earlyexit actual input kill/reap9 beforedeadline",
+    "late ready/truecomplete equivalence, source4341/f0 actualEvaluate1+fence/fullstats, input14.59ready/30expired/49.63late, no consumption/merge and actualexit3"
+  ],
+  "limitations": [
+    "Static native whole FD identity changes17/17; bridge GPU FD identities stable and owned payloads retired",
+    "Motion Wine cold slot80 unreadable; remaining83 valid identities and active-retired/final equal; all four true export payload identities retired",
+    "Late gate proves actual arrival after permanent quarantine and no consumption, not an explicit late-file parser event",
+    "30s failure budget and expensive diagnostics not interactive performance acceptance",
+    "Nonzero jitter, scaling, exposure calibration, parameter UI, model resize/restart and long play remain unverified"
+  ],
+  "late_wording": "Real late arrival + expired-session nonconsumption/fail-closed; native does not parse late complete after quarantine",
+  "runtime_binaries_archived": false,
+  "raw_pixels_archived": false,
+  "model_or_SDK_copied_into_commit": false,
+  "GPU_execution_by_A": false,
+  "C4": "NOT_RUN",
+  "C5": "NOT_RUN",
+  "C6": "NOT_RUN",
+  "additional_evidence_index": [
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c3-game-c3-motion3-20261011/root-fd-diff.json",
+      "sha256": "9410f95628f91ba12b33b6f44545b3812615df4192c23dd4625fbd9c3acea2e4",
+      "bytes": 375
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c3-game-c3-motion3-20261011/root-camera-audit.json",
+      "sha256": "f61bf5c4f1e3d94a2b52ea089b508b24a6ef1bc03370d3fef5793ea540ef5ba1",
+      "bytes": 4864
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c3-game-c3-motion3-20261011/wine-result.json",
+      "sha256": "60afedc403177c508880518bf4254fe894291e45f511f402436e193e9f81495a",
+      "bytes": 522
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c3-game-c3-motion3-20261011/native-helper-exit.json",
+      "sha256": "13177d9996d1e6161fc33da3906bd4c1eb9238bc33cb70fb8b267751b063884e",
+      "bytes": 37
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c3-game-c3-late-20261011/root-late-observer.json",
+      "sha256": "c9b31b337a350e90cd4733a4da944b78d40511f58e8df424bf4c0a1c024098b1",
+      "bytes": 2216
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c3-game-c3-late-20261011/wine-result.json",
+      "sha256": "4ff095e6bae7ba47ae0a494ef1060d973d05dfb7e030a65b9feb310cbd2eb62e",
+      "bytes": 393
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c3-game-c3-late-20261011/native-helper-exit.json",
+      "sha256": "cc72ad80141837f404d6716c8281c4e5c095dac581e230a2aaddf86bf5e81d42",
+      "bytes": 40
+    }
+  ]
+}

@@ -1,0 +1,63 @@
+--- c3/wine_game_nr_resident.cpp
++++ c3-fault/wine_game_nr_resident_fault.cpp
+@@ -145,6 +145,33 @@
+   const char*names[]={"encode_ms","evaluate_commands_ms","resolve_ms","validation_ms","readbacks_ms","release_ms"};
+   for(unsigned i=0;i<6;i++)j[names[i]]=double((q[i+1]-q[i])&mask)*properties.limits.timestampPeriod/1e6;
+   j["total_ms"]=double((q[6]-q[0])&mask)*properties.limits.timestampPeriod/1e6;j["timestamp_period_ns"]=properties.limits.timestampPeriod;j["timestamp_valid_bits"]=timestamp_bits;return j;
++ }
++ // Fault-only artifact: real completed f0 inference is deliberately published late.
++ void fault_delay_before_complete(const Json& complete){
++  if(frame_index!=0)return;
++  require(!negative&&nr->safe&&!in_flight&&evaluates==1&&resolves==1,"fault needs actual fenced first inference",3);
++  auto ready=complete;ready["op"]="fault_publish_ready";ready["status"]="FAULT_PUBLISH_READY";
++  ready["output_valid"]=false;ready["model_valid"]=false;
++  const auto start=GetTickCount64();ready["fault_ready_tick_ms"]=start;
++  ready["fault_delay_ms"]=35000;ready["fault_delay_hard_max_ms"]=40000;
++  ready["fault_frame_elapsed_before_delay_ms"]=start-frame_start;
++  ready["fault_variant"]="after-final-deadline-before-real-complete-v1";
++  atomic_text(dir+"\\"+name("fault-publish-ready",frame_index),ready.dump()+"\n");
++  printf("FAULT_PUBLISH_READY frame=%u source_game_frame=%llu actual_Evaluate=1 result=1 resolve=1 actual_GPU_fence=1 final_deadline_check_passed=1 delay_ms=35000 hard_max_ms=40000 complete_not_published=1 ready_tick_ms=%llu\n",frame_index,(unsigned long long)source_game_frame,(unsigned long long)start);
++  Sleep(35000);
++  const auto elapsed=GetTickCount64()-start;
++  printf("FAULT_DELAY_FINISHED actual_delay_ms=%llu hard_max_ms=40000\n",(unsigned long long)elapsed);
++  require(elapsed>=35000&&elapsed<=40000,"fault delay outside fixed bounded window; no late complete published",3);
++  // Deliberately pass the genuine complete through unchanged despite native timeout/abort.
++ }
++ void fault_after_complete(){
++  if(frame_index!=0)return;
++  const bool aborted=GetFileAttributesA((dir+"\\native.abort").c_str())!=INVALID_FILE_ATTRIBUTES;
++  const auto now=GetTickCount64();
++  printf("FAULT_REAL_COMPLETE_PUBLISHED frame=%u source_game_frame=%llu published_tick_ms=%llu frame_elapsed_ms=%llu native_abort=%u next_frame_forbidden=1 normal_release=0\n",frame_index,(unsigned long long)source_game_frame,(unsigned long long)now,(unsigned long long)(now-frame_start),unsigned(aborted));
++  // Native abort is checked immediately after the original atomic complete publication.
++  require(aborted,"fault complete published but expected native abort absent; negative gate not satisfied",2);
++  throw Stop(3,"fault real late complete published after native abort; abnormal private-process exit only");
+  }
+  void frame(){
+   input();frame_start=GetTickCount64();require(nr->safe,"prior actual GPU fence before persistent reuse",3);begin();nr->reset_frame_descriptors();
+@@ -197,7 +224,8 @@
+   e["sentinel"]=-1234;e["nr_exposure"]=1;e["nr_pre_exposure"]=1;e["frame_elapsed_ms"]=GetTickCount64()-frame_start;e["audit_readback_bytes"]=audit_full?82944000u:64u;
+   frame_deadline("stats_digests_audit_done");
+   printf("C3_GPU_CHECK frame=%u raw_finite=%u raw_written=%u raw_nan=%u out_finite=%u out_written=%u out_sentinel=%u source_finite=%u alpha_equal=%u visited=%u input_signature=%u,%u output_signature=%u,%u GPU_complete=1 audit_kind=%s CPU_stats_ms=%llu GPU_wait_ms=%llu\n",frame_index,stats[0],stats[1],stats[13],stats[2],stats[3],stats[14],stats[4],stats[6],stats[11],stats[7],stats[8],stats[9],stats[10],audit_full?"full":"gpu_full_scan",(unsigned long long)cpu_stats_ms,(unsigned long long)gpu_wait_ms);
+-  atomic_text(dir+"\\"+name("complete",frame_index),e.dump()+"\n");wait_control(frame_index,"consumed","consumed","CONSUMED");++frames_done;
++  fault_delay_before_complete(e);
++  atomic_text(dir+"\\"+name("complete",frame_index),e.dump()+"\n");fault_after_complete();wait_control(frame_index,"consumed","consumed","CONSUMED");++frames_done;
+  }
+  void retire_shared(){
+   wait_control(frame_count,"native-released","release","NATIVE_RELEASED",false);require(!in_flight&&nr&&nr->safe,"shared retirement requires actual GPU completion");
+@@ -321,12 +349,14 @@
+  }
+ };
+ int main(int argc,char**argv){
+- if(argc!=4){fputs("Usage: wine_game_nr_resident.exe resident|skipEvaluate RUN_DIR_WINDOWS SESSION\n",stderr);return 2;}
++ if(argc!=4){fputs("Usage: wine_game_nr_resident_fault.exe resident|skipEvaluate RUN_DIR_WINDOWS SESSION\n",stderr);return 2;}
+  GameNrHelper c;c.dir=argv[2];c.session=argv[3];c.mode=argv[1];
+  if(!freopen((c.dir+"\\wine-helper.log").c_str(),"w",stdout)||!freopen((c.dir+"\\wine-helper-stderr.log").c_str(),"w",stderr))return 4;setvbuf(stdout,nullptr,_IONBF,0);
+  try{
+   require((c.mode=="resident"||c.mode=="skipEvaluate")&&safe_token(c.session),"isolated C3 modes/safe unique session only");c.negative=c.mode=="skipEvaluate";
+-  c.config();c.environment();atomic_text(c.dir+"\\pid-request.json",Json{{"session",c.session},{"exe",module(GetModuleHandleA(nullptr))},{"win_pid",GetCurrentProcessId()}}.dump()+"\n");
++  char fault_flag[96]{};const auto flag_size=GetEnvironmentVariableA("C3_FAULT_DELAY_COMPLETE",fault_flag,sizeof fault_flag);
++  require(flag_size==sizeof("after-fence-f0-35000ms")-1&&std::string(fault_flag)=="after-fence-f0-35000ms"&&c.mode=="resident","fault-only exact opt-in C3_FAULT_DELAY_COMPLETE=after-fence-f0-35000ms and resident required",3);
++  c.config();require(c.frame_count==4&&c.diagnostic_case=="smoke","fault-only isolated four-frame smoke-shaped control envelope",3);c.environment();atomic_text(c.dir+"\\pid-request.json",Json{{"session",c.session},{"exe",module(GetModuleHandleA(nullptr))},{"win_pid",GetCurrentProcessId()}}.dump()+"\n");
+   auto pt=read_bounded(c.dir,"native.pid",c.control_timeout_ms);char*end=nullptr;auto pid=strtoul(pt.c_str(),&end,10);while(end&&(*end=='\r'||*end=='\n'||*end==' '))++end;require(end&&!*end&&pid>1&&pid<=0x7fffffff,"native-supplied verified actual exporter Linux PID",3);c.linux_pid=uint32_t(pid);
+   printf("ACTUAL_LINUX_PID pid=%u authority=native_ancestor_verified session=%s\n",c.linux_pid,c.session.c_str());
+   c.cold_start=GetTickCount64();c.init_nr_device();c.phase_tick("device_ready");c.init_model();c.phase_tick("model_private_ready");
