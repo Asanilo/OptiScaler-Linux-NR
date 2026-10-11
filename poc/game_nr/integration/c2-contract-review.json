@@ -1,0 +1,9 @@
+{
+  "status": "APPROVED_SOURCE_AND_BUILD_ONLY",
+  "sha256": "2a46defd341f87270f3d5afaf45cec4a24012f5e3bdd5fdd8617a40f0cd2c214",
+  "contract": "opti/C2-CONTRACT.md",
+  "reviewed_snapshot": "integration/C2-CONTRACT.reviewed.md",
+  "utc": "2026-10-11T08:52:25.406849+00:00",
+  "decision": "raw/sourceColor/output local readbacks; raw input_digest compares Wine sourceColor; no keep digest or signed-zero canonical extension",
+  "GPU": "NOT_RUN; root review of actual compiled candidate required"
+}

@@ -1,0 +1,707 @@
+{
+  "status": "PASS",
+  "scope": "C2_real_game_single_frame_NR",
+  "contract": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti/C2-CONTRACT.md",
+  "contract_sha256": "2a46defd341f87270f3d5afaf45cec4a24012f5e3bdd5fdd8617a40f0cd2c214",
+  "build": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti/out-c2/build.json",
+  "build_sha256": "3b8340d211d5fe82de173f3999c17ec9b64ffa50c92d26f78f4a07208cdbbdb6",
+  "artifact": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti/out-c2/wine_game_nr_helper.exe",
+  "artifact_sha256": "80a95341599817f3a70eae3544ffa657dd392fdae1dc185c75f9249446fc25cd",
+  "artifact_bytes": 1079808,
+  "source_pins": {
+    "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti/wine_game_nr_helper.cpp": "48bca7b4d13a56e19645453e76dddca49d1034222d5d4de04da3ce7c95967f3a",
+    "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti/c2_production_adapter.h": "8bde11032852c1cad7233b912efcadfd00b6d6fce39154754309cadd369af642",
+    "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti/c2_game_transport.h": "181fe2a53d15b99a481e37f457087ec08f937ee52c4afc760906d9398b90452e",
+    "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti/c2_game_control.h": "220450d9639edae736d2dca4cee4ab10a02da4f0e66d77948c0e92d0e998c9f2",
+    "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti/fixture_util.h": "e84cc94db63d8fbdf5cf19ca3bec67c5901be54d2e440dea0f5acd273100f42d",
+    "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti/build_c2.py": "69714f1a76ab83942b7c4b3ad6cb20cc427934dd8a7b852642beb7fa974c140e",
+    "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti/c2-runtime-pins.json": "b77f71956a7d5827525cc591617eabe0c0236df3774d21489313da9aa1549d84",
+    "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti/C2-CONTRACT.md": "2a46defd341f87270f3d5afaf45cec4a24012f5e3bdd5fdd8617a40f0cd2c214"
+  },
+  "build_log": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti/out-c2/build-history/20261011T085919.998426Z/helper-build.log",
+  "gates": {
+    "compile": {
+      "status": "PASS",
+      "expected_exit_code": 0,
+      "actual_exit_code": 0
+    },
+    "contract_static_check": {
+      "status": "PASS",
+      "note": "reviewed2a46/sourceColor/one-frame/1080/boundedGPUwait; root preliminary review no definite first-run blocker"
+    },
+    "peer_native_cross_review": {
+      "status": "PASS",
+      "evidence": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c2-build-20261011T092138Z",
+      "note": "manifest24 sources/live/snapshot match; final diff only named transfer barrier compile fix and duplicate merge ledger removal; strict field getters/wire echo/return merge barrier/negative fields closed"
+    },
+    "single_model1080": {
+      "status": "PASS",
+      "actual_evaluate_calls": 1
+    },
+    "skipEvaluate_game_fallback": {
+      "status": "PASS",
+      "actual_evaluate_calls": 0
+    },
+    "transport_digest": {
+      "status": "PASS"
+    },
+    "alpha_present": {
+      "status": "PASS"
+    },
+    "FD_lifecycle": {
+      "status": "PASS"
+    },
+    "C3": {
+      "status": "NOT_RUN",
+      "note": "NR continuous frames/history, NR resize/restart/late and long-run lifecycle are outside this single-frame result; G2 shader lifecycle does not establish these NR gates"
+    },
+    "quality": {
+      "status": "NOT_RUN"
+    },
+    "performance": {
+      "status": "NOT_RUN",
+      "note": "12s stats/digests/dumps diagnostic overhead; 16ms frame-start-to-fence interval is not pure NR performance"
+    }
+  },
+  "C1_G1_G2_G3_changed": false,
+  "stable_repository_changed": false,
+  "GPU_executed": true,
+  "limits": [
+    "one frame per private fresh case, HDR DLAA1920x1080 1:1/current and previous viewport+SR jitter0/full valid rect, same-texel real guides/MVScale1",
+    "actual exposure unknown; manualWhitePoint1/Passthrough0/nrExposure1/nrPreExposure1 are explicit fixture choices",
+    "source alpha is all zero in both captured frames; bit preservation verified for these inputs, no arbitrary-alpha coverage claim",
+    "no quality/performance claim; helper full stats/digests/dumps12039/12073ms, 16ms positive fence interval is not pure NR performance",
+    "C3 continuous NR/history/resize/restart/timeout long-run validation NOT_RUN; G2 shader-only lifecycle is not equivalent",
+    "no FG/D3D12/game-wide deployment/nonzero-jitter/guide resampling/external semaphore claim",
+    "no GPU rerun or compilation during this final documentation review; all frozen source/exe/build/runtime pins retained"
+  ],
+  "history": [
+    {
+      "phase": "before_real_game_runtime",
+      "status": "BUILD_ONLY_PASS",
+      "record": {
+        "status": "BUILD_ONLY_PASS",
+        "scope": "C2_real_game_single_frame_NR",
+        "contract": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti/C2-CONTRACT.md",
+        "contract_sha256": "2a46defd341f87270f3d5afaf45cec4a24012f5e3bdd5fdd8617a40f0cd2c214",
+        "build": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti/out-c2/build.json",
+        "build_sha256": "3b8340d211d5fe82de173f3999c17ec9b64ffa50c92d26f78f4a07208cdbbdb6",
+        "artifact": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti/out-c2/wine_game_nr_helper.exe",
+        "artifact_sha256": "80a95341599817f3a70eae3544ffa657dd392fdae1dc185c75f9249446fc25cd",
+        "artifact_bytes": 1079808,
+        "source_pins": {
+          "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti/wine_game_nr_helper.cpp": "48bca7b4d13a56e19645453e76dddca49d1034222d5d4de04da3ce7c95967f3a",
+          "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti/c2_production_adapter.h": "8bde11032852c1cad7233b912efcadfd00b6d6fce39154754309cadd369af642",
+          "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti/c2_game_transport.h": "181fe2a53d15b99a481e37f457087ec08f937ee52c4afc760906d9398b90452e",
+          "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti/c2_game_control.h": "220450d9639edae736d2dca4cee4ab10a02da4f0e66d77948c0e92d0e998c9f2",
+          "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti/fixture_util.h": "e84cc94db63d8fbdf5cf19ca3bec67c5901be54d2e440dea0f5acd273100f42d",
+          "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti/build_c2.py": "69714f1a76ab83942b7c4b3ad6cb20cc427934dd8a7b852642beb7fa974c140e",
+          "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti/c2-runtime-pins.json": "b77f71956a7d5827525cc591617eabe0c0236df3774d21489313da9aa1549d84",
+          "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti/C2-CONTRACT.md": "2a46defd341f87270f3d5afaf45cec4a24012f5e3bdd5fdd8617a40f0cd2c214"
+        },
+        "build_log": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti/out-c2/build-history/20261011T085919.998426Z/helper-build.log",
+        "gates": {
+          "compile": {
+            "status": "PASS",
+            "expected_exit_code": 0,
+            "actual_exit_code": 0
+          },
+          "contract_static_check": {
+            "status": "PASS",
+            "note": "reviewed2a46/sourceColor/one-frame/1080/boundedGPUwait; root preliminary review no definite first-run blocker"
+          },
+          "peer_native_cross_review": {
+            "status": "NOT_RUN",
+            "note": "B native C2 still being completed; no final runtime readiness claim"
+          },
+          "single_model1080": {
+            "status": "NOT_RUN",
+            "actual_evaluate_calls": null
+          },
+          "skipEvaluate_game_fallback": {
+            "status": "NOT_RUN",
+            "actual_evaluate_calls": null
+          },
+          "transport_digest": {
+            "status": "NOT_RUN"
+          },
+          "alpha_present": {
+            "status": "NOT_RUN"
+          },
+          "FD_lifecycle": {
+            "status": "NOT_RUN"
+          }
+        },
+        "C1_G1_G2_G3_changed": false,
+        "stable_repository_changed": false,
+        "GPU_executed": false,
+        "limits": [
+          "no quality/performance claim",
+          "no NR1080 runtime PASS from compiler success",
+          "no C3/FG/nonzero-jitter/known exposure claim"
+        ]
+      }
+    }
+  ],
+  "reviewed_at_UTC": "2026-10-11T09:32:07.302386+00:00",
+  "compile": {
+    "status": "PASS",
+    "expected_exit_code": 0,
+    "actual_exit_code": 0,
+    "build": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti/out-c2/build.json",
+    "build_sha256": "3b8340d211d5fe82de173f3999c17ec9b64ffa50c92d26f78f4a07208cdbbdb6",
+    "new_build_during_final_review": false,
+    "native_build_evidence": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c2-build-20261011T092138Z/build-result.json",
+    "native_libbbgpu_sha256": "206bf8213092bece3a8d7c9dd8a8c9b3baa34485f4771e440815d8bda44d781e"
+  },
+  "runtime": {
+    "status": "PASS",
+    "scope": "one_real_game_HDR_DLAA_1920x1080_1to1_jitter0_NR_frame_and_independent_skipEvaluate_control",
+    "executed_by": "Integration/root",
+    "rerun_by_opti": false,
+    "cases": {
+      "single": {
+        "status": "PASS",
+        "mode": "single",
+        "session": "c2-single-20261011",
+        "run": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c2-game-c2-single-20261011",
+        "invocation": "/home/arinp/Code/nrbridge-design/game-poc-20261011/runs/single-nr-20261011T092353.861428Z",
+        "source_game_frame": 3895,
+        "input": {
+          "completed_GPU": true,
+          "depth_inverted": false,
+          "exposure_source": "unknown",
+          "exposure_valid": false,
+          "frame": 0,
+          "generation": 0,
+          "hdr": true,
+          "height": 1080,
+          "input_digest": "27ff43e92dd78eb9",
+          "input_digest_algorithm": "fnv1a64_rgba32f_bytes",
+          "input_digest_bytes": 33177600,
+          "manual_white_point": 1.0,
+          "mode": "single",
+          "model_valid": false,
+          "mv_scale_x": 1.0,
+          "mv_scale_y": 1.0,
+          "nr_jitter_x": 0.0,
+          "nr_jitter_y": 0.0,
+          "nr_reset": 1,
+          "op": "input",
+          "output_valid": false,
+          "passthrough": false,
+          "previous_sr_jitter_x": 0.0,
+          "previous_sr_jitter_y": 0.0,
+          "previous_viewport_jitter_x": 0.0,
+          "previous_viewport_jitter_y": 0.0,
+          "profile_id": "hdr-run-dlaa-1to1-j0-manual-wp1-v1",
+          "render_height": 1080,
+          "render_width": 1920,
+          "resource_set": "c2-single-20261011-g0",
+          "session": "c2-single-20261011",
+          "source_frame_ms": 17.775787353515625,
+          "source_game_frame": 3895,
+          "source_reset": false,
+          "sr_history_jitter_zero_from_start": true,
+          "sr_initial_reset_observed": true,
+          "sr_initial_source_game_frame": 1588,
+          "sr_jitter_x": 0.0,
+          "sr_jitter_y": 0.0,
+          "status": "INPUT_READY",
+          "valid_rect": {
+            "height": 1080,
+            "width": 1920,
+            "x": 0,
+            "y": 0
+          },
+          "viewport_jitter_x": 0.0,
+          "viewport_jitter_y": 0.0,
+          "width": 1920
+        },
+        "actual_model_and_output": {
+          "evaluate_calls": 1,
+          "evaluate_result": 1,
+          "resolve_calls": 1,
+          "reset": 1,
+          "raw_rgb_finite": 6220800,
+          "raw_rgb_written": 6220800,
+          "raw_rgb_total": 6220800,
+          "resolved_rgba_finite": 8294400,
+          "resolved_rgba_written": 8294400,
+          "resolved_rgba_total": 8294400,
+          "source_alpha_finite": 2073600,
+          "source_alpha_preserved": 2073600,
+          "source_alpha_total": 2073600,
+          "current_input_digest_match": true,
+          "output_valid": true,
+          "model_valid": true
+        },
+        "input_digest_algorithm": "fnv1a64_rgba32f_bytes",
+        "input_digest": "27ff43e92dd78eb9",
+        "input_digest_bytes": 33177600,
+        "output_digest_algorithm": "fnv1a64_rgba32f_bytes",
+        "output_digest": "e94f29d8d7ca5a93",
+        "output_digest_bytes": 33177600,
+        "independent_readback_review": {
+          "source_RGBA_finite": 8294400,
+          "raw_RGB_finite": 6220800,
+          "raw_RGB_NaN": 0,
+          "output_RGBA_finite": 8294400,
+          "output_sentinel_count": 0,
+          "source_alpha_range": [
+            0.0,
+            0.0
+          ],
+          "resolved_source_alpha_bit_equal": 2073600,
+          "FNV_recomputed_from_local_artifacts": true
+        },
+        "negative_control": null,
+        "presentation": {
+          "status": "PASS",
+          "stage": "C2",
+          "mode": "single",
+          "session": "c2-single-20261011",
+          "selected_output": true,
+          "merge_tick": 7795,
+          "present_frame_number": 3896,
+          "swapchain_present": true,
+          "dump": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c2-game-c2-single-20261011/dump/f002_present_1920x1080_bgra.raw",
+          "bytes": 8294400
+        },
+        "FD_lifecycle": {
+          "status": "PASS",
+          "Wine_baseline_count": 83,
+          "Wine_final_count": 83,
+          "Wine_full_inventory_equal": true,
+          "native_baseline_count": 136,
+          "native_final_count": 136,
+          "native_full_inventory_equal_this_run": true,
+          "game_global_FD_count_not_general_leak_predicate": true,
+          "slot_payloads": [
+            {
+              "role": "color",
+              "raw_fd": 80,
+              "device": 12,
+              "inode": 3335,
+              "remaining_after_raw_fd_retirement": 0,
+              "remaining_Wine_final": 0,
+              "remaining_native_final": 0
+            },
+            {
+              "role": "depth",
+              "raw_fd": 81,
+              "device": 12,
+              "inode": 3336,
+              "remaining_after_raw_fd_retirement": 0,
+              "remaining_Wine_final": 0,
+              "remaining_native_final": 0
+            },
+            {
+              "role": "mv",
+              "raw_fd": 82,
+              "device": 12,
+              "inode": 3337,
+              "remaining_after_raw_fd_retirement": 0,
+              "remaining_Wine_final": 0,
+              "remaining_native_final": 0
+            },
+            {
+              "role": "output",
+              "raw_fd": 83,
+              "device": 12,
+              "inode": 3338,
+              "remaining_after_raw_fd_retirement": 0,
+              "remaining_Wine_final": 0,
+              "remaining_native_final": 0
+            }
+          ]
+        },
+        "helper_exit": {
+          "expected_exit_code": 0,
+          "actual_exit_code": 0,
+          "wait_status": 0,
+          "normal_release": true
+        },
+        "outer_cleanup": {
+          "end_reason": "CONTROLLED_STOP",
+          "actual_exit_code": 0,
+          "own_process_group_members_after": [],
+          "private_prefix_members_after": [],
+          "outer_controlled_stop_not_helper_normal_release_evidence": true
+        },
+        "diagnostic_timing": {
+          "frame_start_to_GPU_fence_readback_complete_ms": 16,
+          "helper_full_stats_digests_dumps_ms": 12039,
+          "pure_NR_latency": "NOT_MEASURED",
+          "real_time_performance_claim": false
+        },
+        "local_artifacts": [
+          {
+            "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c2-game-c2-single-20261011/raw-f0.rgba16f",
+            "bytes": 16588800,
+            "sha256": "22e084a4e4c70f213668ce8d74eb1d829ab719f316ccdef1c62a4ab98f825d57",
+            "peer_consumed_CPU_pixel_file": false
+          },
+          {
+            "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c2-game-c2-single-20261011/source-f0.rgba32f",
+            "bytes": 33177600,
+            "sha256": "134ff6f945dfcbac663848b0af6a29307591b77d9b46cbcbb932dcbb514deed8",
+            "peer_consumed_CPU_pixel_file": false
+          },
+          {
+            "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c2-game-c2-single-20261011/resolve-f0.rgba32f",
+            "bytes": 33177600,
+            "sha256": "c5cef692a44a74303d308a46e5d8994be54d4608ec0e6849405a24e7fd2963d6",
+            "peer_consumed_CPU_pixel_file": false
+          }
+        ],
+        "evidence": [
+          {
+            "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c2-game-c2-single-20261011/wine-helper.log",
+            "bytes": 13996,
+            "sha256": "79803d65fed2601e558595d9c6b9403ea497d637efb15750796337c552a77d61"
+          },
+          {
+            "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c2-game-c2-single-20261011/input-c2-single-20261011-g0-f0.json",
+            "bytes": 1106,
+            "sha256": "ba521e14745c7d1ae6e6b21e8b28978954c0e44553120be04a22bfa01260226a"
+          },
+          {
+            "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c2-game-c2-single-20261011/complete-c2-single-20261011-g0-f0.json",
+            "bytes": 1663,
+            "sha256": "6cb2e112adfed3ac744a85787a5fe1d0324ec2c20c6c523034e35e28073f130c"
+          },
+          {
+            "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c2-game-c2-single-20261011/wine-result.json",
+            "bytes": 509,
+            "sha256": "e5a8ba8d454d261157c3f9daed8aa7da2c2ee1e28cd7788b11ff6fdc71bef390"
+          },
+          {
+            "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c2-game-c2-single-20261011/native-helper-exit.json",
+            "bytes": 37,
+            "sha256": "13177d9996d1e6161fc33da3906bd4c1eb9238bc33cb70fb8b267751b063884e"
+          },
+          {
+            "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c2-game-c2-single-20261011/native-audited-c2-single-20261011-g0.json",
+            "bytes": 525,
+            "sha256": "4dc304f1515b0b1b04d255628b772673143e6ddd3b7a83cbc8e1229782f274e6"
+          },
+          {
+            "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c2-game-c2-single-20261011/wine-fd-baseline.json",
+            "bytes": 6970,
+            "sha256": "fe90266e5dbbc58ea3018db3bc6bd9dc1996577bb539493e46f756edb78e29b9"
+          },
+          {
+            "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c2-game-c2-single-20261011/wine-fd-final.json",
+            "bytes": 6970,
+            "sha256": "fe90266e5dbbc58ea3018db3bc6bd9dc1996577bb539493e46f756edb78e29b9"
+          },
+          {
+            "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c2-game-c2-single-20261011/native-fd-baseline.json",
+            "bytes": 12442,
+            "sha256": "f07cbc08b097c7e9a2893356dcb842e2c3360770eeffccc28b288329d7a0b701"
+          },
+          {
+            "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c2-game-c2-single-20261011/native-fd-final.json",
+            "bytes": 12442,
+            "sha256": "f07cbc08b097c7e9a2893356dcb842e2c3360770eeffccc28b288329d7a0b701"
+          },
+          {
+            "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/runs/single-nr-20261011T092353.861428Z/manifest.json",
+            "bytes": 27368,
+            "sha256": "7c9f1241ce8b012a4fd056db0ac03ec457246a4ff99917241dc11083c92ddc35"
+          },
+          {
+            "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/runs/single-nr-20261011T092353.861428Z/game.log",
+            "bytes": 703654,
+            "sha256": "d3e280e6939f9f9b2238a692db609fc5291fb3271b0a9710b473e67c98f09885"
+          },
+          {
+            "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/runs/single-nr-20261011T092353.861428Z/result.json",
+            "bytes": 1679,
+            "sha256": "91f72cca65953c8c6e8581164dcd53622764756533334bf71872ec1494e57b28"
+          }
+        ]
+      },
+      "skipEvaluate": {
+        "status": "PASS",
+        "mode": "skipEvaluate",
+        "session": "c2-skip-20261011",
+        "run": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c2-game-c2-skip-20261011",
+        "invocation": "/home/arinp/Code/nrbridge-design/game-poc-20261011/runs/single-nr-20261011T092634.085116Z",
+        "source_game_frame": 3810,
+        "input": {
+          "completed_GPU": true,
+          "depth_inverted": false,
+          "exposure_source": "unknown",
+          "exposure_valid": false,
+          "frame": 0,
+          "generation": 0,
+          "hdr": true,
+          "height": 1080,
+          "input_digest": "16c0689dd33ad50d",
+          "input_digest_algorithm": "fnv1a64_rgba32f_bytes",
+          "input_digest_bytes": 33177600,
+          "manual_white_point": 1.0,
+          "mode": "skipEvaluate",
+          "model_valid": false,
+          "mv_scale_x": 1.0,
+          "mv_scale_y": 1.0,
+          "nr_jitter_x": 0.0,
+          "nr_jitter_y": 0.0,
+          "nr_reset": 1,
+          "op": "input",
+          "output_valid": false,
+          "passthrough": false,
+          "previous_sr_jitter_x": 0.0,
+          "previous_sr_jitter_y": 0.0,
+          "previous_viewport_jitter_x": 0.0,
+          "previous_viewport_jitter_y": 0.0,
+          "profile_id": "hdr-run-dlaa-1to1-j0-manual-wp1-v1",
+          "render_height": 1080,
+          "render_width": 1920,
+          "resource_set": "c2-skip-20261011-g0",
+          "session": "c2-skip-20261011",
+          "source_frame_ms": 16.896865844726562,
+          "source_game_frame": 3810,
+          "source_reset": false,
+          "sr_history_jitter_zero_from_start": true,
+          "sr_initial_reset_observed": true,
+          "sr_initial_source_game_frame": 2050,
+          "sr_jitter_x": 0.0,
+          "sr_jitter_y": 0.0,
+          "status": "INPUT_READY",
+          "valid_rect": {
+            "height": 1080,
+            "width": 1920,
+            "x": 0,
+            "y": 0
+          },
+          "viewport_jitter_x": 0.0,
+          "viewport_jitter_y": 0.0,
+          "width": 1920
+        },
+        "actual_model_and_output": {
+          "evaluate_calls": 0,
+          "evaluate_result": 0,
+          "resolve_calls": 0,
+          "reset": 1,
+          "raw_rgb_finite": 0,
+          "raw_rgb_written": 0,
+          "raw_rgb_total": 6220800,
+          "resolved_rgba_finite": 8294400,
+          "resolved_rgba_written": 0,
+          "resolved_rgba_total": 8294400,
+          "source_alpha_finite": 2073600,
+          "source_alpha_preserved": 0,
+          "source_alpha_total": 2073600,
+          "current_input_digest_match": true,
+          "output_valid": false,
+          "model_valid": false
+        },
+        "input_digest_algorithm": "fnv1a64_rgba32f_bytes",
+        "input_digest": "16c0689dd33ad50d",
+        "input_digest_bytes": 33177600,
+        "output_digest_algorithm": "fnv1a64_rgba32f_bytes",
+        "output_digest": "bdaa6cda0dada325",
+        "output_digest_bytes": 33177600,
+        "independent_readback_review": {
+          "source_RGBA_finite": 8294400,
+          "raw_RGB_finite": 0,
+          "raw_RGB_NaN": 6220800,
+          "output_RGBA_finite": 8294400,
+          "output_sentinel_count": 8294400,
+          "source_alpha_range": [
+            0.0,
+            0.0
+          ],
+          "resolved_source_alpha_bit_equal": 0,
+          "FNV_recomputed_from_local_artifacts": true
+        },
+        "negative_control": {
+          "same_normal_output_predicate_rejected_INVALID": true,
+          "native_sentinel_diagnostic_only": true,
+          "original_SR_fallback": true
+        },
+        "presentation": {
+          "status": "PASS",
+          "stage": "C2",
+          "mode": "skipEvaluate",
+          "session": "c2-skip-20261011",
+          "selected_output": false,
+          "merge_tick": 7625,
+          "present_frame_number": 3811,
+          "swapchain_present": true,
+          "dump": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c2-game-c2-skip-20261011/dump/f002_present_1920x1080_bgra.raw",
+          "bytes": 8294400
+        },
+        "FD_lifecycle": {
+          "status": "PASS",
+          "Wine_baseline_count": 83,
+          "Wine_final_count": 83,
+          "Wine_full_inventory_equal": true,
+          "native_baseline_count": 136,
+          "native_final_count": 136,
+          "native_full_inventory_equal_this_run": true,
+          "game_global_FD_count_not_general_leak_predicate": true,
+          "slot_payloads": [
+            {
+              "role": "color",
+              "raw_fd": 80,
+              "device": 12,
+              "inode": 3369,
+              "remaining_after_raw_fd_retirement": 0,
+              "remaining_Wine_final": 0,
+              "remaining_native_final": 0
+            },
+            {
+              "role": "depth",
+              "raw_fd": 81,
+              "device": 12,
+              "inode": 3370,
+              "remaining_after_raw_fd_retirement": 0,
+              "remaining_Wine_final": 0,
+              "remaining_native_final": 0
+            },
+            {
+              "role": "mv",
+              "raw_fd": 82,
+              "device": 12,
+              "inode": 3371,
+              "remaining_after_raw_fd_retirement": 0,
+              "remaining_Wine_final": 0,
+              "remaining_native_final": 0
+            },
+            {
+              "role": "output",
+              "raw_fd": 83,
+              "device": 12,
+              "inode": 3372,
+              "remaining_after_raw_fd_retirement": 0,
+              "remaining_Wine_final": 0,
+              "remaining_native_final": 0
+            }
+          ]
+        },
+        "helper_exit": {
+          "expected_exit_code": 0,
+          "actual_exit_code": 0,
+          "wait_status": 0,
+          "normal_release": true
+        },
+        "outer_cleanup": {
+          "end_reason": "CONTROLLED_STOP",
+          "actual_exit_code": 0,
+          "own_process_group_members_after": [],
+          "private_prefix_members_after": [],
+          "outer_controlled_stop_not_helper_normal_release_evidence": true
+        },
+        "diagnostic_timing": {
+          "frame_start_to_GPU_fence_readback_complete_ms": 0,
+          "helper_full_stats_digests_dumps_ms": 12073,
+          "pure_NR_latency": "NOT_MEASURED",
+          "real_time_performance_claim": false
+        },
+        "local_artifacts": [
+          {
+            "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c2-game-c2-skip-20261011/raw-f0.rgba16f",
+            "bytes": 16588800,
+            "sha256": "c9b521ef54f376800bfffbd72e30cb425615958b816e88be5cdab676a219cb8f",
+            "peer_consumed_CPU_pixel_file": false
+          },
+          {
+            "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c2-game-c2-skip-20261011/source-f0.rgba32f",
+            "bytes": 33177600,
+            "sha256": "f4164d6f3bbaf85588454534f1e938b008b7974102f8ef773a7e64576572f5cb",
+            "peer_consumed_CPU_pixel_file": false
+          },
+          {
+            "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c2-game-c2-skip-20261011/resolve-f0.rgba32f",
+            "bytes": 33177600,
+            "sha256": "8b90314df28902785dc24a4ae737af4a37b32d2d19fb3cb7ab0b03fdae7bb2c8",
+            "peer_consumed_CPU_pixel_file": false
+          }
+        ],
+        "evidence": [
+          {
+            "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c2-game-c2-skip-20261011/wine-helper.log",
+            "bytes": 13972,
+            "sha256": "d6b6e641e3a285e8b826b0ab90496417c8b3e64c0c705d8fd1131568c049b993"
+          },
+          {
+            "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c2-game-c2-skip-20261011/input-c2-skip-20261011-g0-f0.json",
+            "bytes": 1108,
+            "sha256": "3842ddd4024e3b50598c39fc8b73050f22d7dfbdeb9457b8818f331d6ccfecbe"
+          },
+          {
+            "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c2-game-c2-skip-20261011/complete-c2-skip-20261011-g0-f0.json",
+            "bytes": 1638,
+            "sha256": "4ee1cde3bbfdc293cf44b498c51fc5348a3cc27ed5fdec09a75ec3ec14a85b9e"
+          },
+          {
+            "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c2-game-c2-skip-20261011/wine-result.json",
+            "bytes": 513,
+            "sha256": "47adbf84730647a1d37effd4e2b8c7cca5d9a8e66ab40495fd6cbdc47d1e3116"
+          },
+          {
+            "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c2-game-c2-skip-20261011/native-helper-exit.json",
+            "bytes": 37,
+            "sha256": "13177d9996d1e6161fc33da3906bd4c1eb9238bc33cb70fb8b267751b063884e"
+          },
+          {
+            "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c2-game-c2-skip-20261011/native-audited-c2-skip-20261011-g0.json",
+            "bytes": 527,
+            "sha256": "e0209822849d2c1d847e9eeb224624b7b0c5e1ecec181c625638440c1386db76"
+          },
+          {
+            "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c2-game-c2-skip-20261011/wine-fd-baseline.json",
+            "bytes": 6960,
+            "sha256": "d50328fd197e6d345812c6b62dbc440a42a0389e153ccb793d4b3d51726d0dfc"
+          },
+          {
+            "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c2-game-c2-skip-20261011/wine-fd-final.json",
+            "bytes": 6960,
+            "sha256": "d50328fd197e6d345812c6b62dbc440a42a0389e153ccb793d4b3d51726d0dfc"
+          },
+          {
+            "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c2-game-c2-skip-20261011/native-fd-baseline.json",
+            "bytes": 12434,
+            "sha256": "f3dc814af8dd373f13eec615312c906dac7b8b1dcbd530d7cbe9fe61216bd96c"
+          },
+          {
+            "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c2-game-c2-skip-20261011/native-fd-final.json",
+            "bytes": 12434,
+            "sha256": "f3dc814af8dd373f13eec615312c906dac7b8b1dcbd530d7cbe9fe61216bd96c"
+          },
+          {
+            "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/runs/single-nr-20261011T092634.085116Z/manifest.json",
+            "bytes": 27364,
+            "sha256": "78a4b00923ba28e628804b64d26e731a1ea65c5f7fc91387dff6bc01fb7ad205"
+          },
+          {
+            "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/runs/single-nr-20261011T092634.085116Z/game.log",
+            "bytes": 817824,
+            "sha256": "beda8e461f8ad467be46191196042ed3db6329fe60f8a26b13ea4c63dcfa16c5"
+          },
+          {
+            "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/runs/single-nr-20261011T092634.085116Z/result.json",
+            "bytes": 1684,
+            "sha256": "e944a657f091dda55993701131850cf69d734e27e1426b055cdc4ab9d009103b"
+          }
+        ]
+      }
+    },
+    "model": {
+      "path": "/home/arinp/Code/dlss5_linux/dll/runtime/nvngx_dlssnr.dll",
+      "file_format": "PE x86-64",
+      "bytes": 165830144,
+      "sha256": "6eb209e764f39872625debd6abaf45e2bb6322f6f270f781f70c059ae30b3927"
+    },
+    "device_uuid": "8734fac9db30c279a340fe117ace6365",
+    "driver_uuid": "e960882b01705057bf3ec686505f8776",
+    "transport_consistency_evidence": "raw sourceColor and resolved shared output FNV match between Wine and Linux; no CPU pixels IPC",
+    "model_execution_evidence": "actual Evaluate/result1 + GPU completion + raw poison coverage + finite resolved output + skipEvaluate retains poison and is rejected; hashes alone are not model proof"
+  },
+  "GPU_executed_by": "Integration/root",
+  "GPU_executed_by_this_agent": false
+}

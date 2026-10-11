@@ -1,0 +1,8 @@
+c2-baseline/out-c2/
+c3/out/
+c3/runs/
+*.exe
+*.dll
+*.raw
+*.rgba16f
+*.rgba32f

@@ -1,0 +1,80 @@
+{
+  "scope": "C2_SOURCE_ARCHIVE_ONLY",
+  "base_branch": "linux-nr",
+  "base_commit": "eaada4c2667a26947f6b934008870025e3e1cfb5",
+  "experimental_branch": "poc/game-nr-20261011",
+  "files": [
+    {
+      "original": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti/wine_game_nr_helper.cpp",
+      "archived": "poc/game_nr/c2-baseline/wine_game_nr_helper.cpp",
+      "sha256": "48bca7b4d13a56e19645453e76dddca49d1034222d5d4de04da3ce7c95967f3a",
+      "bytes": 36205
+    },
+    {
+      "original": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti/c2_production_adapter.h",
+      "archived": "poc/game_nr/c2-baseline/c2_production_adapter.h",
+      "sha256": "8bde11032852c1cad7233b912efcadfd00b6d6fce39154754309cadd369af642",
+      "bytes": 18172
+    },
+    {
+      "original": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti/c2_game_transport.h",
+      "archived": "poc/game_nr/c2-baseline/c2_game_transport.h",
+      "sha256": "181fe2a53d15b99a481e37f457087ec08f937ee52c4afc760906d9398b90452e",
+      "bytes": 13693
+    },
+    {
+      "original": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti/c2_game_control.h",
+      "archived": "poc/game_nr/c2-baseline/c2_game_control.h",
+      "sha256": "220450d9639edae736d2dca4cee4ab10a02da4f0e66d77948c0e92d0e998c9f2",
+      "bytes": 2593
+    },
+    {
+      "original": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti/fixture_util.h",
+      "archived": "poc/game_nr/c2-baseline/fixture_util.h",
+      "sha256": "e84cc94db63d8fbdf5cf19ca3bec67c5901be54d2e440dea0f5acd273100f42d",
+      "bytes": 1637
+    },
+    {
+      "original": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti/build_c2.py",
+      "archived": "poc/game_nr/c2-baseline/build_c2.py",
+      "sha256": "69714f1a76ab83942b7c4b3ad6cb20cc427934dd8a7b852642beb7fa974c140e",
+      "bytes": 4424
+    },
+    {
+      "original": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti/c2-runtime-pins.json",
+      "archived": "poc/game_nr/c2-baseline/c2-runtime-pins.json",
+      "sha256": "b77f71956a7d5827525cc591617eabe0c0236df3774d21489313da9aa1549d84",
+      "bytes": 36387
+    },
+    {
+      "original": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti/C2-CONTRACT.md",
+      "archived": "poc/game_nr/c2-baseline/C2-CONTRACT.md",
+      "sha256": "2a46defd341f87270f3d5afaf45cec4a24012f5e3bdd5fdd8617a40f0cd2c214",
+      "bytes": 19661
+    },
+    {
+      "original": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti/C2-README.md",
+      "archived": "poc/game_nr/c2-baseline/C2-README.md",
+      "sha256": "eaa1372dcb3438a73b6412f1f4c5325f1b60ec7032857505a2df754a14f1150c",
+      "bytes": 6599
+    },
+    {
+      "original": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti/c2-results.json",
+      "archived": "poc/game_nr/c2-baseline/c2-results.json",
+      "sha256": "896e2ba656180323026a516424e9ef4d2db114e7a26ff82b50d4a40e4d34ff2e",
+      "bytes": 31576
+    }
+  ],
+  "original_tested_executable": {
+    "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti/out-c2/wine_game_nr_helper.exe",
+    "sha256": "80a95341599817f3a70eae3544ffa657dd392fdae1dc185c75f9249446fc25cd",
+    "bytes": 1079808
+  },
+  "actual_runtime_evidence": "/home/arinp/Code/nrbridge-design/game-poc-20261011/integration/c2-final-audit.json",
+  "original_single_run": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c2-game-c2-single-20261011",
+  "original_skip_run": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/c2-game-c2-skip-20261011",
+  "archived_source_rebuild": "NOT_RUN",
+  "archived_binary_exists": false,
+  "models_PE_game_assets_outputs_committed": false,
+  "originals_not_moved_or_modified": true
+}
