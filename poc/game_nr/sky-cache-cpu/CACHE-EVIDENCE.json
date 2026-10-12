@@ -1,0 +1,27 @@
+{
+  "schema": "sky-cache-cpu-evidence-index-v1",
+  "status": "PASS_CPU_ONLY",
+  "result_path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/sky-cache-cpu/out/build-history/20261012T184849.250557Z/build-result.json",
+  "result_sha256": "1dc59c10579c8e3b0b80d1e6155fffede9757f94905d2b24915cf0d41d749f07",
+  "checks_count": 41,
+  "known_domain": "synthetic aligned guides/color",
+  "actual_four_frame_sources": [
+    18645,
+    18646,
+    18647,
+    18648
+  ],
+  "actual_adjacent_links": 3,
+  "actual_asset_count": 12,
+  "game_spatial_reprojection": "NOT_RUN",
+  "phase": "UNVERIFIED",
+  "Wine": "NOT_RUN",
+  "GPU": "NOT_RUN",
+  "model": "NOT_RUN",
+  "quality": "NOT_EVALUATED",
+  "fixture_commit": "b7d34763042f8ab8c15660eefbd0de52e64deabf",
+  "frozen_fixture_build_sha256": "ab828b20c1c37999fda8b8b6fab849f735281e0101f7ffe1fd2eab455cdc4eb4",
+  "frozen_fixture_artifact_sha256": "53911ec7799dfb37487bea9eff1e74f32de7b6f01bd82cbdae39776d811b4ce1",
+  "frozen_fixture_distinct_active_pins_match": 165,
+  "raw_result_path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/sky-cache-cpu/out/build-history/20261012T184849.250557Z/stdout.json"
+}

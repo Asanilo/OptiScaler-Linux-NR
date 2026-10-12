@@ -1,0 +1,86 @@
+{
+  "schema": "sky-cache-selected-cpu-source-map-v1",
+  "source": {
+    "path": "/home/arinp/Code/dlss5_linux/OptiScaler-Linux-NR/OptiScaler/shaders/dlssnr/precompile/dlssnr_cache.hlsl",
+    "sha256": "0efdd31f1976435b0b956b94814c96a70e68310b838f916aecc289375af02b4f"
+  },
+  "functions": [
+    {
+      "lines": 85,
+      "name": "LinDepth",
+      "cpu": "linear_depth"
+    },
+    {
+      "lines": 113,
+      "name": "Eps",
+      "cpu": "epsilon=1/512"
+    },
+    {
+      "lines": 121,
+      "name": "ClampEdit",
+      "cpu": "clamp_edit"
+    },
+    {
+      "lines": 145,
+      "name": "FreshEdit",
+      "cpu": "fresh_edit"
+    },
+    {
+      "lines": 222,
+      "name": "MotionUvOffset",
+      "cpu": "motion_uv"
+    },
+    {
+      "lines": 266,
+      "name": "CatmullRom",
+      "cpu": "catmull_rom"
+    },
+    {
+      "lines": 296,
+      "name": "ReadHistory",
+      "cpu": "read_history"
+    },
+    {
+      "lines": 413,
+      "name": "FetchLevel",
+      "cpu": "fetch_level"
+    },
+    {
+      "lines": 452,
+      "name": "ReduceToFirstLevel",
+      "cpu": "reduce_first"
+    },
+    {
+      "lines": 513,
+      "name": "Capture/Reproject",
+      "cpu": "capture/reproject"
+    },
+    {
+      "lines": 638,
+      "name": "Pyramid",
+      "cpu": "pyramid"
+    },
+    {
+      "lines": 665,
+      "name": "Apply",
+      "cpu": "apply"
+    }
+  ],
+  "wrapper_only": [
+    "whole lineage invalid -> byte-exact currentSR",
+    "zero effective edit -> original pixel bits",
+    "owned_snapshot immutable/unedited input",
+    "max four contiguous links; no source_gap substitute"
+  ],
+  "excluded": [
+    "crossfade",
+    "temporal stabilization",
+    "despeckle",
+    "Mode5 accumulated model MV",
+    "Mode6 JBU",
+    "native transport",
+    "real game guide phase",
+    "GPU execution"
+  ],
+  "runtime": "NOT_RUN"
+}
