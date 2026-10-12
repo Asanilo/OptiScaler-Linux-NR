@@ -1,0 +1,38 @@
+{
+  "schema": "sky-late-arrival-cpu-evidence-v1",
+  "status": "PASS_CPU_ONLY",
+  "checks": 50,
+  "run_count": 1,
+  "CPU_timeout_seconds": 60,
+  "exit_code": 0,
+  "raw_result": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/sky-cache-cpu/out/late-arrival-20261012T192854.337082Z/result.json",
+  "raw_result_sha256": "14453f21ebc12474db645be1efa933283059b72d347d10d7c083f76fffd126bb",
+  "stderr": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/sky-cache-cpu/out/late-arrival-20261012T192854.337082Z/stderr.log",
+  "stderr_bytes": 0,
+  "new_sources": {
+    "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/sky-cache-cpu/late_arrival.py": "6a2a082570bd0dcbabd99a07fec3a9823401edf8e7d784debbf7d6783708121f",
+    "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/sky-cache-cpu/test_late_arrival.py": "000bf307c72a346293a0b7f9e24ec3983e221befe2442d33cc9adff531f5b070"
+  },
+  "readonly_Sky_CPU_core": {
+    "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/sky-cache-cpu/sky_cache_reference.py",
+    "sha256": "2dddc83def2405f72751a209413eeaff2d75f04d8fce65bdeed7cb05f82c17c5"
+  },
+  "math_reused": [
+    "capture",
+    "reproject",
+    "apply"
+  ],
+  "scope": "Immutable origin-source/depth capture then complete strict 1..4 unedited aligned synthetic links; byte-identical to same-current immediate mode. Any pending/incomplete/reset/identity/epoch/age failure returns currentSR bits before Sky calls.",
+  "max_link_snapshots": 4,
+  "synthetic_pixels": 128,
+  "origin_snapshots": "immutable bytes-backed independent ownership; model result origin must equal retained origin",
+  "model_history": "NOT_RUN; no source-gap inference",
+  "GPU": "NOT_RUN",
+  "Wine": "NOT_RUN",
+  "native_nonblocking_delivery": "NOT_IMPLEMENTED",
+  "GPU_fence": "NOT_IMPLEMENTED",
+  "real_720_to_1080_phase": "UNVERIFIED",
+  "quality": "NOT_EVALUATED",
+  "frozen314pins": "MATCH",
+  "old_CPU7_fixture14_Vk12_PE_build": "UNCHANGED"
+}
