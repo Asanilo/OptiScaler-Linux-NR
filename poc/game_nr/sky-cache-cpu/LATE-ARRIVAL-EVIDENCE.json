@@ -1,17 +1,17 @@
 {
   "schema": "sky-late-arrival-cpu-evidence-v1",
   "status": "PASS_CPU_ONLY",
-  "checks": 50,
-  "run_count": 1,
+  "checks": 52,
+  "run_count": 2,
   "CPU_timeout_seconds": 60,
   "exit_code": 0,
-  "raw_result": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/sky-cache-cpu/out/late-arrival-20261012T192854.337082Z/result.json",
-  "raw_result_sha256": "14453f21ebc12474db645be1efa933283059b72d347d10d7c083f76fffd126bb",
-  "stderr": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/sky-cache-cpu/out/late-arrival-20261012T192854.337082Z/stderr.log",
+  "raw_result": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/sky-cache-cpu/out/late-arrival-20261012T193125.340893Z/result.json",
+  "raw_result_sha256": "7a4587cf098013a07a486ce60761b6f59f761bd077414b3f834b671798d91721",
+  "stderr": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/sky-cache-cpu/out/late-arrival-20261012T193125.340893Z/stderr.log",
   "stderr_bytes": 0,
   "new_sources": {
-    "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/sky-cache-cpu/late_arrival.py": "6a2a082570bd0dcbabd99a07fec3a9823401edf8e7d784debbf7d6783708121f",
-    "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/sky-cache-cpu/test_late_arrival.py": "000bf307c72a346293a0b7f9e24ec3983e221befe2442d33cc9adff531f5b070"
+    "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/sky-cache-cpu/late_arrival.py": "10ebae19619dc3e0ad44a6300aac8f0a43e0bcf01a874d86eccdcdb59c488198",
+    "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/sky-cache-cpu/test_late_arrival.py": "87df67fa3aaed12ae7ef63f84ce55da00592d6fe18293eb92a2db1e67eabcf35"
   },
   "readonly_Sky_CPU_core": {
     "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/sky-cache-cpu/sky_cache_reference.py",
@@ -34,5 +34,14 @@
   "real_720_to_1080_phase": "UNVERIFIED",
   "quality": "NOT_EVALUATED",
   "frozen314pins": "MATCH",
-  "old_CPU7_fixture14_Vk12_PE_build": "UNCHANGED"
+  "old_CPU7_fixture14_Vk12_PE_build": "UNCHANGED",
+  "prior_results": [
+    {
+      "checks": 50,
+      "raw_result": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/sky-cache-cpu/out/late-arrival-20261012T192854.337082Z/result.json",
+      "sha256": "14453f21ebc12474db645be1efa933283059b72d347d10d7c083f76fffd126bb",
+      "scope": "Prior CPU50 pass lacked final-current link_from/jitter metadata gate; retained history, superseded by CPU52."
+    }
+  ],
+  "metadata_fix": "Before any Sky calls, require last.link_from==current.link_from and last.jitter_delta==current.jitter_delta; two rejection cases require0capture/reproject/apply and currentSR bit identity."
 }

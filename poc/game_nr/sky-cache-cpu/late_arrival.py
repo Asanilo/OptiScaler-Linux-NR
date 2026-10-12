@@ -88,6 +88,7 @@ def catch_up(origin,arrival,links,current):
         expected=link.source
     if expected!=current.source or len(links)!=age:return fallback('MISSING_OR_INCOMPLETE_CHAIN_CURRENT_SR')
     last=links[-1] if links else origin
+    if last.link_from!=current.link_from or last.jitter_delta!=current.jitter_delta:return fallback('CURRENT_LINK_METADATA_MISMATCH_CURRENT_SR')
     if any(a.dtype!=b.dtype or a.shape!=b.shape or a.tobytes()!=b.tobytes() for a,b in [(last.color,current.color),(last.depth,current.depth),(last.mv,current.mv)]):return fallback('CURRENT_SNAPSHOT_MISMATCH_CURRENT_SR')
     # The result belongs to origin. Never capture against arrival-time currentSR/current-depth.
     history,_=sky.capture(origin.color,arrival.edited,origin.depth,origin.source)
