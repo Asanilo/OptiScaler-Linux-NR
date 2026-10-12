@@ -1,0 +1,55 @@
+{
+  "schema": "sky-cache-vk-build-only-evidence-v1",
+  "status": "BUILD_ONLY_PASS",
+  "build_path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/sky-cache-vk/out/build.json",
+  "build_sha256": "6b0c954cf5d7db348979c308eef7847a4abd840ae51e360bd86cad4881587f1f",
+  "artifact": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/sky-cache-vk/out/wine_sky_cache_fixture.exe",
+  "artifact_sha256": "e806d8d86dfb0078a10edbafeaeecc920fef1f0a2dbf1b70ae2d14677b8c57cc",
+  "production_shader_source_sha256": "0efdd31f1976435b0b956b94814c96a70e68310b838f916aecc289375af02b4f",
+  "SPIRV_sha256": "83a9ff0f0b00d524c621183217ea991231bc06d9a17d4f5507f598760389e043",
+  "build_steps": [
+    {
+      "name": "HLSL-to-SPIRV",
+      "exit_code": 0,
+      "log": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/sky-cache-vk/out/build-history/20261012T190827.316923Z/HLSL-to-SPIRV.log"
+    },
+    {
+      "name": "spirv-val",
+      "exit_code": 0,
+      "log": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/sky-cache-vk/out/build-history/20261012T190827.316923Z/spirv-val.log"
+    },
+    {
+      "name": "spirv-dis",
+      "exit_code": 0,
+      "log": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/sky-cache-vk/out/build-history/20261012T190827.316923Z/spirv-dis.log"
+    },
+    {
+      "name": "PE-cache-compile",
+      "exit_code": 0,
+      "log": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/sky-cache-vk/out/build-history/20261012T190827.316923Z/PE-cache-compile.log"
+    }
+  ],
+  "CPU_checks": 27,
+  "schema_negative_count": 20,
+  "same_origin_refresh_gate": "CPU_schema+PE_before_Vulkan_init; explicit rejection test PASS_CPU",
+  "same_origin_scope": "Only origin==source refresh. Late-origin capture/catchup NOT_IMPLEMENTED; cannot reuse current base for old model edit.",
+  "source_count": 12,
+  "readonly_pin_count": 288,
+  "generated_pin_count": 110,
+  "frozen_unique_pin_count": 314,
+  "first_compile_failure_preserved": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/sky-cache-vk/out/build-history/20261012T190424.445057Z/build.json",
+  "first_failure_reason": "new CacheOwned referenced inherited header-local V macro after it was undefined; fixed only new SCV dispatch macro and signed format flag",
+  "CPU_core_commit": "9534ff4753981b2953cf75073546fb09b254b5aa",
+  "lowres_fixture_commit": "b7d34763042f8ab8c15660eefbd0de52e64deabf",
+  "saved_lowres_model_cost": "NOT_IDENTIFIED; source actual two-run comparison preserved, no fastest-frame inference",
+  "candidate_scope": "1ownedslot/2historybanks/max4editlinks; unmodified source, full-strength Sky low band; no native/game integration",
+  "Wine": "NOT_RUN",
+  "Vulkan_API": "NOT_RUN",
+  "GPU": "NOT_RUN",
+  "model_create": 0,
+  "model_Evaluate": 0,
+  "model_resolve": 0,
+  "real_guide_phase": "UNVERIFIED",
+  "quality": "NOT_EVALUATED",
+  "performance": "NOT_MEASURED"
+}

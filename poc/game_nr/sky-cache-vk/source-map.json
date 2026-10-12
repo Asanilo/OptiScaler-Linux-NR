@@ -1,0 +1,42 @@
+{
+  "schema": "sky-vulkan-source-map-v1",
+  "production_hlsl": {
+    "path": "/home/arinp/Code/dlss5_linux/OptiScaler-Linux-NR/OptiScaler/shaders/dlssnr/precompile/dlssnr_cache.hlsl",
+    "sha256": "0efdd31f1976435b0b956b94814c96a70e68310b838f916aecc289375af02b4f"
+  },
+  "production_constants": "/home/arinp/Code/dlss5_linux/OptiScaler-Linux-NR/OptiScaler/shaders/dlssnr/DlssNr_CacheCommon.h",
+  "direct_math_reuse": {
+    "Capture2": 513,
+    "Reproject1": 513,
+    "Pyramid3": 638,
+    "Apply4": 665,
+    "MotionUvOffset": 222,
+    "ReadHistory": 296,
+    "ReduceToFirstLevel": 452
+  },
+  "adaptations": [
+    "explicit vk bindings, no register collision",
+    "gWholeValid byte156 original constant padding",
+    "whole invalid currentSR bypass",
+    "zero effective edit original bit identity"
+  ],
+  "owned_utility_reuse": "../high-fps-fixture/lowres_production_adapter.h image/buffer/upload/readback/fence only; NR shader() and NGX APIs never called",
+  "new_host_code": [
+    "cache_context.h: own Vulkan context and required limits",
+    "cache_owned.h: own allocation, descriptor/pipeline/CB sequence",
+    "sky_cache_fixture.cpp: immutable upload, bounded links/lineage, completed-fence readback/cleanup"
+  ],
+  "optional_modes_off": [
+    "crossfade",
+    "JBU",
+    "adaptive",
+    "temporal",
+    "stabilization",
+    "despeckle",
+    "debug"
+  ],
+  "phase": "UNVERIFIED_REAL_GUIDE_DOMAIN",
+  "GPU": "NOT_RUN",
+  "model_API_calls": 0,
+  "scope": "standalone CPU/generated shader/PE build, not native game integration"
+}
