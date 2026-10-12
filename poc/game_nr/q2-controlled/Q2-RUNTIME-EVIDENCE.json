@@ -1,0 +1,146 @@
+{
+  "schema_version": 1,
+  "scope": "Q2_TEXT_MILESTONE_FUNCTIONAL_PASS_SEMANTICS_NOT_IDENTIFIED",
+  "archive_parent_commit": "390dbb03c8f89b51139f74d6ccac9c968c55f626",
+  "compile": {
+    "status": "PASS_BUILD_ONLY",
+    "build": {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/q2-controlled/out/build.json",
+      "bytes": 76062,
+      "sha256": "4c8332fd6a96e57b847afb11b973141bb6dbafcfc5354d4b381e647d5b938826"
+    },
+    "artifact": {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/q2-controlled/out/wine_q2_motion_fixture.exe",
+      "bytes": 1112064,
+      "sha256": "01e52cbc37a9752897648425654bd2957e816d0727b1c3b2a44d2fbf1b5a0166"
+    },
+    "sources_unchanged": {
+      "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/q2-controlled/wine_q2_motion_fixture.cpp": "9003d9acd695eee01733a948e0e1af5d4c3acca86705703fd909513361826ed9",
+      "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/q2-controlled/q2_production_adapter.h": "913d34385a9b01686d0947b015fe29d0ba0066b515e2797d2bbe90bcb393181a",
+      "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/q2-controlled/q2_common.h": "51e9542819a7879622a6c1d0b1b7094fd82e4185b7b255340623a04339aa7a60",
+      "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/q2-controlled/q2_vulkan_context.h": "208ee23935b2b4645e7348a90bda15f19c6b4c4db87af572a7dffbc89d92a793",
+      "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/q2-controlled/q2_case.h": "8d091985632890b8f4e585b4b8d116a2f19b27a8149f70b273d3b93ad21f19d3",
+      "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/q2-controlled/case_check.cpp": "6d4c4fac0628c1789dec38197c5662151d6153e7e1ef3bf899a1343e2028ab2d",
+      "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/q2-controlled/build_q2.py": "caa41ac5e470c22624aa0c47a8bd0e506e89d692b93bea0a8bb8c0e00c55a4af",
+      "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/q2-controlled/README.md": "75bf1f8e1289ffe39677ff9e273b1d4856702ee01f82a4cf364f91f92e1378da"
+    }
+  },
+  "runtime": {
+    "executor": "Integration only",
+    "status": "FUNCTIONAL_PASS_6_OF_6",
+    "actual_launches": 6,
+    "evaluate_calls": 60,
+    "resolve_calls": 60,
+    "fresh_feature_create_calls": 30,
+    "feature_release_calls": 30,
+    "normal_shutdowns": 6,
+    "private_process_residuals": 0,
+    "case_fixture_records": [
+      {
+        "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/runs/q2-controlled-ref1080-s1-20261011T200847.310093Z/output/run-result.json",
+        "bytes": 39096,
+        "sha256": "6bae78506a2dee055f9033b6827b47d641b58cf2f1049e33224a57204857327a"
+      },
+      {
+        "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/runs/q2-controlled-ref1080-s15-20261011T200957.452390Z/output/run-result.json",
+        "bytes": 39089,
+        "sha256": "28c99ddfa758427974595ef8555586fa5fa7d44d71976cde89568c30ad449fe0"
+      },
+      {
+        "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/runs/q2-controlled-g720-raw-s1-20261011T201115.010898Z/output/run-result.json",
+        "bytes": 39041,
+        "sha256": "37346fad6dc582540f502de5897a2cfc9750b30b6d0bdf6a4b8e0393e154f180"
+      },
+      {
+        "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/runs/q2-controlled-g720-raw-s15-20261011T201224.288748Z/output/run-result.json",
+        "bytes": 39038,
+        "sha256": "28cca403f1a3a0753ad4987df3af22bef375760ff3fa99ca432e7b7cadb2e8eb"
+      },
+      {
+        "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/runs/q2-controlled-g720-corrected-s1-20261011T201335.049313Z/output/run-result.json",
+        "bytes": 39045,
+        "sha256": "03eb03e5addaac5e993c8cecd83652295f93a5f10afb955ca4b66b7179987fe8"
+      },
+      {
+        "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/runs/q2-controlled-g720-corrected-s15-20261011T201443.510584Z/output/run-result.json",
+        "bytes": 39051,
+        "sha256": "9b2eede829399b50a3468c346b9f500c45a197d40ec0b9a2beb0d3afe526c023"
+      }
+    ],
+    "case_audits": [
+      {
+        "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/integration/q2/audit-ref1080-s1.json",
+        "bytes": 28435,
+        "sha256": "adf04392de9e099fcc62628f392f670ef56e9bba47218d1ebde2ae07a64ff0be"
+      },
+      {
+        "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/integration/q2/audit-ref1080-s15.json",
+        "bytes": 28477,
+        "sha256": "b0da58723dd91fd922c2b9f26efaa3d798d9a032882070853c59d7ec058eb8c2"
+      },
+      {
+        "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/integration/q2/audit-g720-raw-s1.json",
+        "bytes": 28469,
+        "sha256": "672cbad56ae428a2ea0fc47f3861b1285b247fea945b93a831fab51841a86cdd"
+      },
+      {
+        "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/integration/q2/audit-g720-raw-s15.json",
+        "bytes": 28518,
+        "sha256": "e618fee8ab547de8e0d7db1538a978ac5478a6da0927bf1d17a057c8a5c8d047"
+      },
+      {
+        "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/integration/q2/audit-g720-corrected-s1.json",
+        "bytes": 28778,
+        "sha256": "da18165b63f51dd404f9f4d227590a6183e9d13fcec522aafcaa060a0ca2ca3e"
+      },
+      {
+        "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/integration/q2/audit-g720-corrected-s15.json",
+        "bytes": 28841,
+        "sha256": "31f6a97aa84559eebe90a2344488cd27b3fbae8b09c10af6f218187d368140b1"
+      }
+    ]
+  },
+  "semantics": {
+    "status": "NOT_IDENTIFIED",
+    "repeat_RMS_all": 0.0,
+    "MV_history_sensitive_all_cases": true,
+    "scale_phase_matched_pairs": 5,
+    "selected_winner": null,
+    "NR_MVecScale": "UNVERIFIED",
+    "game_phase": "UNVERIFIED",
+    "clean_truth_utility": "fixed preregistered metric retained; not universal NR visual quality",
+    "runtime_default_exposure_frame_ms": "UNVERIFIED_HOST_DECLARATIONS_NOT_SENT_TO_NR_API"
+  },
+  "evidence": [
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/integration/q2/controlled-final-result.json",
+      "bytes": 10301,
+      "sha256": "703aedfc4283a8488d43457f53482d0195acf588120a678ce2248f30d8932ad8"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/integration/q2/controlled-comparison.json",
+      "bytes": 2297,
+      "sha256": "09f06496268a1b0dee90bf7353e5737f459d5efb9fdbc7bc526bf01f08b3c38e"
+    },
+    {
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/integration/q2/utility-gate-evidence.json",
+      "bytes": 11497,
+      "sha256": "ad94e0e946312fa95ff6df0fe2fff8ee04b1c996bf94d8b29232fda3cbbdcba8"
+    }
+  ],
+  "preservation": {
+    "pinned_Q2_sources_modified": false,
+    "postrun_current_approval_pins_MATCH": 201,
+    "build_history_preserved": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-worktree/poc/game_nr/q2-controlled/out/build-history",
+    "excluded": [
+      "out/PE/SPV",
+      "assets/model/runtime/SDK",
+      "raw dumps",
+      "large logs",
+      "other untracked directories"
+    ],
+    "new_GPU_build_or_test_performed": false,
+    "120_semantic_gate_historical": "BLOCKED_NOT_RUN in archived Q2, new playable authorization tracked independently"
+  },
+  "license": "own GPL-3.0-or-later fixture text; MIT utility/header and Vulkan/NGX/proprietary model dependencies are readonly and excluded"
+}
