@@ -1,0 +1,252 @@
+{
+  "schema": "nr-highfps-captured-input-v1",
+  "origin": "single P1 session p1-quality-wait-diag4-20261012; untouched post-SR HDR1080 and actual720 guides",
+  "frames": [
+    {
+      "ordinal": 0,
+      "source_game_frame": 18645,
+      "source_reset": false,
+      "jitter": {
+        "viewport_jitter_x": 0.4375,
+        "viewport_jitter_y": -0.24074074625968933,
+        "previous_viewport_jitter_x": -0.0625,
+        "previous_viewport_jitter_y": 0.31481480598449707,
+        "sr_jitter_x": 0.4375,
+        "sr_jitter_y": -0.24074074625968933,
+        "previous_sr_jitter_x": -0.0625,
+        "previous_sr_jitter_y": 0.31481480598449707
+      },
+      "original_control": {
+        "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/p0-game-p1-quality-wait-diag4-20261012/frames/bucket-000000/input-p1-quality-wait-diag4-20261012-g0-f0.json",
+        "sha256": "f3e1b5deed47c0fcd3a1333885ecb126945f489cebe039f738b820b01052d3b6"
+      },
+      "assets": {
+        "source": {
+          "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/p0-game-p1-quality-wait-diag4-20261012/frames/bucket-000000/native-source-f0.rgba32f",
+          "windows_path": "Z:\\home\\arinp\\Code\\nrbridge-design\\game-poc-20261011\\bbport\\runs\\p0-game-p1-quality-wait-diag4-20261012\\frames\\bucket-000000\\native-source-f0.rgba32f",
+          "sha256": "4cf4840e813f53229367c0fd2a7c73448986c0feaa5432bc7a4bff8b121ded14",
+          "bytes": 33177600,
+          "format": 109,
+          "extent": [
+            1920,
+            1080
+          ],
+          "channels": 4,
+          "dtype": "float32_le"
+        },
+        "depth": {
+          "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/p0-game-p1-quality-wait-diag4-20261012/frames/bucket-000000/native-depth-f0.r32f",
+          "windows_path": "Z:\\home\\arinp\\Code\\nrbridge-design\\game-poc-20261011\\bbport\\runs\\p0-game-p1-quality-wait-diag4-20261012\\frames\\bucket-000000\\native-depth-f0.r32f",
+          "sha256": "cd4b90cce5dea7a83aef57925dcb646861563b018afc9f9b11c9b45beab2003d",
+          "bytes": 3686400,
+          "format": 100,
+          "extent": [
+            1280,
+            720
+          ],
+          "channels": 1,
+          "dtype": "float32_le"
+        },
+        "mv": {
+          "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/p0-game-p1-quality-wait-diag4-20261012/frames/bucket-000000/native-mv-f0.rg32f",
+          "windows_path": "Z:\\home\\arinp\\Code\\nrbridge-design\\game-poc-20261011\\bbport\\runs\\p0-game-p1-quality-wait-diag4-20261012\\frames\\bucket-000000\\native-mv-f0.rg32f",
+          "sha256": "ea168609fc02d39d925e60ce5cdc8284e2002941cb6c6e239b249837dfe11797",
+          "bytes": 7372800,
+          "format": 103,
+          "extent": [
+            1280,
+            720
+          ],
+          "channels": 2,
+          "dtype": "float32_le"
+        }
+      }
+    },
+    {
+      "ordinal": 1,
+      "source_game_frame": 18646,
+      "source_reset": false,
+      "jitter": {
+        "viewport_jitter_x": -0.46875,
+        "viewport_jitter_y": 0.09259259700775146,
+        "previous_viewport_jitter_x": 0.4375,
+        "previous_viewport_jitter_y": -0.24074074625968933,
+        "sr_jitter_x": -0.46875,
+        "sr_jitter_y": 0.09259259700775146,
+        "previous_sr_jitter_x": 0.4375,
+        "previous_sr_jitter_y": -0.24074074625968933
+      },
+      "original_control": {
+        "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/p0-game-p1-quality-wait-diag4-20261012/frames/bucket-000000/input-p1-quality-wait-diag4-20261012-g0-f1.json",
+        "sha256": "30a309607de861e9dc436608bc8856cec7caf06c47caaca2798740889bc4e688"
+      },
+      "assets": {
+        "source": {
+          "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/p0-game-p1-quality-wait-diag4-20261012/frames/bucket-000000/native-source-f1.rgba32f",
+          "windows_path": "Z:\\home\\arinp\\Code\\nrbridge-design\\game-poc-20261011\\bbport\\runs\\p0-game-p1-quality-wait-diag4-20261012\\frames\\bucket-000000\\native-source-f1.rgba32f",
+          "sha256": "accb224d8af28f76b7efecc024f00250cdad3977faf891891348566fa97c69b9",
+          "bytes": 33177600,
+          "format": 109,
+          "extent": [
+            1920,
+            1080
+          ],
+          "channels": 4,
+          "dtype": "float32_le"
+        },
+        "depth": {
+          "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/p0-game-p1-quality-wait-diag4-20261012/frames/bucket-000000/native-depth-f1.r32f",
+          "windows_path": "Z:\\home\\arinp\\Code\\nrbridge-design\\game-poc-20261011\\bbport\\runs\\p0-game-p1-quality-wait-diag4-20261012\\frames\\bucket-000000\\native-depth-f1.r32f",
+          "sha256": "161da7be2f4a34f7efbed25092e79684e289bd6fa8fa0c380ae754cb018f3161",
+          "bytes": 3686400,
+          "format": 100,
+          "extent": [
+            1280,
+            720
+          ],
+          "channels": 1,
+          "dtype": "float32_le"
+        },
+        "mv": {
+          "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/p0-game-p1-quality-wait-diag4-20261012/frames/bucket-000000/native-mv-f1.rg32f",
+          "windows_path": "Z:\\home\\arinp\\Code\\nrbridge-design\\game-poc-20261011\\bbport\\runs\\p0-game-p1-quality-wait-diag4-20261012\\frames\\bucket-000000\\native-mv-f1.rg32f",
+          "sha256": "05f8b827788c084e8048429cbebde0f1a1c88fd4233e7ae9b0984ef52addb2c0",
+          "bytes": 7372800,
+          "format": 103,
+          "extent": [
+            1280,
+            720
+          ],
+          "channels": 2,
+          "dtype": "float32_le"
+        }
+      }
+    },
+    {
+      "ordinal": 2,
+      "source_game_frame": 18647,
+      "source_reset": false,
+      "jitter": {
+        "viewport_jitter_x": 0.03125,
+        "viewport_jitter_y": 0.4259259104728699,
+        "previous_viewport_jitter_x": -0.46875,
+        "previous_viewport_jitter_y": 0.09259259700775146,
+        "sr_jitter_x": 0.03125,
+        "sr_jitter_y": 0.4259259104728699,
+        "previous_sr_jitter_x": -0.46875,
+        "previous_sr_jitter_y": 0.09259259700775146
+      },
+      "original_control": {
+        "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/p0-game-p1-quality-wait-diag4-20261012/frames/bucket-000000/input-p1-quality-wait-diag4-20261012-g0-f2.json",
+        "sha256": "41fcb923d63101091d5bd824b66c6ae951e5ebe9194ded3c9502a558699bfa12"
+      },
+      "assets": {
+        "source": {
+          "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/p0-game-p1-quality-wait-diag4-20261012/frames/bucket-000000/native-source-f2.rgba32f",
+          "windows_path": "Z:\\home\\arinp\\Code\\nrbridge-design\\game-poc-20261011\\bbport\\runs\\p0-game-p1-quality-wait-diag4-20261012\\frames\\bucket-000000\\native-source-f2.rgba32f",
+          "sha256": "85c677d86f7d6354e00671e9ab570e6b4fb9172e12a9d32514b20072d9f97097",
+          "bytes": 33177600,
+          "format": 109,
+          "extent": [
+            1920,
+            1080
+          ],
+          "channels": 4,
+          "dtype": "float32_le"
+        },
+        "depth": {
+          "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/p0-game-p1-quality-wait-diag4-20261012/frames/bucket-000000/native-depth-f2.r32f",
+          "windows_path": "Z:\\home\\arinp\\Code\\nrbridge-design\\game-poc-20261011\\bbport\\runs\\p0-game-p1-quality-wait-diag4-20261012\\frames\\bucket-000000\\native-depth-f2.r32f",
+          "sha256": "dca68eaae2e225b34b54e5f207c99d8c363f5c227a27f9d35d441fabf9db9ef8",
+          "bytes": 3686400,
+          "format": 100,
+          "extent": [
+            1280,
+            720
+          ],
+          "channels": 1,
+          "dtype": "float32_le"
+        },
+        "mv": {
+          "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/p0-game-p1-quality-wait-diag4-20261012/frames/bucket-000000/native-mv-f2.rg32f",
+          "windows_path": "Z:\\home\\arinp\\Code\\nrbridge-design\\game-poc-20261011\\bbport\\runs\\p0-game-p1-quality-wait-diag4-20261012\\frames\\bucket-000000\\native-mv-f2.rg32f",
+          "sha256": "43e4db013b50610341fae570c932efbf2644447c60ce070a120207bbc04f3808",
+          "bytes": 7372800,
+          "format": 103,
+          "extent": [
+            1280,
+            720
+          ],
+          "channels": 2,
+          "dtype": "float32_le"
+        }
+      }
+    },
+    {
+      "ordinal": 3,
+      "source_game_frame": 18648,
+      "source_reset": false,
+      "jitter": {
+        "viewport_jitter_x": -0.21875,
+        "viewport_jitter_y": -0.4259259104728699,
+        "previous_viewport_jitter_x": 0.03125,
+        "previous_viewport_jitter_y": 0.4259259104728699,
+        "sr_jitter_x": -0.21875,
+        "sr_jitter_y": -0.4259259104728699,
+        "previous_sr_jitter_x": 0.03125,
+        "previous_sr_jitter_y": 0.4259259104728699
+      },
+      "original_control": {
+        "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/p0-game-p1-quality-wait-diag4-20261012/frames/bucket-000000/input-p1-quality-wait-diag4-20261012-g0-f3.json",
+        "sha256": "c1e011a0c9a8d636c2078edc1c708c25a933c27eec0bf353c25416d25ec21fe9"
+      },
+      "assets": {
+        "source": {
+          "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/p0-game-p1-quality-wait-diag4-20261012/frames/bucket-000000/native-source-f3.rgba32f",
+          "windows_path": "Z:\\home\\arinp\\Code\\nrbridge-design\\game-poc-20261011\\bbport\\runs\\p0-game-p1-quality-wait-diag4-20261012\\frames\\bucket-000000\\native-source-f3.rgba32f",
+          "sha256": "02d7b75fb139dd52fb6db2fe58ff6d197838d988f8b141ecbb8e68ef5267e6d4",
+          "bytes": 33177600,
+          "format": 109,
+          "extent": [
+            1920,
+            1080
+          ],
+          "channels": 4,
+          "dtype": "float32_le"
+        },
+        "depth": {
+          "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/p0-game-p1-quality-wait-diag4-20261012/frames/bucket-000000/native-depth-f3.r32f",
+          "windows_path": "Z:\\home\\arinp\\Code\\nrbridge-design\\game-poc-20261011\\bbport\\runs\\p0-game-p1-quality-wait-diag4-20261012\\frames\\bucket-000000\\native-depth-f3.r32f",
+          "sha256": "b19d8a7b20ceeec1161f10e7cf2bc4c9c7669bfef2a4d149fe954e408144468c",
+          "bytes": 3686400,
+          "format": 100,
+          "extent": [
+            1280,
+            720
+          ],
+          "channels": 1,
+          "dtype": "float32_le"
+        },
+        "mv": {
+          "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/p0-game-p1-quality-wait-diag4-20261012/frames/bucket-000000/native-mv-f3.rg32f",
+          "windows_path": "Z:\\home\\arinp\\Code\\nrbridge-design\\game-poc-20261011\\bbport\\runs\\p0-game-p1-quality-wait-diag4-20261012\\frames\\bucket-000000\\native-mv-f3.rg32f",
+          "sha256": "78b34889fc9ae410c4cabb4eb60a0cec7a5df93efd3a1887de715a4b2ccd0f8c",
+          "bytes": 7372800,
+          "format": 103,
+          "extent": [
+            1280,
+            720
+          ],
+          "channels": 2,
+          "dtype": "float32_le"
+        }
+      }
+    }
+  ],
+  "pixel_transport": "fixture_local_CPU_upload_only; not production IPC",
+  "phase": "UNVERIFIED",
+  "k_output": "NOT_IDENTIFIED",
+  "alpha": "actual captured alpha; do not force1",
+  "RGB": "actual finite nonnegative HDR (values>1 allowed)",
+  "frozen_inputs": true
+}

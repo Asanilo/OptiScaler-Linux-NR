@@ -1,0 +1,9 @@
+# Experimental high-FPS lowres cost fixture
+
+Offline only: `python3 build_lowres.py` builds/runs the host schema/SHA/actual-input CPU checker and cross-compiles `out/wine_nr_lowres_fixture.exe`. No Wine/GPU invocation. See CASE-SCHEMA.md, the sole case.json and exact input-manifest.json. Current installed runtime615.78.08 requires new matched1080 reference before720. Root owns later budget/approval/serial execution; no automatic test/retry.
+
+Implementation is a new per-image/per-dispatch copy of accepted Q2 utilities, reusing exact production Common/SPIR-V, fixed forwarder/model and safe parameters. Original Q1/Q2/P0/worktrees/stable/model/driver are not edited. Image dimensions/dispatch/readback derive actual target/CI, fullkeep/output1080 retained. Owned upload/independent readback and SHA pins are fixture-local CPU I/O, not shared pixels or game integration. NR core/algorithm is not rewritten. GPL-3.0-or-later own text; MIT JSON/utility and SDK/runtime remain read-only with their licenses.
+
+Host CPU checker tests canonical order/reference gate/schema/type/limits/asset SHA. Crosscompile PASS is not Create/Eval/GPU proof. Root's future maximum2 identical starts, each4reference+4lowres+4skip =8realEval/4skip, separate repeat noise comparison. All fixed constraints and honest parameter_application/timing/lifecycle scopes are documented in CASE-SCHEMA.md. out/build.json snapshots sources/dependencies/tools/generated/artifact and preserves failed builds; do not commit out/PE/SDK/models/raw.
+
+A separate Sky CPU cache core follows next: Capture/Reproject/Pyramid/Apply expressions only, finite4-link lineage; entire invalidity directly copies currentSR including negative/signedzero/alpha, explicit zero-edit identity, and low hist confidence does not suppress legal original Sky low-band filling. No native wire/game/async GPU cache integration in this fixture milestone.
