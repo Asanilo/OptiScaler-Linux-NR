@@ -1,0 +1,84 @@
+{
+  "status": "SOURCE_ONLY_NO_RUNTIME",
+  "route": "original game HDR720 -> production Encode720 -> NR720 guides720 -> Resolve720 -> same-source Native DLSS SR1080",
+  "model_reset": "Reset1 each bounded job; no source evidence requiring continuous history, j1 temporal quality UNVERIFIED",
+  "WorkingScale": "1 relative render720, distinct from DLSS Quality render/output ratio",
+  "source_map": [
+    {
+      "path": "/home/arinp/Code/dlss5_linux/OptiScaler-Linux-NR/OptiScaler/shaders/dlssnr/DlssNr_Dx12.cpp",
+      "sha256": "45cdde99dac1ea6a876587550a3f4fc166d96fcbb42a658b9f0ec904d56c74e3",
+      "line": 3610,
+      "evidence": "EvaluateAtSeam selects Color before upscale; preOut matches render Color and replaces SR input at3822"
+    },
+    {
+      "path": "/home/arinp/Code/dlss5_linux/OptiScaler-Linux-NR/OptiScaler/dlssnr/DlssNrFeature_Vk.cpp",
+      "sha256": "f239a2344af88cb83578993401034932d31cf253527b9afcec3af6eb3b7ccd95",
+      "line": 627,
+      "evidence": "WorkingScale relative source dimensions; reduced-only Mode2 at920, Evaluate dimensions+guides at1011, Resolve at1032"
+    },
+    {
+      "path": "/home/arinp/Code/dlss5_linux/OptiScaler-Linux-NR/OptiScaler/shaders/dlssnr/precompile/dlssnr.hlsl",
+      "sha256": "a847238905acb797e3520e638b460b91428340e5aa0a4b7b7d78c73c8d06497a",
+      "line": 524,
+      "evidence": "Encode Mode0 reads same-texel renderColor; keep RGB clamp and original alpha, manualWP/proxy; no stage-specific NR algorithm"
+    },
+    {
+      "path": "/home/arinp/Code/dlss5_linux/OptiScaler-Linux-NR/build_out/nr-runtime-poc-20261010/OptiScaler/dlssnr/forwarder/dlssnr_forwarder.cpp",
+      "sha256": "6e355af2305bf9584dbfc1b8701ffd9e9bc0341ee32d79ee8976403f81841b5a",
+      "line": 729,
+      "evidence": "Fixed actual forwarder takes color/depth/mv/output explicit model+guide extent/reset/MVecScale; no jitter/frame_ms/exposure/pre_exposure setter"
+    }
+  ],
+  "shared_resources": {
+    "color": [
+      109,
+      1280,
+      720
+    ],
+    "depth": [
+      100,
+      1280,
+      720
+    ],
+    "mv": [
+      103,
+      1280,
+      720
+    ],
+    "output": [
+      109,
+      1280,
+      720
+    ]
+  },
+  "native_original_CI_from_B": {
+    "color": [
+      97,
+      1280,
+      720
+    ],
+    "depth": [
+      130,
+      1280,
+      720
+    ],
+    "mv": [
+      83,
+      1280,
+      720
+    ]
+  },
+  "production_reused": {
+    "adapter": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/high-fps-fixture/lowres_production_adapter.h",
+    "shader": "fixed precompiled DlssNr_Shader_Vk.h; no shader changes"
+  },
+  "no_downsample": true,
+  "no_post_SR_input": true,
+  "jitter_phase": "EXPERIMENTAL_UNVERIFIED",
+  "exposure": "manualWP1 unknown actual game exposure",
+  "runtime": "NOT_RUN",
+  "GPU": "NOT_RUN",
+  "source_reset_wire": "actual pre-NR-decision game/SR reset request; appliedSRreset original request OR raw/NR input-domain change independently logged",
+  "canonical_delta": "/home/arinp/Code/nrbridge-design/game-poc-20261011/integration/high-fps-20261013/pre-sr-minimal-delta-v1.json",
+  "canonical_delta_sha256": "ad2e589a36bdb59b6425d2842572dd0a8acbbbd6fc7fecdcbbc398e4b72d0770"
+}
