@@ -1,0 +1,43 @@
+{
+  "status": "BUILD_ONLY_PASS",
+  "runtime": "NOT_RUN",
+  "Wine": "NOT_RUN",
+  "GPU": "NOT_RUN",
+  "build": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/sky-cache-late-vk/out/build.json",
+  "build_sha256": "67bab2813774be30f09a991713da480808753fe0ce2a7d567a2c6f8c311c66a8",
+  "artifact": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/sky-cache-late-vk/out/wine_sky_cache_late_fixture.exe",
+  "artifact_sha256": "51120bb5fe6e72dbb7a4d2f1ef78d439e2e9de34f22ae062cbd48c92cf4dca76",
+  "history": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/sky-cache-late-vk/out/build-history/20261013T050442.990429Z",
+  "case_bundle": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/sky-cache-late-vk/out/case-bundle.json",
+  "case_bundle_sha256": "98e2d1c13b4fa49d39cbe86b362f446b78792ada8978d47ee3ad9a60d3024a0c",
+  "CLI": "wine_sky_cache_late_fixture.exe RUN_DIR_WINDOWS CASE_BUNDLE_WINDOWS",
+  "sources": {
+    "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/sky-cache-late-vk/.gitignore": "744a1502c1d7ad664e0677975e40beb6cf6abfe3f49da5311af22b109a50af68",
+    "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/sky-cache-late-vk/README.md": "f60a75a3e21a31fd935a7d6736592fe1d4b06e9ab9c781773daed0d068206a5d",
+    "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/sky-cache-late-vk/IMPLEMENTATION-BOUNDARY.md": "c831a1663356978a19e0f1b740fda432a8d6f289008553275bafa793e8a479cd",
+    "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/sky-cache-late-vk/SKY-PASS-INTERFACE.md": "660044b586a7dc2cce96438b76b4e220d31ce75aecbb0ad286c6191c63dbd1b1",
+    "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/sky-cache-late-vk/late_origin_sequence.h": "36be9f0fdf44709f948d83aa4b894b51f7ba65b710dc2fcf45154aff98d144b8",
+    "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/sky-cache-late-vk/late_fixture.cpp": "ffff233ca7325b3f8e319c121fb0cca9a181875916ef5962657b2115c8acd51c",
+    "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/sky-cache-late-vk/late_cases.py": "879800b3a38919c072d6e82bf71ca3934879aa5c497ab7fb450b3d7f449f4296",
+    "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/sky-cache-late-vk/cpu_checks.py": "43a4b5773278b3f18700a073caf3da3cbeefcfd60796571c04ede358e709d905",
+    "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/sky-cache-late-vk/build_late.py": "3dfb40da92f8f620fb4baee21dfa0b7c9ee49f8ceb19fff0e0a347ca60d288bb"
+  },
+  "readonly_pin_count": 335,
+  "generated_count": 15,
+  "build_tools_count": 3,
+  "all_live_pins_match": true,
+  "CPU_checks": 34,
+  "known_synthetic_jobs": 13,
+  "accepted_positive_jobs": 6,
+  "negative_jobs": 7,
+  "model_Evaluate": 0,
+  "r2_SPIRV_sha256": "e99efc568377f2a59563609e68705fcc038789b1fd7e70522981437a89c08f92",
+  "oracle_tolerance": "3e-5 + 3e-4*abs(reference)",
+  "runtime_requires": "Root independent finite approval/ledger; no A Wine/GPU invocation",
+  "scope": "GPU late-origin known-aligned causal fixture, not Native async service; real 720/1080 phase and quality UNVERIFIED",
+  "static_review": "Actual origin snapshot layout handles used for final Apply; immutable payload retained. Whole chain prevalidated. No partial Apply. Reuses observed-fence API retirement from frozen r2.",
+  "history_preserved": [
+    "20261013T050311.108169Z first BUILD_ONLY_PASS",
+    "20261013T050442.990429Z origin layout handle fix BUILD_ONLY_PASS"
+  ]
+}
