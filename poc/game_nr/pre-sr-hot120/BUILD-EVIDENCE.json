@@ -1,0 +1,83 @@
+{
+  "status": "PASS_BUILD_ONLY",
+  "runtime": "NOT_RUN",
+  "Wine": "NOT_RUN",
+  "GPU": "NOT_RUN",
+  "helper_base_commit": "619ee82e531f7a5a339f85f1938481eb1b717cc7",
+  "build": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-pre-sr-worktree/poc/game_nr/pre-sr-hot120/out/build.json",
+  "build_sha256": "3745ec0cd6fe2daeedde602ee5a15e35dca84bb9a3baa13e97a6153228f01727",
+  "artifact": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-pre-sr-worktree/poc/game_nr/pre-sr-hot120/out/wine_presr_nr120.exe",
+  "artifact_sha256": "c185bd6ea6768eaa02a0521941705f724982486fab442f23c10c4fbcfe6e6844",
+  "artifact_bytes": 1895424,
+  "effective_spec": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-pre-sr-worktree/poc/game_nr/pre-sr-hot120/out/effective-generated-spec.json",
+  "effective_spec_sha256": "ab8cfae7566fd10b7ce39afe823e325c815695f9f6560619da4ffc0beb2df5aa",
+  "effective_delta_exact": "Only first_runtime_limits/max_jobs, config exact_sample/max_jobs, metadata max_jobs declaration changed4->120; all other generated JSON identical619ee",
+  "CPU": {
+    "GPU": "NOT_RUN",
+    "Wine": "NOT_RUN",
+    "checks": 223,
+    "scope": "exact canonical literals and CPU rejection; no simulated PID/FD/GPU proof",
+    "status": "PASS_CPU_ONLY"
+  },
+  "steps": [
+    {
+      "name": "CPU-wire-compile",
+      "exit_code": 0,
+      "log": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-pre-sr-worktree/poc/game_nr/pre-sr-hot120/out/build-history/20261013T141118.627825Z/CPU-wire-compile.log"
+    },
+    {
+      "name": "CPU-wire-tests",
+      "exit_code": 0,
+      "log": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-pre-sr-worktree/poc/game_nr/pre-sr-hot120/out/build-history/20261013T141118.627825Z/CPU-wire-tests.log"
+    },
+    {
+      "name": "PE-presr120-compile",
+      "exit_code": 0,
+      "log": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-pre-sr-worktree/poc/game_nr/pre-sr-hot120/out/build-history/20261013T141118.627825Z/PE-presr120-compile.log"
+    }
+  ],
+  "warnings": {
+    "CPU-wire-compile": 0,
+    "CPU-wire-tests": 0,
+    "PE-presr120-compile": 0
+  },
+  "pin_count": 206,
+  "pins_match": true,
+  "old619_build_artifact_source_generated_pins": "MATCH_UNCHANGED",
+  "production_frame_transport": "BYTE_IDENTICAL_619EE",
+  "hard_budgets_ms": {
+    "cold": 120000,
+    "job": 30000,
+    "fence": 10000,
+    "control": 60000,
+    "wall": 300000
+  },
+  "max_jobs": 120,
+  "job_ordinal": [
+    0,
+    119
+  ],
+  "buckets": [
+    "bucket-000000",
+    "bucket-000001"
+  ],
+  "commit_text_allowlist": [
+    "poc/game_nr/pre-sr-hot120/.gitignore",
+    "poc/game_nr/pre-sr-hot120/README.md",
+    "poc/game_nr/pre-sr-hot120/SOURCE-EVIDENCE.json",
+    "poc/game_nr/pre-sr-hot120/pre_sr_wire.h",
+    "poc/game_nr/pre-sr-hot120/pre_sr_frame.h",
+    "poc/game_nr/pre-sr-hot120/pre_sr_transport.h",
+    "poc/game_nr/pre-sr-hot120/wine_presr_nr120.cpp",
+    "poc/game_nr/pre-sr-hot120/wire_check.cpp",
+    "poc/game_nr/pre-sr-hot120/build_presr120.py",
+    "poc/game_nr/pre-sr-hot120/BUILD-EVIDENCE.json"
+  ],
+  "runtime_limitations": [
+    "120 actual model/source/Present/resource lifecycle NOT_RUN",
+    "source only strictly increasing; continuous cadence not inferred",
+    "finalized includes captured/obsolete/skip; not accepted or Present count",
+    "cap waits for explicit stop, service300 includes idle and retirement",
+    "NRReset1 does not set Native SR domain reset; phase/quality UNVERIFIED"
+  ]
+}
