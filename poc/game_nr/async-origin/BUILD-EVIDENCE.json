@@ -1,0 +1,51 @@
+{
+  "status": "BUILD_ONLY_PASS",
+  "runtime": "NOT_RUN",
+  "Wine": "NOT_RUN",
+  "GPU": "NOT_RUN",
+  "artifact": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/async-origin/out/wine_origin_nr.exe",
+  "artifact_sha256": "e89f1dafda1c2011450939ac2cc152b7d9290e26f84e81734ec3dba5f45027e2",
+  "artifact_bytes": 1895936,
+  "build": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/async-origin/out/build.json",
+  "build_sha256": "7dbe1aa68f45b08d9e29328d25e1f215f9d78c3854591f53c9fd21a82943e5bc",
+  "contract": "/home/arinp/Code/nrbridge-design/game-poc-20261011/integration/high-fps-20261013/async-origin-interface-v1.json",
+  "contract_sha256": "5f4da5793c45d94181f1719d987b3f9c00c77faa0f26583304267a4f0de3af58",
+  "CLI": "wine_origin_nr.exe resident|skipEvaluate RUN_DIR_WINDOWS SESSION",
+  "CPU_checks": {
+    "GPU": "NOT_RUN",
+    "Wine": "NOT_RUN",
+    "checks": 72,
+    "scope": "exact canonical literals and CPU rejection; no simulated PID/FD/GPU proof",
+    "status": "PASS_CPU_ONLY"
+  },
+  "sources": {
+    "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/async-origin/.gitignore": "744a1502c1d7ad664e0677975e40beb6cf6abfe3f49da5311af22b109a50af68",
+    "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/async-origin/README.md": "68f1dd01c1ef40315b2b0a957d33c9bda73e8108b60709644bb5e23b3ce5fbfe",
+    "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/async-origin/async_wire.h": "a778508538fb24797ea19d5b6b658cb174be55a2cef03cb9009da22243c3e769",
+    "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/async-origin/origin_frame.h": "40fe95e6962f62d6faada489c1750d9ba8a016d1331d4584eea4a7de601c1b28",
+    "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/async-origin/wine_origin_nr.cpp": "b2341bd4211c7e262bd61ee5bf780d91455cbb6e2997a92a2911b82ba5bc910e",
+    "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/async-origin/wire_check.cpp": "e6cc95fa11151784e5363ed514cb3139e702727c8c1db82a650c4e7937cc348f",
+    "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/async-origin/build_origin.py": "a83eec6b81166291af9b54e5ef3e01bf0ec36ed83120f0ff36f47cdb5e87ac42"
+  },
+  "pin_counts": {
+    "sources": 7,
+    "readonly_source_pins": 168,
+    "generated": 2,
+    "build_tools": 3
+  },
+  "all_live_pins": "MATCH",
+  "history": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/async-origin/out/build-history/20261013T051819.138643Z",
+  "compile_warning_count": 0,
+  "static_scope": [
+    "hot immutable origin Encode1080 Mode0 -> Downsample720 Mode2 -> Evaluate720 guide720 Reset1 -> Resolve1080 Mode1, unchanged model/forwarder/shader",
+    "stage-specific host false vs actual creation/export/job fence true; actual API FD consumption after Native import ACK",
+    "one shared slot, exact origin tuple, no next input until real CONSUMED proof",
+    "N0..4 stop/count/last-origin validation, Native max last-use proof independent of N, observed tick may advance",
+    "four truthful host-not-applied parameter declarations; skip evaluate_parameters empty because no call",
+    "no Helper Sky per-frame cache or Present inference; phase/k_output/NRscale UNVERIFIED"
+  ],
+  "old_files_changed": false,
+  "milestone": "new source/build candidate only; no runtime approval",
+  "first_build_history": "20261013T051632.893733Z",
+  "final_build_history": "20261013T051819.138643Z"
+}
