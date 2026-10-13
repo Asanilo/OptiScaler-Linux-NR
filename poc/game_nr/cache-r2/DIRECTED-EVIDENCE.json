@@ -1,0 +1,53 @@
+{
+  "schema": "sky-cache-r2-directed-zero-cpu-v1",
+  "observed_F0": {
+    "source_edited_output_bytes_equal": true,
+    "edit_nonzero_RGB_channels": 48,
+    "edit_nonzero_pixels": 16,
+    "nonzero_columns": [
+      5,
+      15
+    ],
+    "nonzero_values": [
+      -1.183070708066225e-08
+    ],
+    "confidence_values": [
+      1.0
+    ]
+  },
+  "pins": {
+    "/home/arinp/Code/nrbridge-design/game-poc-20261011/runs/sky-cache-vk-cache-zero-edit-a-20261013T040119.628921Z/output/f0-edit-history.rgba32f": "2bfe03befb0083e0cbda35a99892949549d9d2baa59eaeae66c92bb545031df5",
+    "/home/arinp/Code/nrbridge-design/game-poc-20261011/runs/sky-cache-vk-cache-zero-edit-a-20261013T040119.628921Z/output/f0-current-source.rgba32f": "c3d56abfd7eec99419ac6c3869e738551b13813ed9e219a396351e6312fe62ee",
+    "/home/arinp/Code/nrbridge-design/game-poc-20261011/runs/sky-cache-vk-cache-zero-edit-a-20261013T040119.628921Z/output/f0-cache-output.rgba32f": "c3d56abfd7eec99419ac6c3869e738551b13813ed9e219a396351e6312fe62ee",
+    "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/sky-cache-vk/out/cases/zero_edit.json": "cd5a9e6a3f5f1d101c2550d54f1c466a10ba8daa6eeef818b74be722713c7e3c",
+    "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/sky-cache-vk/out/sky_cache.spvasm": "55d80d2dd3997f893a64d34256a4b4be2d54b7dff8b20784a32dcdde8e72a1b0",
+    "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/sky-cache-vk/out/assets/zero_edit/f1-source.f32": "3500188dc39fef8db3329817d22dc28e027e0c77ef18af6c13c2799de0cc5065",
+    "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/sky-cache-vk/out/assets/zero_edit/f1-edited.f32": "3500188dc39fef8db3329817d22dc28e027e0c77ef18af6c13c2799de0cc5065",
+    "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/sky-cache-vk/out/assets/zero_edit/f1-depth.f32": "9b7bd71d9509d0605f08275259ddcd4fb2fed71a59deb2ed5bd8370045a05119",
+    "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/sky-cache-vk/out/assets/zero_edit/f1-mv.f32": "5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef"
+  },
+  "F1_canonical_source_edited_bytes_equal": true,
+  "CPU_replay_from_F0_actual_edit_only": {
+    "scope": "Not F1 GPU observation: only actual F0 edit, CPU-reconstructed guide+pyramid then CPU reprojection/apply",
+    "max_error_vs_frozen_F1_oracle": 0.25,
+    "pixel00_output": [
+      0.0,
+      0.0,
+      0.0,
+      -0.0
+    ],
+    "pixel00_expected": [
+      -0.25,
+      -0.0,
+      0.0,
+      -0.0
+    ],
+    "pixel00_apply_entered": true
+  },
+  "source_mechanism": "FreshEdit computes log2((nr+eps)/(orig+eps)) without exact equal-input branch. Tiny nonzero low edit survives confidence<1. Apply clamps negative original through max(original,0) unless its effective edit==0 exactly.",
+  "F1_actual_GPU_pixels": "UNAVAILABLE_FAILED_BEFORE_DUMP",
+  "cause_conclusion": "F0 numerical zero-intent residual confirmed; negative-clamp amplification is reproducible CPU mechanism, NOT confirmed actual F1 mismatch coordinates/cause.",
+  "identity_proposal": "Exact bit-equal finite originalRGB==editedRGB implies FreshEdit0/ok1 algebraically; bypass x/x/log2 only for that semantic identity. No residual threshold, epsilon/mask/tolerance change. NOT_APPLIED in diagnostic candidate.",
+  "GPU": "NOT_RUN",
+  "Wine": "NOT_RUN"
+}

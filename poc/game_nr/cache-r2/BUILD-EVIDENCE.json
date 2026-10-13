@@ -1,0 +1,79 @@
+{
+  "schema": "cache-r2-exact-identity-build-evidence-v1",
+  "status": "BUILD_ONLY_PASS",
+  "build_path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/cache-r2/out/build.json",
+  "build_sha256": "ff309ae699adf6958b440c659f39b34b8bc3e103f78e3ac9d0780ee52b54095d",
+  "artifact": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/cache-r2/out/wine_sky_cache_diagnostic.exe",
+  "artifact_sha256": "a464a2d2d4ec850a51bc823e20bb974b98e7709b0861a5cc99ba6273a54c5a36",
+  "source_count": 10,
+  "frozen_unique_pin_count": 334,
+  "applied_shader_diff": "Only finite rawRGB bit equality => ok1/edit0 BEFORE max/ratio/log2; bit-distinct signedzero,1ULP,NaN/Inf do not take guard. Other Sky math unchanged.",
+  "r2_SPIRV_sha256": "e99efc568377f2a59563609e68705fcc038789b1fd7e70522981437a89c08f92",
+  "old_SPIRV_sha256": "83a9ff0f0b00d524c621183217ea991231bc06d9a17d4f5507f598760389e043",
+  "CPU_identity_checks": 18,
+  "CPU_old_case_layout_checks": 27,
+  "steps": [
+    {
+      "name": "r2-HLSL-SPIRV",
+      "exit_code": 0,
+      "log": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/cache-r2/out/build-history/20261013T042152.876397Z/r2-HLSL-SPIRV.log"
+    },
+    {
+      "name": "r2-SPIRV-val",
+      "exit_code": 0,
+      "log": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/cache-r2/out/build-history/20261013T042152.876397Z/r2-SPIRV-val.log"
+    },
+    {
+      "name": "r2-SPIRV-dis",
+      "exit_code": 0,
+      "log": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/cache-r2/out/build-history/20261013T042152.876397Z/r2-SPIRV-dis.log"
+    },
+    {
+      "name": "CPU-identity-counterexamples",
+      "exit_code": 0,
+      "log": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/cache-r2/out/build-history/20261013T042152.876397Z/CPU-identity-counterexamples.log"
+    },
+    {
+      "name": "PE-r2-exact-identity",
+      "exit_code": 0,
+      "log": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/cache-r2/out/build-history/20261013T042152.876397Z/PE-r2-exact-identity.log"
+    }
+  ],
+  "diagnostic_only_history": [
+    {
+      "build_path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/cache-r2/out/build-history/20261013T041219.452667Z/build.json",
+      "build_sha256": "568a0437ac233700862eed696a785da21c9d8f04d8fc0f1e3f2dc2c647b2853c",
+      "artifact_sha256": "8b87f4127e9bb05781ae31e6734a0c50b5cbf24f4022b18e9837e60d9f3aebda",
+      "scope": "prior diagnostic-only, shader identity guard NOT_APPLIED; preserved exact metadata/source/logs"
+    },
+    {
+      "build_path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/cache-r2/out/build-history/20261013T041605.626943Z/build.json",
+      "build_sha256": "8db0a74e0c6088edad058d03915b3d00100ec51215e915e1ac7262a86d218fad",
+      "artifact_sha256": "3dda7259fa7543a3e54380593c217927fc21f5c8f34ce9f35fbb007ec949d7eb",
+      "scope": "prior diagnostic-only, shader identity guard NOT_APPLIED; preserved exact metadata/source/logs"
+    }
+  ],
+  "failed_batch": "stopped2/5; remaining3 NOT_RUN, original numeric failure and unproved ledger not rewritten",
+  "proposed_new_GPU_matrix": {
+    "authorization": "PENDING_ROOT_NEW_BUDGET_NOT_OLD_REMAINDER",
+    "maximum_new_PE_starts": 5,
+    "existing_case_order": [
+      "translation",
+      "zero_edit",
+      "whole_invalid",
+      "low_confidence_depth_occlusion",
+      "saved-real"
+    ],
+    "maximum_frames": 24,
+    "new_model_evaluates": 0,
+    "criteria": "all frozen original oracle/finite/written/alpha/bitidentity/fence/retirement gates unchanged; any FAIL stop, no retry"
+  },
+  "diagnostic_retirement": "safe completed readbacks before assertion; mismatch bytes/coordinates; numerical FAILexit2 remains separate from true observed-fence API retirement. Unknown or unobserved completion sets owned.safe=false => HOLD.",
+  "GPU": "NOT_RUN",
+  "Wine": "NOT_RUN",
+  "actual_F1_original_cause": "UNCONFIRMED_NO_ORIGINAL_F1_GPU_DUMP",
+  "phase": "UNVERIFIED_REAL_720_1080",
+  "quality": "NOT_EVALUATED",
+  "native_async": "NOT_IMPLEMENTED",
+  "production_boundary": "Native owns per-frame Sky edit/Apply; Helper sparse NR only; r2 is standalone fixture"
+}
