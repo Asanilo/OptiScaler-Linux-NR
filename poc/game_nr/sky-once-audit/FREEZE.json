@@ -1,0 +1,45 @@
+{
+  "status": "PASS_CPU_ONLY_FROZEN_AUDIT_TOOL",
+  "sources": {
+    "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-antiflicker-masked-worktree/poc/game_nr/sky-once-audit/.gitignore": "744a1502c1d7ad664e0677975e40beb6cf6abfe3f49da5311af22b109a50af68",
+    "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-antiflicker-masked-worktree/poc/game_nr/sky-once-audit/README.md": "4d6665782db9d33e111ad7a9e778cede4d0c99905775b74eafcce28ffc690755",
+    "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-antiflicker-masked-worktree/poc/game_nr/sky-once-audit/once_pixels.py": "fc9f3bcdea1446ff8c87b2af357c90a0af7a692802b5863f7e7d8b616bf4ccdb",
+    "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-antiflicker-masked-worktree/poc/game_nr/sky-once-audit/test_once_pixels.py": "20f2bc1b5e42f5079754bd5e93869f33028100cffd9a95dabb1e58cde9de494a",
+    "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-antiflicker-masked-worktree/poc/game_nr/sky-once-audit/audit_once.py": "280a407854f10376fdee5899e110af9ee5266cbd22eb842d00207e20d2f10089",
+    "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-antiflicker-masked-worktree/poc/game_nr/sky-once-audit/test_adapter.py": "08859e6b2796e1cb4b713beae3d93c5743714db8f5c9207f0ba207e69f116895"
+  },
+  "CPU_pixel_checks": {
+    "count": 19,
+    "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-antiflicker-masked-worktree/poc/game_nr/sky-once-audit/out/cpu-checks.json",
+    "sha256": "7f300be40b61fdb7819ef62cfd82a16c033e4ee5a44cdf4e1c5aa7e8629c7c6e"
+  },
+  "CPU_adapter_checks": {
+    "count": 14,
+    "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-antiflicker-masked-worktree/poc/game_nr/sky-once-audit/out/adapter-checks.json",
+    "sha256": "4f7b5d99d5b1a074d6aa6591d414bbc0e34128d07bfcb9594df75ba9e7fbad27"
+  },
+  "producer_commit": "e02b6bc49a76636e7e63ae95c1041d65c786e2d1",
+  "producer_source_sha256": "01e0babf9dd27d75729ca907207de5ecfda3b52914a829b17f2b99f25f825501",
+  "masked_Apply4_fix": {
+    "commit": "fcdbdebad468b861eb4db05cd9b6caf845079741",
+    "source_sha256": "1db55d0df8e91c6e3d3ad04fc1bec3d59f74eff47b32c9fe08bdae647f4d4bc6",
+    "scope": "only two masked Apply4 constants LowTemporal.95/Temporal0/Crossfade0; off unchanged; SPV header identical613429; static only"
+  },
+  "frozen_kernel": {
+    "commit": "0b8bdb11cf72be1066f7d0b364f4f60190dfc8e2",
+    "source_pins_checked": 14,
+    "status": "MATCH",
+    "build_sha256": "f05e11d6c944cfab4113de9ba652b672661f3822547281889539256543a4c86b",
+    "SPV_sha256": "3e31ea305d15bab0ff7e2a657bc952e768027d8b77087d2b21abe22993936270"
+  },
+  "Python": "3.14.7 (main, Aug 13 2026, 07:40:04) [GCC 16.2.1 20260810]",
+  "numpy_version": "2.5.4",
+  "real_once": "NOT_RUN",
+  "new_compilation": "NONE",
+  "GPU": "NOT_RUN",
+  "Wine": "NOT_RUN",
+  "runtime_fixture": "NONE",
+  "metadata_schema": "existing native-async-pre-sr-once-readback-v1 ONLY",
+  "limits": "eligible once only; no raw/WholeInvalid/partialrecord branch or historicalGPUgate/quality/benefit acceptance; Root must join actual runtime and Present/FD/API retirement",
+  "canonical_tolerance": "same WP1 frozenMode12, input-only fixedfloat32/log2 bounds, no GPU residual fitting"
+}
