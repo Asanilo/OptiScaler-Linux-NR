@@ -1,0 +1,132 @@
+{
+  "status": "PASS_BUILD_ONLY",
+  "runtime": "NOT_RUN",
+  "Wine": "NOT_RUN",
+  "GPU": "NOT_RUN",
+  "base_commit": "619ee82e531f7a5a339f85f1938481eb1b717cc7",
+  "canonical": "/home/arinp/Code/nrbridge-design/game-poc-20261011/integration/high-fps-20261013/async-pre-sr-minimal-delta-v1.json",
+  "canonical_sha256": "a35eb054ec9c94011dbab42c0fa9ec3b1b5799451390abf76245b94d134b6103",
+  "base_effective_header_sha256": "8cc2fae3d946a595f4033b79100014da46f97847bbf366c01615850b881184fc",
+  "effective_spec": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-async-pre-sr-worktree/poc/game_nr/async-pre-sr/out/effective-generated-spec.json",
+  "effective_spec_sha256": "a501dc377bf388dfd1c3eadff973dc096d55134823547b37ef6050a38c325cb4",
+  "six_pointers_exact": true,
+  "build": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-async-pre-sr-worktree/poc/game_nr/async-pre-sr/out/build.json",
+  "build_sha256": "f7e85ba9fd4dab1c6f22cc94d6a3924f4f5c5c9834503351bc75c3bef0847822",
+  "PE": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-async-pre-sr-worktree/poc/game_nr/async-pre-sr/out/wine_async_presr_nr.exe",
+  "PE_sha256": "1056522d7d1a260ceb5a313e2fbc4f7882cd27e0c5b38d87792035bf0036e699",
+  "PE_bytes": 1894400,
+  "CPU": {
+    "GPU": "NOT_RUN",
+    "Wine": "NOT_RUN",
+    "checks": 82,
+    "scope": "exact canonical literals and CPU rejection; no simulated PID/FD/GPU proof",
+    "status": "PASS_CPU_ONLY"
+  },
+  "steps": [
+    {
+      "name": "CPU-wire-compile",
+      "exit_code": 0,
+      "log": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-async-pre-sr-worktree/poc/game_nr/async-pre-sr/out/build-history/20261014T101403.023862Z/CPU-wire-compile.log"
+    },
+    {
+      "name": "CPU-wire-tests",
+      "exit_code": 0,
+      "log": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-async-pre-sr-worktree/poc/game_nr/async-pre-sr/out/build-history/20261014T101403.023862Z/CPU-wire-tests.log"
+    },
+    {
+      "name": "PE-async-presr-compile",
+      "exit_code": 0,
+      "log": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-async-pre-sr-worktree/poc/game_nr/async-pre-sr/out/build-history/20261014T101403.023862Z/PE-async-presr-compile.log"
+    }
+  ],
+  "warnings": {
+    "CPU-wire-compile": 0,
+    "CPU-wire-tests": 0,
+    "PE-async-presr-compile": 0
+  },
+  "pin_count": 205,
+  "pins": "MATCH",
+  "old619_sources_generated_PE_build": "MATCH_UNCHANGED",
+  "new_main_frame_transport_wire": "BYTE_IDENTICAL619",
+  "profile_id": "async-pre-sr-quality-hdr720-j1-experimental-v1",
+  "route": "async_pre_sr_nr_origin_to_native_cache_then_dlss_sr",
+  "resources": {
+    "color": [
+      109,
+      1280,
+      720
+    ],
+    "depth": [
+      100,
+      1280,
+      720
+    ],
+    "mv": [
+      103,
+      1280,
+      720
+    ],
+    "output": [
+      109,
+      1280,
+      720
+    ],
+    "usage": 15,
+    "layout": "GENERAL",
+    "queue_family": "EXTERNAL",
+    "private_proxy_keep_raw": "109/109/97 all720;Encode0/Evaluate720/Resolve1 only;noMode2/downsample/1080model",
+    "native_original": "97RGBA16F/130DEPTH/83RG16F all720; copies immutable raw, never recursive cache",
+    "native_Sky_input": "109/100/103 same texel720; output independent109720;finite/half-range+retain actualcurrent originalalpha ->private97 before existing SR1080"
+  },
+  "max_jobs": 4,
+  "actual_N": "0..4 actual counts, finalized=captured+obsolete+skip",
+  "budgets_ms": {
+    "cold": 120000,
+    "job": 30000,
+    "fence": 10000,
+    "control": 60000,
+    "wall": 300000
+  },
+  "legacy_native_soft_deadline_ms": "500 compatibility literal; no Native same-frame NR wait",
+  "parameter_application": {
+    "frame_ms": "HOST_FIXTURE_DECLARATION_NOT_SENT_TO_NR_API",
+    "exposure": "HOST_FIXTURE_DECLARATION_NOT_SENT_TO_NR_API",
+    "pre_exposure": "HOST_FIXTURE_DECLARATION_NOT_SENT_TO_NR_API",
+    "runtime_default_values": "UNVERIFIED"
+  },
+  "actual_NR_Evaluate_args": {
+    "DepthInverted": 0,
+    "Reset": 1,
+    "Style": 0,
+    "Intensity": 1,
+    "MVecScale": [
+      1,
+      1
+    ],
+    "model_and_guides": [
+      1280,
+      720
+    ]
+  },
+  "unverified": [
+    "NR_output_phase",
+    "game_depth_convention",
+    "j1_temporal_quality",
+    "Native cache/current eligibility/Present",
+    "game cost/performance"
+  ],
+  "no_Helper_cache": true,
+  "scope": "Immutable original720 sparse NR -> Native lineage/catchup/Apply to current raw720 -> existingSR1080; not stale NR output bound as current",
+  "text_allowlist": [
+    "poc/game_nr/async-pre-sr/.gitignore",
+    "poc/game_nr/async-pre-sr/README.md",
+    "poc/game_nr/async-pre-sr/SOURCE-EVIDENCE.json",
+    "poc/game_nr/async-pre-sr/pre_sr_wire.h",
+    "poc/game_nr/async-pre-sr/pre_sr_frame.h",
+    "poc/game_nr/async-pre-sr/pre_sr_transport.h",
+    "poc/game_nr/async-pre-sr/wine_async_presr_nr.cpp",
+    "poc/game_nr/async-pre-sr/wire_check.cpp",
+    "poc/game_nr/async-pre-sr/build_async_presr.py",
+    "poc/game_nr/async-pre-sr/BUILD-EVIDENCE.json"
+  ]
+}

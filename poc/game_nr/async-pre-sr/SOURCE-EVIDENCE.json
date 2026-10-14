@@ -1,0 +1,73 @@
+{
+  "scope": "P1 isolated immutable-origin720 Helper, exact Root childdelta; no Helper cache",
+  "base_commit": "619ee82e531f7a5a339f85f1938481eb1b717cc7",
+  "base_build": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-pre-sr-worktree/poc/game_nr/pre-sr-game/out/build.json",
+  "base_build_sha256": "31988f9f753502f9eed0d6249ac1e4eed594ec0c4a069cb0d707fafeeaab5fdb",
+  "base_PE_sha256": "3d4e81352aac754966ad7b71cceffffa81e5b7cc817134c0006f1bbff0ac576d",
+  "source_map": [
+    {
+      "path": "/home/arinp/Code/dlss5_linux/OptiScaler-Linux-NR/OptiScaler/shaders/dlssnr/DlssNr_Dx12.cpp",
+      "sha256": "45cdde99dac1ea6a876587550a3f4fc166d96fcbb42a658b9f0ec904d56c74e3",
+      "line": 2958,
+      "evidence": "PreSR unjittered MV cache jitterDelta=(previous-current)/renderExtent; invalid missing jitter/reset"
+    },
+    {
+      "path": "/home/arinp/Code/dlss5_linux/OptiScaler-Linux-NR/OptiScaler/shaders/dlssnr/DlssNr_Dx12.cpp",
+      "sha256": "45cdde99dac1ea6a876587550a3f4fc166d96fcbb42a658b9f0ec904d56c74e3",
+      "line": 3822,
+      "evidence": "Separate PreUpscale render-sized destination; never rewrite original input"
+    },
+    {
+      "path": "/home/arinp/Code/dlss5_linux/OptiScaler-Linux-NR/OptiScaler/shaders/dlssnr/DlssNr_EditCache_Dx12.cpp",
+      "sha256": "c9b68fcb990ae9e35c1c8f3299143e03123ace75e69a9d1985fda4f790547c79",
+      "line": 485,
+      "evidence": "PreSR disables fine temporal/crossfade, low temporal/pyramid semantics distinct"
+    },
+    {
+      "path": "/home/arinp/Code/dlss5_linux/OptiScaler-Linux-NR/OptiScaler/shaders/dlssnr/DlssNr_EditCache_Dx12.cpp",
+      "sha256": "c9b68fcb990ae9e35c1c8f3299143e03123ace75e69a9d1985fda4f790547c79",
+      "line": 680,
+      "evidence": "Model history policy1 accumulated MV; not needed by Reset1 sparse Helper"
+    },
+    {
+      "path": "/home/arinp/Code/dlss5_linux/OptiScaler-Linux-NR/OptiScaler/shaders/dlssnr/precompile/dlssnr_cache.hlsl",
+      "sha256": "0efdd31f1976435b0b956b94814c96a70e68310b838f916aecc289375af02b4f",
+      "line": 244,
+      "evidence": "Shared Sky reprojection MV/guide size plus jitterDelta; remains Native-owned"
+    },
+    {
+      "path": "/home/arinp/Code/dlss5_linux/OptiScaler-Linux-NR/OptiScaler/dlssnr/MotionJitter.h",
+      "sha256": "e020c0fefdedf6dac60347a500011588d79f377db37e43d956b7c06ce3244eb9",
+      "line": 26,
+      "evidence": "Game-input history continuity independent of model/cache refresh"
+    }
+  ],
+  "production_frame_transport": "BYTE_IDENTICAL619",
+  "shared_resource_formats": [
+    109,
+    100,
+    103,
+    109
+  ],
+  "all_shared_model_guide_extent": [
+    1280,
+    720
+  ],
+  "Helper_model_Reset": 1,
+  "Helper_cache": "NONE",
+  "Native_cache_math_reuse": "Capture2/Reproject1/Pyramid3/Apply4 unchanged; exact lineage and preSR jitter required",
+  "jitter_phase": "UNVERIFIED_NR_NO_JITTER_SETTER",
+  "GPU": "NOT_RUN",
+  "Wine": "NOT_RUN",
+  "canonical_child": {
+    "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/integration/high-fps-20261013/async-pre-sr-minimal-delta-v1.json",
+    "sha256": "a35eb054ec9c94011dbab42c0fa9ec3b1b5799451390abf76245b94d134b6103",
+    "pointers": 6
+  },
+  "profile_id": "async-pre-sr-quality-hdr720-j1-experimental-v1",
+  "route": "async_pre_sr_nr_origin_to_native_cache_then_dlss_sr",
+  "NR_actual_depth_inverted_arg": 0,
+  "NR_depth_phase_status": "UNVERIFIED; literal0 preserved from619 is not game projection proof",
+  "Native_renderer_NR_wait_ms": 0,
+  "legacy_config_soft_deadline_ms": 500
+}
