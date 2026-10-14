@@ -1,0 +1,130 @@
+{
+  "status": "SOURCE_SPIRV_CPU_PE_BUILD_ONLY_PASS",
+  "branch": "poc/nr-sky-antiflicker-20261014",
+  "parent": "12199b80662871a4a0d210a8e89ae37c44a5865f",
+  "build": {
+    "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-antiflicker-worktree/poc/game_nr/sky-antiflicker/out/build.json",
+    "sha256": "f807daf711b9b2a92d31a416a57cda8ad5911b197a51a41cf05eb290dd58a782",
+    "history": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-antiflicker-worktree/poc/game_nr/sky-antiflicker/out/build-history/20261014T135832.907950Z"
+  },
+  "SPIRV": {
+    "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-antiflicker-worktree/poc/game_nr/sky-antiflicker/out/sky_antiflicker.spv",
+    "sha256": "4a53a1adb18664d9616b262a93136b4e57ee32b3aa3df2486c6342a97429b2cf"
+  },
+  "PE_compile_gate": {
+    "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-antiflicker-worktree/poc/game_nr/sky-antiflicker/out/sky_antiflicker_compile_gate.exe",
+    "sha256": "4b70a13c319020bc55a06e3d68bb7e2657ddf3f8dca01193eaeebea4886411bb",
+    "NOT_runtime_fixture": true
+  },
+  "all_pins_MATCH": 358,
+  "old_f527_57b_r2_frozen_pins_MATCH": 45,
+  "CPU_expressions_layout_negative": 31,
+  "CPU_policy": 17,
+  "actualP1_energy": {
+    "status": "PASS_READONLY_SOURCE_OUTPUT_PINS_AND_ENERGY_ONLY",
+    "source": 9072,
+    "origin": 9068,
+    "age": 4,
+    "pins": [
+      {
+        "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-async-pre-sr-game-presr-async-real4-a/native-async-pre-sr-once/original-current720.rgba16f",
+        "bytes": 7372800,
+        "sha256": "1bc991846a4c9c96d0f6a9884c2afdec283bf2b4fabb062512350fe53bfdd69e"
+      },
+      {
+        "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-async-pre-sr-game-presr-async-real4-a/native-async-pre-sr-once/actual-sr-input720.rgba16f",
+        "bytes": 7372800,
+        "sha256": "10151fc826e5a37d1e708e8e7b3f3e3286031430a0daf1c405472d4fcf60b0c6"
+      }
+    ],
+    "raw_finite": 3686400,
+    "display_finite": 3686400,
+    "alpha_equal_bits": 921600,
+    "actual_display_minus_raw_RGB_RMS": 0.00579850730628131,
+    "full_edit_reconstruction_minus_raw_RGB_RMS": 0.005798507291685352,
+    "full_reconstruction_energy_ratio": 0.9999999974828077,
+    "effective_edit_logRGB_RMS": 0.29787248817081385,
+    "effective_edit_logLuma_mean": -0.022747650368101162,
+    "effective_edit_logLuma_RMS": 0.2695062744790014,
+    "changed_RGB_pixels": 920879,
+    "no_legal_prior_shown_available": "NO_TEMPORAL_CLAIM; candidate must take full entry effect",
+    "scope": "actual current/cache-applied private97 pair, not immutable-origin NR truth or actual prev-shown/depth chain. Full-intensity reconstruction energy only. Cannot evaluate temporal flicker/phase, occlusion or new candidate GPU behavior on this single pair. Newcandidate lowband/AntiPop do not smooth whole-invalid entry/exit by design.",
+    "GPU": "NOT_RUN",
+    "Wine": "NOT_RUN"
+  },
+  "steps": [
+    {
+      "name": "HLSL-SPIRV",
+      "exit_code": 0,
+      "log": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-antiflicker-worktree/poc/game_nr/sky-antiflicker/out/build-history/20261014T135832.907950Z/HLSL-SPIRV.log"
+    },
+    {
+      "name": "SPIRV-val",
+      "exit_code": 0,
+      "log": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-antiflicker-worktree/poc/game_nr/sky-antiflicker/out/build-history/20261014T135832.907950Z/SPIRV-val.log"
+    },
+    {
+      "name": "SPIRV-dis",
+      "exit_code": 0,
+      "log": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-antiflicker-worktree/poc/game_nr/sky-antiflicker/out/build-history/20261014T135832.907950Z/SPIRV-dis.log"
+    },
+    {
+      "name": "CPU-expressions-negative-layout",
+      "exit_code": 0,
+      "log": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-antiflicker-worktree/poc/game_nr/sky-antiflicker/out/build-history/20261014T135832.907950Z/CPU-expressions-negative-layout.log"
+    },
+    {
+      "name": "CPU-actual-P1-energy",
+      "exit_code": 0,
+      "log": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-antiflicker-worktree/poc/game_nr/sky-antiflicker/out/build-history/20261014T135832.907950Z/CPU-actual-P1-energy.log"
+    },
+    {
+      "name": "CPU-policy-compile",
+      "exit_code": 0,
+      "log": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-antiflicker-worktree/poc/game_nr/sky-antiflicker/out/build-history/20261014T135832.907950Z/CPU-policy-compile.log"
+    },
+    {
+      "name": "CPU-policy-test",
+      "exit_code": 0,
+      "log": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-antiflicker-worktree/poc/game_nr/sky-antiflicker/out/build-history/20261014T135832.907950Z/CPU-policy-test.log"
+    },
+    {
+      "name": "PE-owned-record-compile",
+      "exit_code": 0,
+      "log": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-antiflicker-worktree/poc/game_nr/sky-antiflicker/out/build-history/20261014T135832.907950Z/PE-owned-record-compile.log"
+    }
+  ],
+  "noPEwarning": true,
+  "important_identity_requirements": [
+    "Admission reset is actual game/cache-lineage reset, NEVER model Reset1 or mere SR input-domain-reset flag",
+    "version_epoch_match includes old shown/current-context chain, not just fresh target identity",
+    "Previous CURRENT-source must be exactly adjacent; oldest CONTRIBUTING origin current age<=4; no new target relabeling",
+    "Pending recording state publishes only after actual submit/fence; otherwise HOLD",
+    "DefaultOFF retains original r2 e99 and old21bindings; new kernels explicit only"
+  ],
+  "cadence_scope": "Short1-2 edit,raw4-7,stride6.28 means no valid prior shown at most cohort entries. BOTH candidates do NOT remove global-invalid entry/exit steps. They only smooth legal intra-chain regional changes. B SR_HISTORY/SR_INPUT separation remains necessary.",
+  "pipeline": {
+    "bindings": 23,
+    "CB_bytes": 256,
+    "whole_valid_offset": 156,
+    "AntiPopStep_offset": 160,
+    "FrameTolerance_offset": 164,
+    "ContextW_offset": 168,
+    "ContextH_offset": 172,
+    "workgroup": [
+      8,
+      8,
+      1
+    ],
+    "fine_temporal": 0,
+    "crossfade": 0,
+    "low_temporal": 0.95,
+    "NR_strength": 1,
+    "age_max": 4
+  },
+  "quality": "UNVERIFIED; existing user flicker FAIL not overwritten",
+  "runtime": "NOT_RUN",
+  "GPU": "NOT_RUN",
+  "Wine": "NOT_RUN",
+  "followup": "Root/B controlled matching valid-cohort integration; no automatic GPU action by A"
+}

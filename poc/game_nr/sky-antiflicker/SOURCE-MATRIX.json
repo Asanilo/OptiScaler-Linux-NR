@@ -1,0 +1,605 @@
+{
+  "scope": "one bounded related-source comparison; literal missing names reported NOT_FOUND, no alias invented",
+  "stable_commit": "eaada4c2667a26947f6b934008870025e3e1cfb5",
+  "stale_cached_sky_remote_commit": "591fd305a2a8e1eca92eee8ccd584925ac2791ae",
+  "upstream": {
+    "url": "https://github.com/Skynizz/optiscaler-dlss5.git",
+    "commit": "6bfc4389c25054ef6747df6e6b1b470e9541c4da",
+    "date": "2026-10-11",
+    "license": "GPL-3.0 repository LICENSE; preserve source/modification notice",
+    "AGENTS": "NOT_FOUND_IN_UPSTREAM_TREE"
+  },
+  "rows": [
+    {
+      "item": "CacheAsync",
+      "stable": {
+        "status": "NOT_FOUND_IN_BOUNDED_RELATED_SOURCE",
+        "hits": []
+      },
+      "Skynizz6bfc": {
+        "status": "FOUND",
+        "hits": [
+          {
+            "path": "OptiScaler/Config.h",
+            "line": 650,
+            "text": "CustomOptional<bool> DlssNrCacheAsync { false };"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/DlssNr_Dx12.cpp",
+            "line": 725,
+            "text": "else if (k == \"CacheAsync\") c->DlssNrCacheAsync = b;"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/DlssNr_Dx12.cpp",
+            "line": 2127,
+            "text": "bool AsyncWanted(const Config& cfg, float workScale)"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/DlssNr_Dx12.cpp",
+            "line": 2129,
+            "text": "if (!cfg.DlssNrCacheAsync.value_or_default() || g_async.broken)"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/DlssNr_Dx12.cpp",
+            "line": 2864,
+            "text": "AsyncWanted(cfg, workScale) && AsyncReady(device, timingQueue, desc.Format, width, height);"
+          }
+        ]
+      }
+    },
+    {
+      "item": "CacheInterval/x8",
+      "stable": {
+        "status": "FOUND",
+        "hits": [
+          {
+            "path": "OptiScaler/Config.h",
+            "line": 365,
+            "text": "CustomOptional<uint32_t> DlssNrCacheInterval { 2 };"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/DlssNr_Dx12.cpp",
+            "line": 2729,
+            "text": "std::make_pair(cfg.DlssNrCacheInterval.value_or_default(), cfg.DlssNrCacheAdaptive.value_or_default());"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/DlssNr_Dx12.cpp",
+            "line": 2849,
+            "text": "cfg.DlssNrCacheInterval.value_or_default(), cfg.DlssNrCacheAdaptive.value_or_default());"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/DlssNr_EditCache_Dx12.cpp",
+            "line": 491,
+            "text": "const unsigned int interval = std::clamp(cfg.DlssNrCacheInterval.value_or_default(), 1u, 16u);"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/precompile/dlssnr_cache.hlsl",
+            "line": 444,
+            "text": "// An 8x8 group covers exactly 2x2 texels of a quarter-size level, so the reduction never leaves the"
+          }
+        ]
+      },
+      "Skynizz6bfc": {
+        "status": "FOUND",
+        "hits": [
+          {
+            "path": "OptiScaler/Config.h",
+            "line": 540,
+            "text": "CustomOptional<uint32_t> DlssNrCacheInterval { 3 };"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/DlssNr_Dx12.cpp",
+            "line": 695,
+            "text": "else if (k == \"CacheInterval\") c->DlssNrCacheInterval = (uint32_t) v;"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/DlssNr_Dx12.cpp",
+            "line": 4915,
+            "text": "? std::format(\"1 image sur {}{}{}\", cfg.DlssNrCacheInterval.value_or_default(),"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/DlssNr_Dx12.cpp",
+            "line": 5288,
+            "text": "// instead of the output's: 1484x835 rather than 2560x1440 for DLSS Balanced at 1440p, 2.9 times fewer"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/DlssNr_EditCache_Dx12.cpp",
+            "line": 635,
+            "text": "if (std::max(std::clamp(cfg.DlssNrCacheInterval.value_or_default(), 1u, 16u), intervalFloor) <= 1)"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/DlssNr_EditCache_Dx12.cpp",
+            "line": 658,
+            "text": "const unsigned int interval = std::max(std::clamp(cfg.DlssNrCacheInterval.value_or_default(), 1u, 16u), intervalFloor);"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/DlssNr_EditCache_Dx12.cpp",
+            "line": 1225,
+            "text": "// x8 preset) the whole picture's light jumped on every model run: 0.018 stop against 0.004 on the other"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/precompile/dlssnr_cache.hlsl",
+            "line": 634,
+            "text": "// An 8x8 group covers exactly 2x2 texels of a quarter-size level, so the reduction never leaves the"
+          }
+        ]
+      }
+    },
+    {
+      "item": "CacheFingerprint",
+      "stable": {
+        "status": "NOT_FOUND_IN_BOUNDED_RELATED_SOURCE",
+        "hits": []
+      },
+      "Skynizz6bfc": {
+        "status": "FOUND",
+        "hits": [
+          {
+            "path": "OptiScaler/Config.h",
+            "line": 588,
+            "text": "CustomOptional<bool> DlssNrCacheFingerprint { true };"
+          },
+          {
+            "path": "OptiScaler/Config.h",
+            "line": 592,
+            "text": "CustomOptional<float> DlssNrCacheFingerprintTolerance { 0.25f };"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/DlssNr_Dx12.cpp",
+            "line": 726,
+            "text": "else if (k == \"CacheFingerprint\") c->DlssNrCacheFingerprint = b;"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/DlssNr_Dx12.cpp",
+            "line": 728,
+            "text": "else if (k == \"CacheFingerprintTolerance\") c->DlssNrCacheFingerprintTolerance = v;"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/DlssNr_EditCache_Dx12.cpp",
+            "line": 609,
+            "text": "if (cfg.DlssNrCacheFingerprint.value_or_default())"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/DlssNr_EditCache_Dx12.cpp",
+            "line": 647,
+            "text": "_printTol = std::clamp(cfg.DlssNrCacheFingerprintTolerance.value_or_default(), 0.02f, 4.0f);"
+          }
+        ]
+      }
+    },
+    {
+      "item": "Context",
+      "stable": {
+        "status": "NOT_FOUND_IN_BOUNDED_RELATED_SOURCE",
+        "hits": []
+      },
+      "Skynizz6bfc": {
+        "status": "FOUND",
+        "hits": [
+          {
+            "path": "OptiScaler/Config.h",
+            "line": 590,
+            "text": "CustomOptional<bool> DlssNrCacheContext { true };"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/DlssNr_Dx12.cpp",
+            "line": 727,
+            "text": "else if (k == \"CacheContext\") c->DlssNrCacheContext = b;"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/DlssNr_EditCache_Dx12.cpp",
+            "line": 613,
+            "text": "if (cfg.DlssNrCacheContext.value_or_default())"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/precompile/dlssnr_cache.hlsl",
+            "line": 182,
+            "text": "float ContextAt(float2 uv)"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/precompile/dlssnr_cache.hlsl",
+            "line": 953,
+            "text": "contextNow = Ghost(kGhostContext) ? ContextAt(uv) : 0.0;"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/precompile/dlssnr_cache.hlsl",
+            "line": 1173,
+            "text": "w = saturate(1.0 - abs(ContextAt(uv) - ContextPrevAt(q)) / 0.15);"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/precompile/dlssnr_cache.hlsl",
+            "line": 1570,
+            "text": "const float frameNow = ContextAt(uv);"
+          }
+        ]
+      },
+      "note": "Old NrContext(device,SR identity) exists but is NOT the new regional CacheContext image/math."
+    },
+    {
+      "item": "AntiPop",
+      "stable": {
+        "status": "NOT_FOUND_IN_BOUNDED_RELATED_SOURCE",
+        "hits": []
+      },
+      "Skynizz6bfc": {
+        "status": "FOUND",
+        "hits": [
+          {
+            "path": "OptiScaler/Config.h",
+            "line": 621,
+            "text": "CustomOptional<bool> DlssNrCacheAntiPop { true };"
+          },
+          {
+            "path": "OptiScaler/Config.h",
+            "line": 622,
+            "text": "CustomOptional<float> DlssNrCacheAntiPopRate { 0.75f };"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/DlssNr_Dx12.cpp",
+            "line": 739,
+            "text": "else if (k == \"CacheAntiPop\") c->DlssNrCacheAntiPop = b;"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/DlssNr_Dx12.cpp",
+            "line": 740,
+            "text": "else if (k == \"CacheAntiPopRate\") c->DlssNrCacheAntiPopRate = v;"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/DlssNr_EditCache_Dx12.cpp",
+            "line": 599,
+            "text": "const float rate = std::clamp(cfg.DlssNrCacheAntiPopRate.value_or_default(), 0.1f, 20.0f);"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/DlssNr_EditCache_Dx12.cpp",
+            "line": 600,
+            "text": "_antiPopStep = cfg.DlssNrCacheAntiPop.value_or_default() ? rate * (float) _frameSeconds : 0.0f;"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/precompile/dlssnr_cache.hlsl",
+            "line": 62,
+            "text": "float gAntiPopStep;     // anti light pop-in: max change of the regional edit per frame where the frame is still (0 off)"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/precompile/dlssnr_cache.hlsl",
+            "line": 1318,
+            "text": "if ((gTemporal > 0.0 || gAntiPopStep > 0.0 || Ghost(kGhostGuided)) && gDebugView == 0)"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/precompile/dlssnr_cache.hlsl",
+            "line": 1469,
+            "text": "const bool split = gLowTemporal > 0.0 || gAntiPopStep > 0.0;"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/precompile/dlssnr_cache.hlsl",
+            "line": 1566,
+            "text": "if (gAntiPopStep > 0.0)"
+          }
+        ]
+      }
+    },
+    {
+      "item": "Crossfade",
+      "stable": {
+        "status": "FOUND",
+        "hits": [
+          {
+            "path": "OptiScaler/Config.h",
+            "line": 377,
+            "text": "CustomOptional<bool> DlssNrCacheCrossfade { true };"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/DlssNr_EditCache_Dx12.cpp",
+            "line": 494,
+            "text": "_crossfadeOn = cfg.DlssNrCacheCrossfade.value_or_default() && !preSr;"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/precompile/dlssnr_cache.hlsl",
+            "line": 44,
+            "text": "uint  gCrossfadeOn;     // keyframe crossfade: the shown edit walks toward the model's latest answer"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/precompile/dlssnr_cache.hlsl",
+            "line": 338,
+            "text": "if (gCrossfadeOn != 0)"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/precompile/dlssnr_cache.hlsl",
+            "line": 369,
+            "text": "if (gCrossfadeOn != 0)"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/precompile/dlssnr_cache.hlsl",
+            "line": 559,
+            "text": "if (gCrossfadeOn != 0)"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/precompile/dlssnr_cache.hlsl",
+            "line": 577,
+            "text": "if (gCrossfadeOn != 0)"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/precompile/dlssnr_cache.hlsl",
+            "line": 602,
+            "text": "if (gCrossfadeOn != 0)"
+          }
+        ]
+      },
+      "Skynizz6bfc": {
+        "status": "FOUND",
+        "hits": [
+          {
+            "path": "OptiScaler/Config.h",
+            "line": 564,
+            "text": "CustomOptional<bool> DlssNrCacheCrossfade { true };"
+          },
+          {
+            "path": "OptiScaler/Config.h",
+            "line": 601,
+            "text": "CustomOptional<uint32_t> DlssNrCacheCrossfadeFrames { 0 };"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/DlssNr_Dx12.cpp",
+            "line": 704,
+            "text": "else if (k == \"CacheCrossfade\") c->DlssNrCacheCrossfade = b;"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/DlssNr_Dx12.cpp",
+            "line": 730,
+            "text": "else if (k == \"CacheCrossfadeFrames\") c->DlssNrCacheCrossfadeFrames = (uint32_t) v;"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/DlssNr_Dx12.cpp",
+            "line": 4917,
+            "text": "cfg.DlssNrCacheCrossfade.value_or_default() ? \", transitions douces\" : \"\")"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/DlssNr_EditCache_Dx12.cpp",
+            "line": 650,
+            "text": "_crossfadeFrames = std::min(cfg.DlssNrCacheCrossfadeFrames.value_or_default(), 16u);"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/DlssNr_EditCache_Dx12.cpp",
+            "line": 689,
+            "text": "_crossfadeOn = cfg.DlssNrCacheCrossfade.value_or_default() && !preSr;"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/precompile/dlssnr_cache.hlsl",
+            "line": 44,
+            "text": "uint  gCrossfadeOn;     // keyframe crossfade: the shown edit walks toward the model's latest answer"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/precompile/dlssnr_cache.hlsl",
+            "line": 512,
+            "text": "if (gCrossfadeOn != 0)"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/precompile/dlssnr_cache.hlsl",
+            "line": 559,
+            "text": "if (gCrossfadeOn != 0)"
+          }
+        ]
+      }
+    },
+    {
+      "item": "lowband",
+      "stable": {
+        "status": "FOUND",
+        "hits": [
+          {
+            "path": "OptiScaler/Config.h",
+            "line": 379,
+            "text": "CustomOptional<float> DlssNrCacheLowTemporal { 0.95f };"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/DlssNr_EditCache_Dx12.cpp",
+            "line": 488,
+            "text": "_lowTemporal = finite(cfg.DlssNrCacheLowTemporal.value_or_default(), 0.0f, 0.95f, 0.95f);"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/precompile/dlssnr_cache.hlsl",
+            "line": 48,
+            "text": "float gLowTemporal;     // luminance stability: weight of the reprojected regional (low band) edit (0 off)"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/precompile/dlssnr_cache.hlsl",
+            "line": 720,
+            "text": "if ((gTemporal > 0.0 || gLowTemporal > 0.0) && gDebugView == 0)"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/precompile/dlssnr_cache.hlsl",
+            "line": 854,
+            "text": "if (gLowTemporal > 0.0)"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/precompile/dlssnr_cache.hlsl",
+            "line": 896,
+            "text": "if (gLowTemporal <= 0.0)"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/precompile/dlssnr_cache.hlsl",
+            "line": 927,
+            "text": "const float lowW = gLowTemporal * valid * exp(-step * step) * exp(-motionPx * motionPx);"
+          }
+        ]
+      },
+      "Skynizz6bfc": {
+        "status": "FOUND",
+        "hits": [
+          {
+            "path": "OptiScaler/Config.h",
+            "line": 574,
+            "text": "CustomOptional<float> DlssNrCacheLowTemporal { 0.95f };"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/DlssNr_Dx12.cpp",
+            "line": 706,
+            "text": "else if (k == \"CacheLowTemporal\") c->DlssNrCacheLowTemporal = v;"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/DlssNr_EditCache_Dx12.cpp",
+            "line": 580,
+            "text": "_lowTemporal = std::clamp(cfg.DlssNrCacheLowTemporal.value_or_default(), 0.0f, 0.95f);"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/precompile/dlssnr_cache.hlsl",
+            "line": 48,
+            "text": "float gLowTemporal;     // luminance stability: weight of the reprojected regional (low band) edit (0 off)"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/precompile/dlssnr_cache.hlsl",
+            "line": 1469,
+            "text": "const bool split = gLowTemporal > 0.0 || gAntiPopStep > 0.0;"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/precompile/dlssnr_cache.hlsl",
+            "line": 1557,
+            "text": "const float lowW = gLowTemporal * valid * exp(-step * step) * exp(-motionPx * motionPx);"
+          }
+        ]
+      }
+    },
+    {
+      "item": "preSR_jitter",
+      "stable": {
+        "status": "FOUND",
+        "hits": [
+          {
+            "path": "OptiScaler/shaders/dlssnr/DlssNr_Dx12.cpp",
+            "line": 2965,
+            "text": "cacheIn.jitterDeltaX = (Context().cacheJitterX - frame.JitterX) / float(std::max(width, 1u));"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/DlssNr_EditCache_Dx12.cpp",
+            "line": 616,
+            "text": "c.JitterDeltaX = in.jitterDeltaX;"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/precompile/dlssnr_cache.hlsl",
+            "line": 49,
+            "text": "float gJitterDeltaX;    // pre-SR: this frame's change of camera jitter, in uv, added to every reprojection"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/precompile/dlssnr_cache.hlsl",
+            "line": 249,
+            "text": "return mv / float2(gMotionW, gMotionH) + float2(gJitterDeltaX, gJitterDeltaY);"
+          }
+        ]
+      },
+      "Skynizz6bfc": {
+        "status": "FOUND",
+        "hits": [
+          {
+            "path": "OptiScaler/shaders/dlssnr/DlssNr_Dx12.cpp",
+            "line": 3376,
+            "text": "float jitterDeltaX = 0.0f;"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/DlssNr_Dx12.cpp",
+            "line": 3383,
+            "text": "jitterDeltaX = (float) g_jitterSign * (frame.JitterX - g_lastJitterX) / (float) std::max(width, 1u);"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/DlssNr_Dx12.cpp",
+            "line": 3426,
+            "text": "in.jitterDeltaX = jitterDeltaX;"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/DlssNr_EditCache_Dx12.cpp",
+            "line": 935,
+            "text": "c.JitterDeltaX = in.jitterDeltaX;"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/precompile/dlssnr_cache.hlsl",
+            "line": 49,
+            "text": "float gJitterDeltaX;    // pre-SR: this frame's change of camera jitter, in uv, added to every reprojection"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/precompile/dlssnr_cache.hlsl",
+            "line": 384,
+            "text": "return motion + float2(gJitterDeltaX, gJitterDeltaY);"
+          },
+          {
+            "path": "OptiScaler/shaders/dlssnr/precompile/dlssnr_cache.hlsl",
+            "line": 965,
+            "text": "const float motionPx = length((q - uv - float2(gJitterDeltaX, gJitterDeltaY)) * float2(gWidth, gHeight));"
+          }
+        ]
+      }
+    }
+  ],
+  "additional_name_status": {
+    "CacheX8": "NOT_FOUND_AS_LITERAL_SETTING; x8 appears as preset/comment, CacheInterval clamped1..16",
+    "CacheAsync_PreSR": "UNSUPPORTED_IN_UPSTREAM AsyncWanted preSR rejection at Dx12:2136; this Native route is not claimed upstream async integration"
+  },
+  "pins": {
+    "/home/arinp/Code/dlss5_linux/OptiScaler-Linux-NR/OptiScaler/Config.h": "b4e8c8e57b45aab774b01ea02b96e5f78b5fe8378ee4efed7b44990c979c39ef",
+    "/home/arinp/Code/dlss5_linux/OptiScaler-Linux-NR/OptiScaler/shaders/dlssnr/DlssNr_Dx12.cpp": "45cdde99dac1ea6a876587550a3f4fc166d96fcbb42a658b9f0ec904d56c74e3",
+    "/home/arinp/Code/dlss5_linux/OptiScaler-Linux-NR/OptiScaler/shaders/dlssnr/DlssNr_EditCache_Dx12.cpp": "c9b68fcb990ae9e35c1c8f3299143e03123ace75e69a9d1985fda4f790547c79",
+    "/home/arinp/Code/dlss5_linux/OptiScaler-Linux-NR/OptiScaler/shaders/dlssnr/precompile/dlssnr_cache.hlsl": "0efdd31f1976435b0b956b94814c96a70e68310b838f916aecc289375af02b4f"
+  },
+  "upstream_pins": [
+    {
+      "repo_path": "LICENSE",
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-antiflicker-worktree/poc/game_nr/sky-antiflicker/out/upstream-source/LICENSE",
+      "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
+      "bytes": 35149
+    },
+    {
+      "repo_path": "OptiScaler/shaders/dlssnr/precompile/dlssnr_cache.hlsl",
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-antiflicker-worktree/poc/game_nr/sky-antiflicker/out/upstream-source/OptiScaler/shaders/dlssnr/precompile/dlssnr_cache.hlsl",
+      "sha256": "0b123748c02a36438fc033b605aa8e79e6751b7d9ce8cc778d6d6bfbfd95de8c",
+      "bytes": 76402
+    },
+    {
+      "repo_path": "OptiScaler/shaders/dlssnr/DlssNr_EditCache_Dx12.cpp",
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-antiflicker-worktree/poc/game_nr/sky-antiflicker/out/upstream-source/OptiScaler/shaders/dlssnr/DlssNr_EditCache_Dx12.cpp",
+      "sha256": "9510333ea8f5ff563f2b08d12a2613fd04a4472d572a5df16050386be42f8840",
+      "bytes": 85741
+    },
+    {
+      "repo_path": "OptiScaler/shaders/dlssnr/DlssNr_EditCache_Dx12.h",
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-antiflicker-worktree/poc/game_nr/sky-antiflicker/out/upstream-source/OptiScaler/shaders/dlssnr/DlssNr_EditCache_Dx12.h",
+      "sha256": "004e4ed0bb25a7206fa5d188ad695f43eb068d4238f4e6722a035b246ef28398",
+      "bytes": 22470
+    },
+    {
+      "repo_path": "OptiScaler/shaders/dlssnr/DlssNr_CacheCommon.h",
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-antiflicker-worktree/poc/game_nr/sky-antiflicker/out/upstream-source/OptiScaler/shaders/dlssnr/DlssNr_CacheCommon.h",
+      "sha256": "9365447416c395e473bdbc2d58eb817988d754c03852f59d8664ca34463531c8",
+      "bytes": 9550
+    },
+    {
+      "repo_path": "OptiScaler/shaders/dlssnr/DlssNr_Dx12.cpp",
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-antiflicker-worktree/poc/game_nr/sky-antiflicker/out/upstream-source/OptiScaler/shaders/dlssnr/DlssNr_Dx12.cpp",
+      "sha256": "de12103d60bc08ddd2bf363fd5cccb88001ed0974bca5c9cc2370fd382ae84bc",
+      "bytes": 250677
+    },
+    {
+      "repo_path": "OptiScaler/Config.h",
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-antiflicker-worktree/poc/game_nr/sky-antiflicker/out/upstream-source/OptiScaler/Config.h",
+      "sha256": "558b9f0ac4ef4ff24ffd524608bd9f308cb3eb76042a4634fbbee7aea9a079b0",
+      "bytes": 52998
+    },
+    {
+      "repo_path": "OptiScaler/Config.cpp",
+      "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-antiflicker-worktree/poc/game_nr/sky-antiflicker/out/upstream-source/OptiScaler/Config.cpp",
+      "sha256": "5f4de62d2ca2e4243ae5eaf75f8c7b04f071cc24d75a5d025da0a13da69f13af",
+      "bytes": 114676
+    }
+  ],
+  "r2_build": {
+    "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/cache-r2/out/build.json",
+    "sha256": "ff309ae699adf6958b440c659f39b34b8bc3e103f78e3ac9d0780ee52b54095d",
+    "SPIRV_sha256": "e99efc568377f2a59563609e68705fcc038789b1fd7e70522981437a89c08f92"
+  },
+  "implemented_candidates": [
+    "r2/Stable Mode10 lowband .95, fine temporal0/crossfade0",
+    "r2/Stable Mode10 plus exact6bfc Context12/AntiPop regional-step math, .75stops/s /.15tol"
+  ],
+  "deferred": [
+    "Fingerprint/source print/meta and full Context anti-ghosting suite need independent resource tracking and source-domain predicates",
+    "x8/long history disabled by age<=4; no period setting overrides lifetime",
+    "Crossfade/softrefresh disabled for preSR exactly as both real upstream and stable do"
+  ],
+  "runtime": "NOT_RUN"
+}
