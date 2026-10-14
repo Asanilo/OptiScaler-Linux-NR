@@ -1,0 +1,81 @@
+{
+  "status": "BUILD_ONLY_PASS",
+  "canonical_sha256": "4667d5f888c2453af88946f3a47fb1cb92afad0218e6948a494d759a3ca211a4",
+  "base_commit": "1efad4fb5580102a5ec46343a1783b17e065b462",
+  "build": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-antiflicker-masked-worktree/poc/game_nr/sky-antiflicker-masked/out/build.json",
+  "build_sha256": "f05e11d6c944cfab4113de9ba652b672661f3822547281889539256543a4c86b",
+  "history": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-antiflicker-masked-worktree/poc/game_nr/sky-antiflicker-masked/out/build-history/20261014T152114.737560Z",
+  "artifact": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-antiflicker-masked-worktree/poc/game_nr/sky-antiflicker-masked/out/sky_antiflicker_compile_gate.exe",
+  "artifact_sha256": "60fb08a8902a7cf573d7705a5e6bfd271162a92c7448802fbd7911270c1e7297",
+  "SPV_sha256": "3e31ea305d15bab0ff7e2a657bc952e768027d8b77087d2b21abe22993936270",
+  "owned_source_sha256": "e84f668d34d268d18681ef9dc63018a084ff26c2ebd61f06605ef9d767e1f9c4",
+  "interface_sha256": "0d4aa23a44b0cff5f8afd72c228880a2daea061530cfa49bf1c520a0ce9849db",
+  "CPU_expression_layout_mask_checks": 49,
+  "CPU_policy_checks": 22,
+  "build_steps": [
+    {
+      "name": "HLSL-SPIRV",
+      "exit_code": 0,
+      "log": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-antiflicker-masked-worktree/poc/game_nr/sky-antiflicker-masked/out/build-history/20261014T152114.737560Z/HLSL-SPIRV.log"
+    },
+    {
+      "name": "SPIRV-val",
+      "exit_code": 0,
+      "log": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-antiflicker-masked-worktree/poc/game_nr/sky-antiflicker-masked/out/build-history/20261014T152114.737560Z/SPIRV-val.log"
+    },
+    {
+      "name": "SPIRV-dis",
+      "exit_code": 0,
+      "log": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-antiflicker-masked-worktree/poc/game_nr/sky-antiflicker-masked/out/build-history/20261014T152114.737560Z/SPIRV-dis.log"
+    },
+    {
+      "name": "CPU-expressions-negative-layout",
+      "exit_code": 0,
+      "log": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-antiflicker-masked-worktree/poc/game_nr/sky-antiflicker-masked/out/build-history/20261014T152114.737560Z/CPU-expressions-negative-layout.log"
+    },
+    {
+      "name": "CPU-actual-P1-energy",
+      "exit_code": 0,
+      "log": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-antiflicker-masked-worktree/poc/game_nr/sky-antiflicker-masked/out/build-history/20261014T152114.737560Z/CPU-actual-P1-energy.log"
+    },
+    {
+      "name": "CPU-policy-compile",
+      "exit_code": 0,
+      "log": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-antiflicker-masked-worktree/poc/game_nr/sky-antiflicker-masked/out/build-history/20261014T152114.737560Z/CPU-policy-compile.log"
+    },
+    {
+      "name": "CPU-policy-test",
+      "exit_code": 0,
+      "log": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-antiflicker-masked-worktree/poc/game_nr/sky-antiflicker-masked/out/build-history/20261014T152114.737560Z/CPU-policy-test.log"
+    },
+    {
+      "name": "PE-owned-record-compile",
+      "exit_code": 0,
+      "log": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-antiflicker-masked-worktree/poc/game_nr/sky-antiflicker-masked/out/build-history/20261014T152114.737560Z/PE-owned-record-compile.log"
+    }
+  ],
+  "frozen_pins_match": 381,
+  "old_helper_preservation": [
+    {
+      "build": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-async-pre-sr-play-worktree/poc/game_nr/async-pre-sr-play/out/build.json",
+      "sha256": "f0d2678eeccee728bfa007608c99fefb4422565c25ff45732f702edf2ac380fe",
+      "checked": 13,
+      "status": "MATCH"
+    },
+    {
+      "build": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-async-pre-sr-worktree/poc/game_nr/async-pre-sr/out/build.json",
+      "sha256": "f7e85ba9fd4dab1c6f22cc94d6a3924f4f5c5c9834503351bc75c3bef0847822",
+      "checked": 13,
+      "status": "MATCH"
+    }
+  ],
+  "compile_warnings": 0,
+  "runtime": "NOT_RUN",
+  "Wine": "NOT_RUN",
+  "GPU": "NOT_RUN",
+  "quality": "UNVERIFIED",
+  "flicker": "UNVERIFIED",
+  "phase": "UNVERIFIED",
+  "limits": "No new Fixture/nonzero mask writer in A; B return pass1 only. No history across WholeInvalid or expired age. Off olde99 unchanged.",
+  "preserved_failure": "out/build-history/20261014T151836.755100Z: reflection test used legacy BufferBlock, actualVulkan1.2 StorageBuffer/Block validated after test correction; no shader/math threshold change."
+}
