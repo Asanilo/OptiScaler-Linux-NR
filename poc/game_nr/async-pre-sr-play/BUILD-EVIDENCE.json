@@ -1,0 +1,76 @@
+{
+  "status": "BUILD_ONLY_PASS_RUNTIME_NOT_RUN",
+  "branch": "poc/nr-async-pre-sr-play-20261014",
+  "parent": "57b62ecc31cb5abbb4cde9225bc034c1caa05a92",
+  "build": {
+    "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-async-pre-sr-play-worktree/poc/game_nr/async-pre-sr-play/out/build.json",
+    "sha256": "f0d2678eeccee728bfa007608c99fefb4422565c25ff45732f702edf2ac380fe",
+    "history": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-async-pre-sr-play-worktree/poc/game_nr/async-pre-sr-play/out/build-history/20261014T121808.392090Z"
+  },
+  "artifact": {
+    "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-async-pre-sr-play-worktree/poc/game_nr/async-pre-sr-play/out/wine_async_presr_play.exe",
+    "sha256": "972db051ef3249ec7123b43dba50eab4389a6641aecb4e2277446adc56bd7aeb",
+    "bytes": 1896448
+  },
+  "main_source": {
+    "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-async-pre-sr-play-worktree/poc/game_nr/async-pre-sr-play/wine_async_presr_play.cpp",
+    "sha256": "04b1802d918631a2b061a2848a38d5bbd94bd47b569761892300e68792444138"
+  },
+  "effective_spec": {
+    "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-async-pre-sr-play-worktree/poc/game_nr/async-pre-sr-play/out/effective-generated-spec.json",
+    "sha256": "671c7644c69de5f681b099fb4c3d402ba36f1e4538e65cd5538441e2bd47643b",
+    "exact_changed_pointers": [
+      "/profile_id",
+      "/first_runtime_limits/max_jobs",
+      "/first_runtime_limits/watchdog_seconds",
+      "/helper_directory",
+      "/helper_executable",
+      "/budgets/service_wall_seconds",
+      "/bootstrap_exact/async-config.json/exact_sample/profile_id",
+      "/bootstrap_exact/async-config.json/exact_sample/max_jobs",
+      "/bootstrap_exact/async-config.json/exact_sample/service_wall_seconds",
+      "/bootstrap_exact/async-meta-g0.json/required_stage_fields/max_jobs"
+    ]
+  },
+  "Root_child": {
+    "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/integration/high-fps-20261013/async-pre-sr-continuous-minimal-delta-v1.json",
+    "sha256": "902026b106ccb9ff170f6aad84a3ceeee11587334ad60b506ffa87f95e952a92"
+  },
+  "CPU": {
+    "GPU": "NOT_RUN",
+    "Wine": "NOT_RUN",
+    "checks": 106,
+    "scope": "exact canonical literals and CPU rejection; no simulated PID/FD/GPU proof",
+    "status": "PASS_CPU_ONLY"
+  },
+  "compiler_steps": [
+    {
+      "name": "CPU-wire-compile",
+      "exit_code": 0,
+      "log": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-async-pre-sr-play-worktree/poc/game_nr/async-pre-sr-play/out/build-history/20261014T121808.392090Z/CPU-wire-compile.log"
+    },
+    {
+      "name": "CPU-wire-tests",
+      "exit_code": 0,
+      "log": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-async-pre-sr-play-worktree/poc/game_nr/async-pre-sr-play/out/build-history/20261014T121808.392090Z/CPU-wire-tests.log"
+    },
+    {
+      "name": "PE-async-presr-play-compile",
+      "exit_code": 0,
+      "log": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-async-pre-sr-play-worktree/poc/game_nr/async-pre-sr-play/out/build-history/20261014T121808.392090Z/PE-async-presr-play-compile.log"
+    }
+  ],
+  "PE_log_empty_no_warnings": true,
+  "source_pre_post_MATCH": true,
+  "flat_source_generated_tool_runtime_artifact_pins_MATCH": 207,
+  "old_frozen_source_out_MATCH": 50,
+  "frame_transport_byte_identical57b": true,
+  "scalar_comparison": {
+    "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-async-pre-sr-play-worktree/poc/game_nr/async-pre-sr-play/SCALAR-COMPARISON.json",
+    "sha256": "a3ee3e35063677e5ee25f1e85cadf7023d033744b1a9562bac3a572ba9aca4a3",
+    "scope": "same720 actual ABI scalars/shared resources/pinned libraries; different sources/routes/scheduling, timing cause unknown"
+  },
+  "new_executable_CPU_Wine_Vulkan_GPU": "NOT_RUN",
+  "phase_history_dynamic_quality_performance": "UNVERIFIED",
+  "new_runtime_approval": "NONE; Root alone schedules new short dynamic/phase/history gate before continuous"
+}

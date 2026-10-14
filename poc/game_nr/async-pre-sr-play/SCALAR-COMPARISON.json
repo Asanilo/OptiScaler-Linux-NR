@@ -1,0 +1,391 @@
+{
+  "scope": "Single bounded read-only actual P1 real4 versus synchronous PreSR120-b scalar/resource/runtime comparison; no GPU or performance causality study",
+  "status": "MATCH_DECLARED_AND_ACTUAL_ABI_SCALARS_AND_PINNED_DEPENDENCIES",
+  "rows": [
+    {
+      "case": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-async-pre-sr-game-presr-async-real4-a",
+      "invocation_manifest": {
+        "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/runs/native-async-pre-sr-presr-async-real4-a-20261014T115321.470376Z/manifest.json",
+        "sha256": "17a99ea4c89b03c9002e34e5f0408e53fd2a688a77dc4d5ee41f20da97ecb0a2"
+      },
+      "completion_count": 4,
+      "complete_pins": {
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-async-pre-sr-game-presr-async-real4-a/frames/bucket-000000/async-complete-presr-async-real4-a-g0-f0.json": "5c606773ae1adacfc8f82e7b2d329b44f9b19244f81fb16510b3feb5ad91326f",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-async-pre-sr-game-presr-async-real4-a/frames/bucket-000000/async-complete-presr-async-real4-a-g0-f1.json": "a94f4f98a63b0bb15d4269c0d6cf5d2970ac9b7ec890881e839f0cc275b0d0b9",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-async-pre-sr-game-presr-async-real4-a/frames/bucket-000000/async-complete-presr-async-real4-a-g0-f2.json": "826753012bd27a7c2d4191cf556dcbfd4360f8348b4c4acca244c50438f58439",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-async-pre-sr-game-presr-async-real4-a/frames/bucket-000000/async-complete-presr-async-real4-a-g0-f3.json": "99f81bd61fe26b5105bc38a9de239e83133dc4ec0cd0602415d642e72f2b7afd"
+      },
+      "Evaluate_args": {
+        "AutoMask": 1,
+        "DepthInverted": 0,
+        "Intensity": 1.0,
+        "LocalStructure": 1.0,
+        "LocalTone": 1.0,
+        "MVecScale": [
+          1.0,
+          1.0
+        ],
+        "Reset": 1,
+        "SkinStructure": 1.0,
+        "Style": 0,
+        "color_format": 109,
+        "guide_extent": [
+          1280,
+          720
+        ],
+        "jitter_setter": "NONE",
+        "model_extent": [
+          1280,
+          720
+        ],
+        "raw_format": 97
+      },
+      "shared_resources": [
+        {
+          "role": "color",
+          "format": 109,
+          "width": 1280,
+          "height": 720,
+          "usage": 15,
+          "runtime_layout": 1,
+          "samples": 1,
+          "tiling": 0,
+          "sharing_mode": 0
+        },
+        {
+          "role": "depth",
+          "format": 100,
+          "width": 1280,
+          "height": 720,
+          "usage": 15,
+          "runtime_layout": 1,
+          "samples": 1,
+          "tiling": 0,
+          "sharing_mode": 0
+        },
+        {
+          "role": "mv",
+          "format": 103,
+          "width": 1280,
+          "height": 720,
+          "usage": 15,
+          "runtime_layout": 1,
+          "samples": 1,
+          "tiling": 0,
+          "sharing_mode": 0
+        },
+        {
+          "role": "output",
+          "format": 109,
+          "width": 1280,
+          "height": 720,
+          "usage": 15,
+          "runtime_layout": 1,
+          "samples": 1,
+          "tiling": 0,
+          "sharing_mode": 0
+        }
+      ],
+      "runtime_pins": {
+        "/home/arinp/.local/share/Steam/compatibilitytools.d/GE-Proton11-7-x86_64/files/lib/wine/dxvk/x86_64-windows/dxgi.dll": {
+          "path": "/home/arinp/.local/share/Steam/compatibilitytools.d/GE-Proton11-7-x86_64/files/lib/wine/dxvk/x86_64-windows/dxgi.dll",
+          "sha256": "a32191d1292ee388d7e0c3b8e43716f944971c7b49ce77f213be2cf4f6432756",
+          "bytes": 4857856
+        },
+        "/home/arinp/.local/share/Steam/compatibilitytools.d/GE-Proton11-7-x86_64/files/lib/wine/nvapi/x86_64-windows/nvapi64.dll": {
+          "path": "/home/arinp/.local/share/Steam/compatibilitytools.d/GE-Proton11-7-x86_64/files/lib/wine/nvapi/x86_64-windows/nvapi64.dll",
+          "sha256": "9811daad678402249ea244e06dfee47a1c063f26b1d081624f9f19f72307bdd7",
+          "bytes": 1888256
+        },
+        "/home/arinp/Code/dlss5_linux/OptiScaler-Linux-NR/build_out/nr-runtime-poc-20261010/build_out/poc-runtime-20261010/nvngx.dll_dlssnr.dll": {
+          "path": "/home/arinp/Code/dlss5_linux/OptiScaler-Linux-NR/build_out/nr-runtime-poc-20261010/build_out/poc-runtime-20261010/nvngx.dll_dlssnr.dll",
+          "sha256": "744a1b5b95d8721925261b454366cd3463eb158f02ddde02ad8e554b47386c75",
+          "bytes": 56832
+        },
+        "/home/arinp/Code/dlss5_linux/dll/runtime/nvngx_dlssnr.dll": {
+          "path": "/home/arinp/Code/dlss5_linux/dll/runtime/nvngx_dlssnr.dll",
+          "sha256": "6eb209e764f39872625debd6abaf45e2bb6322f6f270f781f70c059ae30b3927",
+          "bytes": 165830144
+        },
+        "/usr/lib64/nvidia/wine/_nvngx.dll": {
+          "path": "/usr/lib64/nvidia/wine/_nvngx.dll",
+          "sha256": "dabe18b0dc559750113b589d06f672141c8c49a2a571e0a5a7ca7b3e584a7ac3",
+          "bytes": 2012272
+        }
+      },
+      "device_uuid": "8734fac9db30c279a340fe117ace6365",
+      "driver_uuid": "ad6325108a6658c8aa0c9ffd3f6f97fe",
+      "Evaluate_commands_ms": {
+        "mean": 14.869776,
+        "min": 13.76512,
+        "max": 17.124768
+      },
+      "runtime_lines": [
+        "DXGI_MODULE actual=Z:\\home\\arinp\\.local\\share\\Steam\\compatibilitytools.d\\GE-Proton11-7-x86_64\\files\\lib\\wine\\dxvk\\x86_64-windows\\dxgi.dll requested_path_match=1 winerror=0 held_until_after_core_and_NVAPI_release=1",
+        "NVAPI_MODULE actual=Z:\\home\\arinp\\.local\\share\\Steam\\compatibilitytools.d\\GE-Proton11-7-x86_64\\files\\lib\\wine\\nvapi\\x86_64-windows\\nvapi64.dll requested_path_match=1 winerror=0",
+        "RUNTIME model=Z:\\home\\arinp\\Code\\dlss5_linux\\dll\\runtime\\nvngx_dlssnr.dll core=Z:\\usr\\lib64\\nvidia\\wine\\_nvngx.dll forwarder=Z:\\home\\arinp\\Code\\dlss5_linux\\OptiScaler-Linux-NR\\build_out\\nr-runtime-poc-20261010\\build_out\\poc-runtime-20261010\\nvngx.dll_dlssnr.dll",
+        "MODEL_VK_CREATE handle=000000000150AE70 result=0x00000001"
+      ]
+    },
+    {
+      "case": "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b",
+      "invocation_manifest": {
+        "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/runs/native-pre-sr-presr-real120-b-20261013T153525.983628Z/manifest.json",
+        "sha256": "b1c9c8385111e255c090cebb25a7d45d0def916a28dffdf6f8e5f573f162fa7a"
+      },
+      "completion_count": 120,
+      "complete_pins": {
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f0.json": "1c4b360444f1492f94e8ec14f185ba4c7490271b83525668517a03ab4f20e97a",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f1.json": "e2945e8ee816d2d4dca9f1f480c39a1955f31c8f946e73a8eb655bc21baf4bec",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f10.json": "b7fde29116fd390661ffbc974f30abef02b00a085d9d16c7a2077a5f3a3c7f78",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f11.json": "c3f279da6fd1655fff6655a24852605da24c857d9c55c665dbc4e93a292dfef7",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f12.json": "5016ded6f46fa07d88810e1f736326d1bbf70b3d1536645c5ae22f32aca35d16",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f13.json": "ef610841ac54697448a83a6ef6e1b8116cfbb4e2ee60e30967fb2e8aaa74e2d5",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f14.json": "c8a7bb9131f644407c223e3b1408ee7402e68d5e2db15c7ba8b24a7b38649faa",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f15.json": "2f5a2b5451bbbd7e90c124b0c4668c885d4feaba50aae83e5add914037954bd1",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f16.json": "f3a635ee7f7e8b5dc1b628dea5510fd9b18f19ee01d20ee84d07822df4ab5a6e",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f17.json": "4790cebc93d1b0a2258a07d4ec8c33ecb1172b2bcdff31867c4a36026ae14eb8",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f18.json": "017fa26bbad5980784ab8973968ce28abdae889a9f41f9a9fcdb388d13fd6d20",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f19.json": "5668d480a0c75247cd8b209a0a167b2d7a6ba810614d2348050ad771c27d3f2b",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f2.json": "5f5d9341eab74e373c8743ac344bf88eeb15488628053119d0f792f86b92ff8f",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f20.json": "d69c3eecf9120a3fc43ca72c9508353ca45418ca49e625fb9916a198c1c47368",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f21.json": "36a98df209c85326d83a7ca173b27c7154a33fe2938e599eb7868f85d88a0ecd",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f22.json": "b52c957dbf344322baa4cc30f166baa6b18957cb293b086e55de5b716cc6b429",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f23.json": "5c8b43ec0a9e784fff9934b3d9b074512cc13a06abf59c392e211c8add372cfb",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f24.json": "6446ac62e85323ff3caa466df6057e1de6e39999a1b495bbfb29d799a651c219",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f25.json": "fd5ef36eae3d5b5cd349449141b2555b4f07bc88fa38d69ec445e7265346237a",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f26.json": "acf8c6ed1ed706649b5930e3d2522d9c110cc48c303557e8d2385c6c8000b06f",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f27.json": "ce920a01f35f0b0c5064085bdbfc235b15a056aa6286ee8d1d341e83dd605bc3",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f28.json": "0c76e088427c7de289f7bc13e983ba62f776d9b311a0412bc67b56e0b720224e",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f29.json": "c50068a1d1d962306d3bd4c88fc61abaef0fad12318e2a967fd1b4133ef03ed6",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f3.json": "7dae20e36b25c79eb48a4aa5bcbd943cd764ee3ec6b166e422f02b5967e3097d",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f30.json": "0a0f298a6f3c89401122c2dc8ff932844ace8071f71869ad1cca699ff6089589",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f31.json": "c1f26b2a14e4a6d1c494ed5d7bcd6bb5e0aada22c737addda8e49e314d177e81",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f32.json": "62ad74fa596880fb0b3d717eac231d85d8a465ab26a492d0ef65f94b7264992d",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f33.json": "176526beaa41e86162d2ca4a50d5a7c4f494dd1fda011f13488f355035ad2beb",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f34.json": "0e7a653f307d75af68f76e1272274cde9c22d1f35a2319c0db9fc3771d91baa0",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f35.json": "518a8e877cef632c8f86ae2848d66c07227c0167dec370d5b4b36d5e2f81833a",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f36.json": "753d81c16d54754e2b27a5d81f8b4173192f1926f63f2d5e7d663e814d74018a",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f37.json": "6efe87deb3ed6dda471761687eb38a8eadeaab9350ad70ae5a2b6e1b3d1a82f0",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f38.json": "c2ba5ea30fd702e7862312b35753d3ebafee1889252b9303be2047e73b2c7d78",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f39.json": "217b8febccf9837a574bc2d912f693158de60d2436f5c79a33fb0b72565f7920",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f4.json": "b17ce5339615aac14f84afbf95b9ae3c2e78ca7fa6899aa6bd47796a0eec6995",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f40.json": "e7167d027742d3f50514ff1a96de60d0e2c1db0ba52905d2a6aa741f70fb2a36",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f41.json": "3ca1f545217ba170c0f9441605149621393ab03c3fe4105ce94c917757d9886e",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f42.json": "78df100bd370a3ce1c3d6b9c9ba9d0ed5ae649c2ac7feee1dc0e5243591007b7",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f43.json": "8d24a5188ed219a2ef5f780e8ba111997de9fd077dfeb9e9d1b40e8e809914e1",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f44.json": "f0aaa44452b3407152d94b84f22620a1a1effb41ac03bcb816fb738762697d06",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f45.json": "e763aca6376f280bf8e0b23f4de5c39a92e85d5cfb3b4b0306c5b64bbbd82798",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f46.json": "50c4069ffc08b8b50cf7e79291a9a8d260378528517e520c12141a59b5e0a69b",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f47.json": "e2430ccd42e351cd645216cb8d6bd37755d94d2efe7d30b6bf1fa16662d3fabc",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f48.json": "7fbc282e6413c9397d809c8c2c8b24f93006d3231250776a6542649c3a32e837",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f49.json": "abd20ba70927669aeaba713571738ad41939302227bb977421884a78d25411b3",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f5.json": "4b746d4cf2b489cbe302d51ee77ab219e79430117887eed6eb0197ea628136b2",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f50.json": "d866f4f80b1a70ead80d342ff250ccbad41c1fa153e52c7d5bff346725e26f95",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f51.json": "d5775baed3e86d35232f0c72def0271cef0b4a689d499900ee2c5e1bfbaadda5",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f52.json": "fe0a44070567da52ffab1df7eb070ae776b343d8cb8cafac139813649b7fe688",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f53.json": "cdecf1faa1390a5bc3760150f978783c6a9ed44a26203b83a3967fa09b4afd68",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f54.json": "77dd6680528896d2a5b4370c9875190bca736024b12133d8d5e4f1005d8468b5",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f55.json": "236fb172b13338c052d74fcebe64a2dd6e2f83a303fc299af4aaf1ce054a1ad0",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f56.json": "bb6baacb5572560658664766ebbd3e5f9edf832725ec02a3c00762d69fc14502",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f57.json": "541415dc7a5e348416269731d3529c74b14ba910ab9cb3aa4c92e4b0854831b3",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f58.json": "cec3908fc0f1a311697a52e82353238a83bdb9c7d3e8494388361d94e28e3083",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f59.json": "336de3fe199248152e2416a0d3bf4dab76691ffac76b1e8ac49843eee8cec7ee",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f6.json": "b32a2dd5bacc39e7aca5302f763d9c2552a8c6805db83fcf1ceb0125fc52fa45",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f60.json": "5ffe3be960e262e759d0c6e55dba81b075fedcf88d37a7bc01d8b521a466c4c7",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f61.json": "744d51d5e17d74e3dd9f9ef42fc23cda8243baee7929b2d0ad641bb037c6c261",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f62.json": "5cc2a148b6780dde7967ef74499aa5ea58b0ab210dfd729ee54f4239a3675734",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f63.json": "8c142c66774dd8fc2814f3f03757eae635becc9cdf94be555cfecf587f68c6d0",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f7.json": "97cf244c4e4b5389e2038cce5cb257f41984a690de57345005d096ea1cb21cd8",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f8.json": "8bbb1292d4044a3134d6980077b21a8b9a69b13ce78799197734dd73f6536b4c",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000000/async-complete-presr-real120-b-g0-f9.json": "9185ec2d69958cc6443ee3e28e4b5c98c9d516115ea2f9cadd24682b28a4e014",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000001/async-complete-presr-real120-b-g0-f100.json": "aeb3041d526347d20479bbe9c928256b2a0a92a8a2fa4513ee530fa2b9f15c93",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000001/async-complete-presr-real120-b-g0-f101.json": "268eb5dda4db7d1cfda76bee51232ed2ffc966c8a05caa99af6800350050150e",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000001/async-complete-presr-real120-b-g0-f102.json": "286dad72c9ff3d62657e3d1d6cb28e6344049f3128b8bee4d0c73b14eb0887a0",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000001/async-complete-presr-real120-b-g0-f103.json": "bbfc36832755de9a06248c689c76c8e1efb2212c589bad2025a0d27e7b79d1ad",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000001/async-complete-presr-real120-b-g0-f104.json": "eea6556ddf65910ac7a689f76514e66e041d31e70647ff6fdc1f6bb1fc9d46c1",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000001/async-complete-presr-real120-b-g0-f105.json": "c55e810dcf866133d8bdf994152c219ac478e5d78fd838fa95f337da0175034b",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000001/async-complete-presr-real120-b-g0-f106.json": "806b4a7cd2facbd7713ebb7fd329bb9f6e1dcebde9fb1145c87254a330466b4c",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000001/async-complete-presr-real120-b-g0-f107.json": "d3b20c739a1f487584f695dcdcd33b6da03d8dbd32dc1bc5cdbb5800c3cbe957",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000001/async-complete-presr-real120-b-g0-f108.json": "e794a435539c79ae43060a1d43ed8cf814d88c712f8db41cd689ca6fb0f7eb65",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000001/async-complete-presr-real120-b-g0-f109.json": "877a5e276f731f570eb514c984cb0538afec38baadd71a4f1b0383131b1da810",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000001/async-complete-presr-real120-b-g0-f110.json": "7b5ca03ed718bac866c9ac69119fe1073c3afa046780b58f29959890c21fbdf6",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000001/async-complete-presr-real120-b-g0-f111.json": "c9293db3ad929b5fd40b025fd628700f3becec7102c455460d1d41fcce9f19ec",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000001/async-complete-presr-real120-b-g0-f112.json": "2c474d394c14a9b7065d6c226ddf756566960b87235ad34287f4b9128eb4d8ae",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000001/async-complete-presr-real120-b-g0-f113.json": "1b98e1c599a50eb51a42bd66b9864d98eadadac2cbfbfd38eaa0e0e12f591184",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000001/async-complete-presr-real120-b-g0-f114.json": "9633b67d33708d927d7d313e3cb9c076d1f2fa86cdf56af1bf2938246879e4b2",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000001/async-complete-presr-real120-b-g0-f115.json": "3f4c7c8d2c99701ffa5863376275880ac9f8495003e561947f1baa3024b67357",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000001/async-complete-presr-real120-b-g0-f116.json": "0da45ae80d2c5e804378cb0c6b4872ebc3b0932d0b6026dec9e0c8e61ff26bdb",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000001/async-complete-presr-real120-b-g0-f117.json": "6c141dc94abca2833a77a5f6404b4eaa6524df8eba37801c7ba5c222f982a652",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000001/async-complete-presr-real120-b-g0-f118.json": "1d10a418002b657d43b5e8c8f5a8915beae867bf793830e570828a3b079bd6c8",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000001/async-complete-presr-real120-b-g0-f119.json": "500e2d4eacb5efd582e387b7cc282dba372da87507367ffa936cd81048aeae3e",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000001/async-complete-presr-real120-b-g0-f64.json": "c6a01391685537dddbe85d3b42d2af4db986f0389298aa79ab4c4eafa82bf2bc",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000001/async-complete-presr-real120-b-g0-f65.json": "1ba4722ea3669700e4c677c99a1fac7411add04e0297b422cd23f5864f1e4f4b",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000001/async-complete-presr-real120-b-g0-f66.json": "47ccc0276f29da16ae9857eb2a4948c16d13328f274aeb99e897838413b6ccc6",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000001/async-complete-presr-real120-b-g0-f67.json": "8a3db68e33ba78873c1c23f2e8429ef765998e938a35b379c4126081e3a962ae",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000001/async-complete-presr-real120-b-g0-f68.json": "8ac2c568340c8dce84027690be8e193a66e827c1ed854773c844f6545c88604e",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000001/async-complete-presr-real120-b-g0-f69.json": "3449a1edc03476d26c6cb5f92cedb959a93fa72e5cfa7e77f901afb76d13b091",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000001/async-complete-presr-real120-b-g0-f70.json": "7f737d02b46c1d1161c0be32d7529195b3e8db5f2e911be02186b525696e8475",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000001/async-complete-presr-real120-b-g0-f71.json": "f32dbd7ac0a522ea5777d2dbe7c82189799a25adc0282bd8ed539383eb476c16",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000001/async-complete-presr-real120-b-g0-f72.json": "93208d687b9d8454388b3fbcc23c7045926d77f2ef2a4dd4c9cdff6def37fd61",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000001/async-complete-presr-real120-b-g0-f73.json": "511cfb0e93eca9599507b3900f74f16040d75b2b5e9828cfc1d11378f1b6cd0f",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000001/async-complete-presr-real120-b-g0-f74.json": "cf55df9e11cf88d7df30087e9d1d14af40a56a6e888921bcf35ae92b201038e8",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000001/async-complete-presr-real120-b-g0-f75.json": "6624b092f9b8f60a85612ef58728052b853ce771bf37f1b7d39de31990324677",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000001/async-complete-presr-real120-b-g0-f76.json": "3e2f1157df3cf8193b77dbd99c171422fa1d4594e0cafb06198d4a4e596250dc",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000001/async-complete-presr-real120-b-g0-f77.json": "95b2ba9113cf8a8ce736a9a3e35fba50a65ae3d1760ca16c9a4845b001c77def",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000001/async-complete-presr-real120-b-g0-f78.json": "59cc2d1020917bbbfc50d6cd756f9c80a3d8520580e124c5e4c6037698f9c811",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000001/async-complete-presr-real120-b-g0-f79.json": "c2f5b6bfd4b46837aea8b4b83f951bfc0ac199b7eef73624a906e63aec359b1f",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000001/async-complete-presr-real120-b-g0-f80.json": "6a3966b512f85f36cdaad637c22d929972eef8b858ebde7bdfc37b3e149f79f5",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000001/async-complete-presr-real120-b-g0-f81.json": "40b050eea32618428ed3c019479123065907b3d3575641d65eee4907d3dda0e9",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000001/async-complete-presr-real120-b-g0-f82.json": "5e838a533865f30d03f442936cd0de1e674696ae7dcc42db6c2b7ca67e98e499",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000001/async-complete-presr-real120-b-g0-f83.json": "04eb8598bcef1c5aa6589b99cdac61c350b2a67700e53d5c502e5bee6accf376",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000001/async-complete-presr-real120-b-g0-f84.json": "ea20a5730b3158addb3b2b2188e09f6f0a60b20ba2311592ee1abf254db3e756",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000001/async-complete-presr-real120-b-g0-f85.json": "7d18bb057d043c4ffff909b18482e49cff50da8c438947d24b6c32f1a0c369bf",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000001/async-complete-presr-real120-b-g0-f86.json": "5581c2ebae093a7adda9bbcd592d06bcab51146bb0a9a2e040a279da6804b7f5",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000001/async-complete-presr-real120-b-g0-f87.json": "9a03453a85f2cf3f77fe1ff6dfb13fb99846a9dc40581c283656c14e327f1892",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000001/async-complete-presr-real120-b-g0-f88.json": "6e540a0c9e4d7a786ebab95afb2d0513f9e1f329205c98edfbe2a8af18bd5778",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000001/async-complete-presr-real120-b-g0-f89.json": "18857e6328c78083d10ad8978f8b072d22976f120819241876e4c2bdc5808ad9",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000001/async-complete-presr-real120-b-g0-f90.json": "37d74bf9b44fc19f0255a7321608961f291404c4442e077cfb61f284a189edbc",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000001/async-complete-presr-real120-b-g0-f91.json": "def4e47aeebdd7e2d9b1ee167800dad7992e307f64d8915cfe1dd6e56e36181f",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000001/async-complete-presr-real120-b-g0-f92.json": "e6308cdf9a3d72d67cdedcd37dfb0f5d4b893afde79611b1ad4b2580b4a1ebdf",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000001/async-complete-presr-real120-b-g0-f93.json": "891826dbac3baa7f7f69b65c5595e5fe16d5330359e5a3404d3178add912441f",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000001/async-complete-presr-real120-b-g0-f94.json": "7f72426835766eee3cc08171971778d4b30632dbbf83250ce406334725faab92",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000001/async-complete-presr-real120-b-g0-f95.json": "0ef4d7a211c7378a32fa81e2678a6184361f5dcc0dca4d701b3352e9fbce4418",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000001/async-complete-presr-real120-b-g0-f96.json": "1ac2179a3d770c6d604f2902b15090283a5e8c874ba0644670c1ad3f02b57fb0",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000001/async-complete-presr-real120-b-g0-f97.json": "4320aec4170a74f57baa696a611f74fab63f4ac182a8b751b68f308a0f824d96",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000001/async-complete-presr-real120-b-g0-f98.json": "974d93f6ff1bc2be5c36767baf2498317e1afc6eb740aec8eaa2f29e98679e7d",
+        "/home/arinp/Code/nrbridge-design/game-poc-20261011/bbport/runs/native-pre-sr-game-presr-real120-b/frames/bucket-000001/async-complete-presr-real120-b-g0-f99.json": "7b62a3293a968b1150c39fc817dda09803c187dc0006bc7b3398d534a90669ef"
+      },
+      "Evaluate_args": {
+        "AutoMask": 1,
+        "DepthInverted": 0,
+        "Intensity": 1.0,
+        "LocalStructure": 1.0,
+        "LocalTone": 1.0,
+        "MVecScale": [
+          1.0,
+          1.0
+        ],
+        "Reset": 1,
+        "SkinStructure": 1.0,
+        "Style": 0,
+        "color_format": 109,
+        "guide_extent": [
+          1280,
+          720
+        ],
+        "jitter_setter": "NONE",
+        "model_extent": [
+          1280,
+          720
+        ],
+        "raw_format": 97
+      },
+      "shared_resources": [
+        {
+          "role": "color",
+          "format": 109,
+          "width": 1280,
+          "height": 720,
+          "usage": 15,
+          "runtime_layout": 1,
+          "samples": 1,
+          "tiling": 0,
+          "sharing_mode": 0
+        },
+        {
+          "role": "depth",
+          "format": 100,
+          "width": 1280,
+          "height": 720,
+          "usage": 15,
+          "runtime_layout": 1,
+          "samples": 1,
+          "tiling": 0,
+          "sharing_mode": 0
+        },
+        {
+          "role": "mv",
+          "format": 103,
+          "width": 1280,
+          "height": 720,
+          "usage": 15,
+          "runtime_layout": 1,
+          "samples": 1,
+          "tiling": 0,
+          "sharing_mode": 0
+        },
+        {
+          "role": "output",
+          "format": 109,
+          "width": 1280,
+          "height": 720,
+          "usage": 15,
+          "runtime_layout": 1,
+          "samples": 1,
+          "tiling": 0,
+          "sharing_mode": 0
+        }
+      ],
+      "runtime_pins": {
+        "/home/arinp/.local/share/Steam/compatibilitytools.d/GE-Proton11-7-x86_64/files/lib/wine/dxvk/x86_64-windows/dxgi.dll": {
+          "path": "/home/arinp/.local/share/Steam/compatibilitytools.d/GE-Proton11-7-x86_64/files/lib/wine/dxvk/x86_64-windows/dxgi.dll",
+          "bytes": 4857856,
+          "sha256": "a32191d1292ee388d7e0c3b8e43716f944971c7b49ce77f213be2cf4f6432756"
+        },
+        "/home/arinp/.local/share/Steam/compatibilitytools.d/GE-Proton11-7-x86_64/files/lib/wine/nvapi/x86_64-windows/nvapi64.dll": {
+          "path": "/home/arinp/.local/share/Steam/compatibilitytools.d/GE-Proton11-7-x86_64/files/lib/wine/nvapi/x86_64-windows/nvapi64.dll",
+          "bytes": 1888256,
+          "sha256": "9811daad678402249ea244e06dfee47a1c063f26b1d081624f9f19f72307bdd7"
+        },
+        "/home/arinp/Code/dlss5_linux/OptiScaler-Linux-NR/build_out/nr-runtime-poc-20261010/build_out/poc-runtime-20261010/nvngx.dll_dlssnr.dll": {
+          "path": "/home/arinp/Code/dlss5_linux/OptiScaler-Linux-NR/build_out/nr-runtime-poc-20261010/build_out/poc-runtime-20261010/nvngx.dll_dlssnr.dll",
+          "bytes": 56832,
+          "sha256": "744a1b5b95d8721925261b454366cd3463eb158f02ddde02ad8e554b47386c75"
+        },
+        "/home/arinp/Code/dlss5_linux/dll/runtime/nvngx_dlssnr.dll": {
+          "path": "/home/arinp/Code/dlss5_linux/dll/runtime/nvngx_dlssnr.dll",
+          "bytes": 165830144,
+          "sha256": "6eb209e764f39872625debd6abaf45e2bb6322f6f270f781f70c059ae30b3927"
+        },
+        "/usr/lib64/nvidia/wine/_nvngx.dll": {
+          "path": "/usr/lib64/nvidia/wine/_nvngx.dll",
+          "bytes": 2012272,
+          "sha256": "dabe18b0dc559750113b589d06f672141c8c49a2a571e0a5a7ca7b3e584a7ac3"
+        }
+      },
+      "device_uuid": "8734fac9db30c279a340fe117ace6365",
+      "driver_uuid": "ad6325108a6658c8aa0c9ffd3f6f97fe",
+      "Evaluate_commands_ms": {
+        "mean": 6.604158133333334,
+        "min": 6.52128,
+        "max": 6.655392
+      },
+      "runtime_lines": [
+        "DXGI_MODULE actual=Z:\\home\\arinp\\.local\\share\\Steam\\compatibilitytools.d\\GE-Proton11-7-x86_64\\files\\lib\\wine\\dxvk\\x86_64-windows\\dxgi.dll requested_path_match=1 winerror=0 held_until_after_core_and_NVAPI_release=1",
+        "NVAPI_MODULE actual=Z:\\home\\arinp\\.local\\share\\Steam\\compatibilitytools.d\\GE-Proton11-7-x86_64\\files\\lib\\wine\\nvapi\\x86_64-windows\\nvapi64.dll requested_path_match=1 winerror=0",
+        "RUNTIME model=Z:\\home\\arinp\\Code\\dlss5_linux\\dll\\runtime\\nvngx_dlssnr.dll core=Z:\\usr\\lib64\\nvidia\\wine\\_nvngx.dll forwarder=Z:\\home\\arinp\\Code\\dlss5_linux\\OptiScaler-Linux-NR\\build_out\\nr-runtime-poc-20261010\\build_out\\poc-runtime-20261010\\nvngx.dll_dlssnr.dll",
+        "MODEL_VK_CREATE handle=000000000150AC00 result=0x00000001"
+      ]
+    }
+  ],
+  "Create_call_source": {
+    "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-async-pre-sr-worktree/poc/game_nr/async-pre-sr/wine_async_presr_nr.cpp",
+    "sha256": "8664f8ccd9c1d8dce06c586cde17ddcefaedabb05013207dcac0ccbe2f566531",
+    "line": 133,
+    "literal": "dlssnr_vk_create(cmd,params,1280,720,0,1,0,1,1,1,1,0)"
+  },
+  "frame_source": {
+    "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-async-pre-sr-worktree/poc/game_nr/async-pre-sr/pre_sr_frame.h",
+    "sha256": "65e8ebef1b478deb33f7f938ad474be3833b9dde5de407ea219abbb39f07ecc8",
+    "same_frozen619_frame": true
+  },
+  "runtime_limitations": [
+    "Model line records requested model path, not a separately queried actual model module filename or internal neural-network shape",
+    "Actual core/forwarder/NVAPI/DXGI module paths agree; both invocation model/core/forwarder/NVAPI/DXGI hashes agree",
+    "Timing is same-queue Evaluate command/dependency interval, not pure inference; source content and concurrent route/scheduling differ, cause NOT_IDENTIFIED",
+    "NR phase/jitter/MVecScale semantics, actual exposure/runtime defaults remain UNVERIFIED"
+  ],
+  "Wine_this_task": "NOT_RUN",
+  "GPU_this_task": "NOT_RUN"
+}

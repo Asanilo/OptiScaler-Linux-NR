@@ -1,0 +1,24 @@
+{
+  "scope": "Continuous child only; same immutable720 sparse producer, no Helper cache",
+  "base_commit": "57b62ecc31cb5abbb4cde9225bc034c1caa05a92",
+  "canonical": {
+    "path": "/home/arinp/Code/nrbridge-design/game-poc-20261011/integration/high-fps-20261013/async-pre-sr-continuous-minimal-delta-v1.json",
+    "sha256": "902026b106ccb9ff170f6aad84a3ceeee11587334ad60b506ffa87f95e952a92",
+    "pointers": 10
+  },
+  "unchanged_byte_identical_frame_transport": {
+    "pre_sr_frame.h": "65e8ebef1b478deb33f7f938ad474be3833b9dde5de407ea219abbb39f07ecc8",
+    "pre_sr_transport.h": "81c757673118d68ac548c0d6cb42cf1819390c9761242e1305e7e13e9a2c4e57"
+  },
+  "continuous_reference_commit": "86837c4ae4a24d5655bf200f5955896fa80c333e",
+  "only_changes": [
+    "strict new profile/generated ten pointers",
+    "backup job range0..16383/fourcounts actualN0..16384",
+    "Native prespawn256 existing buckets checked before any model/device init",
+    "service wall600s; independent cold120/job30/control60/fence10 unchanged"
+  ],
+  "NR_Reset": 1,
+  "GPU": "NOT_RUN",
+  "Wine": "NOT_RUN",
+  "limits": "No dynamic/history/phase/quality/performance acceptance inferred from CPU/build or earlier fourjob game PASS"
+}
