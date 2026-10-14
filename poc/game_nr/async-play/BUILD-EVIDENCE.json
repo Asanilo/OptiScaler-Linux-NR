@@ -1,0 +1,83 @@
+{
+  "status": "PASS_BUILD_ONLY",
+  "runtime": "NOT_RUN",
+  "Wine": "NOT_RUN",
+  "GPU": "NOT_RUN",
+  "helper_base_commit": "12199b80662871a4a0d210a8e89ae37c44a5865f",
+  "canonical_child": "/home/arinp/Code/nrbridge-design/game-poc-20261011/integration/high-fps-20261013/native-async-continuous-play-delta-v1.json",
+  "canonical_child_sha256": "921101a4b771f3ec2e303da2b64d581f552ba1abd96af70759cf810ed9985371",
+  "base_contract_sha256": "5f4da5793c45d94181f1719d987b3f9c00c77faa0f26583304267a4f0de3af58",
+  "build": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-async-play-worktree/poc/game_nr/async-play/out/build.json",
+  "build_sha256": "94abce916a6be488e617edae7770a9df9f5f6234deb308e6ea676b7ebc047767",
+  "PE": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-async-play-worktree/poc/game_nr/async-play/out/wine_origin_nr_play.exe",
+  "PE_sha256": "e8548c2ef9352f17573b1de680bd56fc0417246d90bd3acd871cca9179d0292e",
+  "PE_bytes": 1897472,
+  "effective_spec": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-async-play-worktree/poc/game_nr/async-play/out/effective-generated-spec.json",
+  "effective_spec_sha256": "d9366b3efa61b62bd45a60ea3afe9d5e8bff05741349d12639193093120236d1",
+  "derived_exact": "Root seven JSON-pointer overrides plus explicit metadata max_jobs declaration; all other base fields unchanged",
+  "source_count": 8,
+  "pin_count": 197,
+  "pins": "MATCH",
+  "old12199_source_build_generated_PE": "MATCH_UNCHANGED",
+  "production_frame": "BYTE_IDENTICAL12199",
+  "job_control_retire_body": "BYTE_IDENTICAL12199",
+  "CPU": {
+    "GPU": "NOT_RUN",
+    "Wine": "NOT_RUN",
+    "checks": 91,
+    "scope": "exact canonical literals and CPU rejection; no simulated PID/FD/GPU proof",
+    "status": "PASS_CPU_ONLY"
+  },
+  "steps": [
+    {
+      "name": "CPU-wire-compile",
+      "exit_code": 0,
+      "log": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-async-play-worktree/poc/game_nr/async-play/out/build-history/20261014T052333.938270Z/CPU-wire-compile.log"
+    },
+    {
+      "name": "CPU-wire-tests",
+      "exit_code": 0,
+      "log": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-async-play-worktree/poc/game_nr/async-play/out/build-history/20261014T052333.938270Z/CPU-wire-tests.log"
+    },
+    {
+      "name": "PE-async-play-compile",
+      "exit_code": 0,
+      "log": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-async-play-worktree/poc/game_nr/async-play/out/build-history/20261014T052333.938270Z/PE-async-play-compile.log"
+    }
+  ],
+  "warnings": {
+    "CPU-wire-compile": 0,
+    "CPU-wire-tests": 0,
+    "PE-async-play-compile": 0
+  },
+  "budgets_ms": {
+    "cold": 120000,
+    "job": 30000,
+    "fence": 10000,
+    "control": 60000,
+    "wall": 600000
+  },
+  "max_jobs_backup": 16384,
+  "job_bounds": [
+    0,
+    16383
+  ],
+  "actual_terminal_N_bounds": [
+    0,
+    16384
+  ],
+  "prespawn_bucket_count": 256,
+  "profile_id": "native-async-continuous-origin720-current-sr1080-experimental-v1",
+  "scope": "New Helper continuous backup cap/finite service only. Native currentSR/cache/age4/120s selected Present window independently measured; no continuous model history or performance/quality PASS",
+  "text_allowlist": [
+    "poc/game_nr/async-play/.gitignore",
+    "poc/game_nr/async-play/README.md",
+    "poc/game_nr/async-play/SOURCE-EVIDENCE.json",
+    "poc/game_nr/async-play/origin_frame.h",
+    "poc/game_nr/async-play/async_wire.h",
+    "poc/game_nr/async-play/wire_check.cpp",
+    "poc/game_nr/async-play/wine_origin_nr_play.cpp",
+    "poc/game_nr/async-play/build_play.py",
+    "poc/game_nr/async-play/BUILD-EVIDENCE.json"
+  ]
+}

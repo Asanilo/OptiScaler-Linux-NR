@@ -1,0 +1,16 @@
+{
+  "base_commit": "12199b80662871a4a0d210a8e89ae37c44a5865f",
+  "base_build": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/async-origin/out/build.json",
+  "base_build_sha256": "7dbe1aa68f45b08d9e29328d25e1f215f9d78c3854591f53c9fd21a82943e5bc",
+  "base_PE": "/home/arinp/Code/nrbridge-design/game-poc-20261011/opti-highfps-worktree/poc/game_nr/async-origin/out/wine_origin_nr.exe",
+  "base_PE_sha256": "e89f1dafda1c2011450939ac2cc152b7d9290e26f84e81734ec3dba5f45027e2",
+  "child_delta": "/home/arinp/Code/nrbridge-design/game-poc-20261011/integration/high-fps-20261013/native-async-continuous-play-delta-v1.json",
+  "child_sha256": "921101a4b771f3ec2e303da2b64d581f552ba1abd96af70759cf810ed9985371",
+  "production_frame_bytes": "UNCHANGED12199",
+  "model_route": "postSR fullEncode1080 -> Mode2downsample720 -> Evaluate720 -> fullResolve1080",
+  "NR_Reset": "1 every sparse job; no continuous model history claim",
+  "four_counts": "finalized=captured+obsolete+skip; native Present independently measured",
+  "idle": "Unchanged next_input: service/identity/abort/stop checks, no inactive30s timeout",
+  "runtime": "NOT_RUN",
+  "GPU": "NOT_RUN"
+}
