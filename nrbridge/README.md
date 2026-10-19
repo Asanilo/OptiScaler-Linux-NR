@@ -1,0 +1,25 @@
+# Standalone NRBridge runtime-model Helper
+
+`nrbridge/` owns the current Helper entry/frame, minimal transport and Vulkan adapter closure, protocol specification, CPU protocol/retirement tests, shutdown shim, and independent build recipe. The imported production behavior is unchanged: immutable origin720 Encode/Evaluate/Resolve, existing tuple/sidecar and parameter versions, strict drain/rebuild ACK, actual GPU fences and shared/FD retirement. `source-provenance.json` records the precise imported sources and include relocations. Original Native/Poc copies and existing Helper/forwarder outputs remain preserved.
+
+```bash
+python3 nrbridge/build.py --check-only
+python3 nrbridge/build.py
+python3 nrbridge/protocol/export.py --output /absolute/new/protocol-export
+```
+
+The build uses the locked LLVM MinGW compiler, external Vulkan/NGX SDK and nlohmann JSON headers. `--llvm-root`, `--vulkan-include`, `--ngx-sdk-root` and `--json-root` independently select prepared roots containing the same locked bytes; missing or altered locked inputs are rejected before compiler invocation. No SDK, model, system library, old `poc` tree or frozen closure is copied. Source/dependency discovery and generated headers stay under `build/convergence/runtime-model-prepare`; the PE, host test binaries/logs and full manifest are written to a new content address under `build/helper-runtime-model`. The identity covers Helper/protocol/build/test sources, compiler/frontend/linker, actual transitive headers, persistent link libraries, generation inputs, commands, and the original explicit runtime defaults. Existing complete outputs are verified, and incomplete/different outputs are preserved and refused.
+
+The build compiles/runs wire, runtime-model and runtime-config CPU checks, runs the copied retirement and builder tests, validates the locked SPIR-V and compiles the PE. These checks do not load a Windows DLL or prove GPU behavior. Run the CPU tests directly with `python3 -m unittest discover -s nrbridge/tests -p 'test_*.py'`.
+
+`nrbridge/protocol` is the physical protocol source. The export contains the byte-identical `native_runtime_model.h`, the wire parser with only a local generated-header include, the unchanged effective JSON and its deterministically generated `pre_sr_spec.h`. `protocol-export.json` lists versions and SHA256 values. Native consumes the exported copies and records their hashes; it does not directly include files across repositories. No ABI/wire/sidecar field has changed.
+
+Optional resource selection extends the existing CLI:
+
+```text
+wine_runtime_model.exe MODE RUN_DIR_WINDOWS SESSION [--runtime-config RUNTIME_JSON_WINDOWS]
+```
+
+The optional JSON must have exactly five string fields: `schema: "nrbridge-helper-runtime-v1"`, `model`, `forwarder`, `ngx_dir`, `ge_files`. The four paths are absolute canonical ASCII Linux paths; the first two select specific DLLs. Helper maps them through the existing Wine `Z:` mapping. The core is `ngx_dir/_nvngx.dll`; NVAPI and DXGI derive from the selected GE `files` directory. Helper still requires the exact NVAPI enable/override settings and checks `NVIDIA_WINE_DLL_DIR` and `WINEDLLPATH` against the selected directories. Runner verifies the selected DLL hashes using runtime-only pins before launch; resource selection never enters job/model wire tuples. Omitting this option preserves all current default paths and versions. The manifest records those defaults without packaging private binaries.
+
+The regular build uses the exact committed production SPIR-V (`7b44aeb...`), validates it with `spirv-val`, and regenerates a C header with byte-identical array contents. `shaders/dlssnr-frozen.hlsl` preserves the narrow historical source at the last SPIR-V update (`c3f70dc7`), while the repository's current HLSL has later motion-offset changes and is deliberately not substituted. The original DXC flags and generation recipe are recorded. `shaders/regenerate.py` can verify an explicitly supplied native Linux DXC by SHA and requires its output to reproduce the frozen SPIR-V; no suitable Linux DXC was available in this validation. HLSL→SPIR-V recompilation is therefore **NOT_RUN**. No Wine, DXC download, shader upgrade, runtime DLL installation or default selection change occurs.
