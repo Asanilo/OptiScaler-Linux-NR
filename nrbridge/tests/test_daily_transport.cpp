@@ -9,7 +9,7 @@ void rejects(std::function<void()> f){bool yes=false;try{f();}catch(const std::e
 int main(){
  unsetenv("BB_NR_DAILY");assert(JobLimit()==16384);auto old=W::config_expected("session-A","resident",std::string(32,'a'),std::string(32,'b'));
  setenv("BB_NR_DAILY","1",1);assert(Daily()&&DailySlots>=2);rejects([&]{W::config(old,"session-A","resident");});
- auto config=W::config_expected("session-A","resident",std::string(32,'a'),std::string(32,'b'));W::config(config,"session-A","resident");assert(config["protocol_version"]==2&&config["transport_layout"]==DailyLayout);
+ auto config=W::config_expected("session-A","resident",std::string(32,'a'),std::string(32,'b'));W::config(config,"session-A","resident");assert(config["max_jobs"]==JobLimit()&&config["service_wall_seconds"]==0);assert(config["protocol_version"]==2&&config["transport_layout"]==DailyLayout);
  std::set<std::string> files;auto create=[&](uint64_t j){for(const char* k:{"input","complete","consumed"})assert(files.insert(W::job_path("r",k,"s",j)).second);for(bool a:{false,true})assert(files.insert("r\\"+JobName(j,a)).second);};
  W::Counts counts;
  for(uint64_t j=0;j<20000;j++){

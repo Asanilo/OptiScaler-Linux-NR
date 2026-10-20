@@ -45,7 +45,7 @@
       "target": "nrbridge/protocol/pre_sr_wire.h",
       "initial_sha256": "bc52ffa09da608b33652a955f00fe9bd3675b2251674cbd09ff8f9f97c0f7067",
       "changes": "include relocation only",
-      "migrated_sha256": "ce58be9c930d878aba3359ffe06d5ebb82d00ed5830db68c6d823381320779a6",
+      "migrated_sha256": "50c9ed37cdfbf948d07ce153b7b146a966c616ddef864cdab709c792f8395d4f",
       "initial_migrated_sha256": "bc52ffa09da608b33652a955f00fe9bd3675b2251674cbd09ff8f9f97c0f7067",
       "update": "Astra-reviewed daily ring64 v2; bounded consumed-file cleanup, uint64 counters; finite diagnostics retained"
     },
