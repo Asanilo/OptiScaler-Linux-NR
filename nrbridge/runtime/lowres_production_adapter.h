@@ -43,7 +43,7 @@ class LowresProduction
     VkSampler sampler = nullptr;
     VkFence frameFence = nullptr;
     bool safe = true;
-    unsigned serial = 0;
+    uint64_t serial = 0;
     uint32_t gpu_timeout_ms = 10000;
     double fence_wait_cpu_ms = 0; // Measured vkWaitForFences call only, not End/QueueSubmit.
     template <class T> T api(const char* name)
@@ -297,6 +297,7 @@ class LowresProduction
     }
     void submit()
     {
+        need(serial<9007199254740991ull,"GPU serial exhausted before submit");
         VkMemoryBarrier b {};
         b.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER;
         b.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
@@ -318,8 +319,9 @@ class LowresProduction
         if (wait != VK_SUCCESS) throw Stop(wait == VK_TIMEOUT ? 3 : 2, "NR GPU fence incomplete; HOLD resources");
         check(V(vkGetFenceStatus)(device, frameFence), "frame fence observed");
         safe = true;
-        ++serial;
-        std::printf("GPU_COMPLETE value=%u observed=%u wait=0 route=WineVulkan\n", serial, serial);
+        need(serial<9007199254740991ull,"GPU serial exhausted");++serial;
+        std::printf("GPU_COMPLETE value=%llu observed=%llu wait=0 route=WineVulkan\n",
+                    (unsigned long long)serial, (unsigned long long)serial);
     }
     static float unhalf(uint16_t h)
     {

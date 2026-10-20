@@ -38,12 +38,12 @@ struct PreSrTransport {
  }
  void begin(){require(!in_flight,"record before GPU completion");api(D(vkResetCommandBuffer)(cmd,0),"ResetCommand");VkCommandBufferBeginInfo b{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};b.flags=VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;api(D(vkBeginCommandBuffer)(cmd,&b),"BeginCommand");}
  void submit(){
-  require(!in_flight,"submit while GPU outstanding");api(D(vkEndCommandBuffer)(cmd),"EndCommand");api(D(vkResetFences)(device,1,&fence),"ResetFence");
+  require(serial<9007199254740991ull,"transport serial exhausted before submit",3);require(!in_flight,"submit while GPU outstanding");api(D(vkEndCommandBuffer)(cmd),"EndCommand");api(D(vkResetFences)(device,1,&fence),"ResetFence");
   VkSubmitInfo si{VK_STRUCTURE_TYPE_SUBMIT_INFO};si.commandBufferCount=1;si.pCommandBuffers=&cmd;in_flight=true;api(D(vkQueueSubmit)(queue,1,&si,fence),"QueueSubmit");
   VkResult result=D(vkWaitForFences)(device,1,&fence,VK_TRUE,uint64_t(gpu_timeout_ms)*1000000ull);
   printf("GPU_WAIT result=%d deadline_ms=%u actual_fence=1\n",int(result),gpu_timeout_ms);
   if(result!=VK_SUCCESS)throw Stop(result==VK_TIMEOUT?3:2,"GPU fence incomplete; HOLD resources, abnormal private helper exit only");
-  api(D(vkGetFenceStatus)(device,fence),"FenceObserved");in_flight=false;++serial;
+  api(D(vkGetFenceStatus)(device,fence),"FenceObserved");in_flight=false;require(serial<9007199254740991ull,"transport serial exhausted",3);++serial;
   printf("GPU_COMPLETE serial=%llu actual_fence=1 external_semaphore=NOT_USED\n",(unsigned long long)serial);
  }
  void barrier(Image&im,VkImageLayout old,uint32_t src,uint32_t dst,VkAccessFlags sa,VkAccessFlags da,VkPipelineStageFlags ss,VkPipelineStageFlags ds){VkImageMemoryBarrier b{VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER};b.oldLayout=old;b.newLayout=VK_IMAGE_LAYOUT_GENERAL;b.srcQueueFamilyIndex=src;b.dstQueueFamilyIndex=dst;b.srcAccessMask=sa;b.dstAccessMask=da;b.image=im.image;b.subresourceRange={VK_IMAGE_ASPECT_COLOR_BIT,0,1,0,1};D(vkCmdPipelineBarrier)(cmd,ss,ds,0,0,nullptr,0,nullptr,1,&b);}

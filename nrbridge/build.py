@@ -86,7 +86,7 @@ def prepare(args):
     host_flags = ['-std=c++17', '-O2', '-Wall', '-Wextra', '-Werror',
                   '-I' + str(args.json_root), '-I' + str(HERE / 'protocol'),
                   '-I' + str(HERE / 'runtime'), '-I' + str(generated)]
-    for name in ('wire_check', 'test_protocol', 'test_runtime_config'):
+    for name in ('wire_check', 'test_protocol', 'test_runtime_config', 'test_daily_transport'):
         files, _ = compiler_inputs(Path('/usr/bin/c++'), host_flags, HERE / ('tests/' + name + '.cpp'), ROOT, environment)
         dependencies.update(files)
     inputs = {'schema': 'nrbridge-helper-build-inputs-v1', 'sources': sources,
@@ -133,7 +133,7 @@ def main():
             commands.append({'name': name, 'command': command, 'exit_code': result.returncode})
             if result.returncode:
                 raise RuntimeError(name + ': ' + result.stdout.decode(errors='replace'))
-        for name in ('wire_check', 'test_protocol', 'test_runtime_config'):
+        for name in ('wire_check', 'test_protocol', 'test_runtime_config', 'test_daily_transport'):
             checker = output / name
             run(name + '-compile', ['/usr/bin/c++', *inputs['host_flags'], str(HERE / ('tests/' + name + '.cpp')), '-o', str(checker)])
             run(name, [str(checker)])

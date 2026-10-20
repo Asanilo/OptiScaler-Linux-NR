@@ -10,7 +10,7 @@ class PreSrFrame {
  using Evaluate=int(*)(void*,void*,void*,void*,void*,void*,void*,unsigned,unsigned,unsigned,unsigned,int,int,float,int,float,float,float,int,float,float);
  float model_intensity=1.f;unsigned model_style=0;
  N&n;N::Image full,raw,keep,dummy;N::Buffer enc,res;
- VkQueryPool queries{};uint32_t bits;double period,command_bound=0;unsigned expected=0;bool recorded=false;
+ VkQueryPool queries{};uint32_t bits;double period,command_bound=0;uint64_t expected=0;bool recorded=false;
  unsigned evaluate_calls=0,resolve_calls=0;int evaluate_result=0;double evaluate_cpu_ms=0;
  PreSrFrame(N&adapter,uint32_t validbits,double ns):n(adapter),bits(validbits),period(ns){
   require(n.safe&&validbits<=64,"prior GPU and valid timestamp width");full=n.image(VK_FORMAT_R32G32B32A32_SFLOAT,false,1280,720);raw=n.image(VK_FORMAT_R16G16B16A16_SFLOAT,true,1280,720);keep=n.image(VK_FORMAT_R32G32B32A32_SFLOAT,true,1280,720);dummy=n.image(VK_FORMAT_R32G32B32A32_SFLOAT,true,1280,720);
@@ -19,7 +19,7 @@ class PreSrFrame {
  }
  static N::Image wrap(VkImage image,VkImageView view,VkFormat format,bool writable,unsigned w,unsigned h){N::Image i{};i.handle=image;i.view=view;i.format=format;i.layout=VK_IMAGE_LAYOUT_GENERAL;i.ngx.Type=NVSDK_NGX_RESOURCE_VK_TYPE_VK_IMAGEVIEW;i.ngx.ReadWrite=writable;i.ngx.Resource.ImageViewInfo={view,image,{VK_IMAGE_ASPECT_COLOR_BIT,0,1,0,1},format,w,h};return i;}
  void stamp(unsigned k){if(queries)n.api<PFN_vkCmdWriteTimestamp>("vkCmdWriteTimestamp")(n.command,k?VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT:VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,queries,k);}
- void start(){require(n.safe&&!recorded,"no slot or descriptor reuse before prior fence+consumed");n.reset_frame_descriptors();expected=n.serial+1;evaluate_calls=resolve_calls=0;evaluate_result=0;evaluate_cpu_ms=0;if(queries)n.api<PFN_vkCmdResetQueryPool>("vkCmdResetQueryPool")(n.command,queries,0,6);stamp(0);}
+ void start(){require(n.safe&&!recorded,"no slot or descriptor reuse before prior fence+consumed");n.reset_frame_descriptors();require(n.serial<9007199254740991ull,"frame serial exhausted");expected=n.serial+1;evaluate_calls=resolve_calls=0;evaluate_result=0;evaluate_cpu_ms=0;if(queries)n.api<PFN_vkCmdResetQueryPool>("vkCmdResetQueryPool")(n.command,queries,0,6);stamp(0);}
  void record(N::Image&color,N::Image&depth,N::Image&mv,N::Image&output,bool skip,void*feature,void*params,Evaluate evaluate){
   require(n.safe&&feature&&params&&evaluate,"real live720 feature");
   auto dims=[](const N::Image&i,VkFormat f,unsigned w,unsigned h){auto v=i.ngx.Resource.ImageViewInfo;require(i.format==f&&v.Width==w&&v.Height==h,"exact actual shared role CI");};dims(color,VK_FORMAT_R32G32B32A32_SFLOAT,1280,720);dims(output,VK_FORMAT_R32G32B32A32_SFLOAT,1280,720);dims(depth,VK_FORMAT_R32_SFLOAT,1280,720);dims(mv,VK_FORMAT_R32G32_SFLOAT,1280,720);require(color.handle!=output.handle,"immutable origin Color != Output");

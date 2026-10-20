@@ -7,7 +7,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 SPEC_SHA = '671c7644c69de5f681b099fb4c3d402ba36f1e4538e65cd5538441e2bd47643b'
-MODEL_SHA = '67fa656294fa38c6aca66f011a64211ae9fe79e44aad2f9a93fbe5cfcfcc732b'
+MODEL_SHA = '92c16609685a651a405842126b6160fd02376c2be034d2142f365bda119a0205'
 
 
 def digest(data):
@@ -25,7 +25,7 @@ def payloads():
              'pre_sr_wire.h': (HERE / 'pre_sr_wire.h').read_bytes(),
              'effective-spec.json': spec_bytes, 'pre_sr_spec.h': header.encode()}
     meta = {'schema': 'nrbridge-protocol-export-v1', 'wire_version': 1,
-            'interface_revision': 3, 'runtime_model_schema': 'nr-runtime-model-v1',
+            'interface_revision': 4, 'runtime_model_schema': 'nr-runtime-model-v1',
             'job_model_schema': 'nr-runtime-job-model-v1',
             'exports': {name: digest(data) for name, data in files.items()}}
     files['protocol-export.json'] = (json.dumps(meta, indent=2) + '\n').encode()

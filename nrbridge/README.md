@@ -33,3 +33,21 @@ The Helper has been merged into the existing `linux-nr` long-term branch; the da
 The build's default LLVM-MinGW, Vulkan/NGX SDK and JSON roots still refer to prepared directories in the local Code workspace. Paths can be selected with the documented options, but the locked contents must match. Output roots remain local absolute paths. A fresh clone on another machine needs those inputs prepared; proprietary models/SDKs and game data are not supplied by this Git repository. Native's `tools/nr_dev/README.md` lists the complete local input layout.
 
 The local `OptiScaler-Linux-NR/.worktree/nrbridge` is a linked Git worktree whose Git metadata lives in `dlss5_linux/OptiScaler-Linux-NR/.git`. Do not delete that original repository while this worktree is in use. The old nr-runtime worktree was removed normally; its SDK input path and unique source files remain preserved. The current build defaults now use the byte-verified SDK and JSON roots in `/home/arinp/Code/nrbridge-dev/inputs/workspace-return-20261020/{ngx-sdk,nlohmann}`; the compiler and Vulkan sysroot remain locked external inputs. This is not a live legacy build environment. Native/Helper implementation and runtime protocol are unchanged by this directory move.
+
+### Daily transport (interface revision 4)
+
+`BB_NR_DAILY=1` selects bootstrap wire version 2 and `frame-ring-64-daily-v2`.
+It removes only the experiment's service wall deadline. The GPU allocations and
+resource generation stay unchanged; task identities remain strictly monotonic.
+The Helper removes a job's five transport/model files only after validating the
+exact CONSUMED tuple and actual Native GPU final-use proof, before servicing the
+next input. Cleanup failure quarantines the service. Model request/ACK pairs are
+removed by Native only after validating the actual creation ACK. The 64 slots
+bound file retention; GPU/phase/job/control deadlines and FD retirement remain.
+Daily logs are capped at operation boundaries; an individual operation can
+slightly exceed the 16 MiB threshold. `BB_NR_DAILY` absent preserves finite v1.
+
+CPU transport tests cover 20,000 jobs, repeated wrap with one-ahead publication,
+stale tuples, failed deletion, mixed versions and uint53 limits. These are CPU
+contract checks, not GPU longevity acceptance. Roll back by selecting the old
+7f69 Helper together with a finite-mode Native; never mix daily v2 with it.

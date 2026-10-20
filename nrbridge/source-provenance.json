@@ -17,7 +17,9 @@
       "target": "nrbridge/runtime/transport.h",
       "initial_sha256": "b1703cd104e385d0c799ee85650fb7799dbaedf2d9a7461e1c79d5643eb171c2",
       "changes": "include relocation only",
-      "migrated_sha256": "b1703cd104e385d0c799ee85650fb7799dbaedf2d9a7461e1c79d5643eb171c2"
+      "migrated_sha256": "afde02b9cd4a89a750f744d21db1b06111298d6324bc4ab8578face1d88c450e",
+      "initial_migrated_sha256": "b1703cd104e385d0c799ee85650fb7799dbaedf2d9a7461e1c79d5643eb171c2",
+      "update": "Astra-reviewed daily ring64 v2; bounded consumed-file cleanup, uint64 counters; finite diagnostics retained"
     },
     {
       "source": "/home/arinp/Code/nrbridge-dev/inputs/helper-f527/closure/4c33b0134603-playable_runtime_types.h",
@@ -33,7 +35,9 @@
       "target": "nrbridge/runtime/lowres_production_adapter.h",
       "initial_sha256": "163873192ac900ec7c8632e5270ff63911ea8d1d7b26bbd6ed4fcd6d2ea863bc",
       "changes": "include relocation only",
-      "migrated_sha256": "f996b33666115261d1ce65f06a5df8a037ddb8b94bcc207d06072367b450a7d4"
+      "migrated_sha256": "62bacf308b2e5be87ffddeceb3240654b5d08f967986e40509da3475eac66f06",
+      "initial_migrated_sha256": "f996b33666115261d1ce65f06a5df8a037ddb8b94bcc207d06072367b450a7d4",
+      "update": "Astra-reviewed daily ring64 v2; bounded consumed-file cleanup, uint64 counters; finite diagnostics retained"
     },
     {
       "source": "/home/arinp/Code/nrbridge-dev/inputs/helper-f527/closure/21fc0d142f2f-pre_sr_wire.h",
@@ -41,7 +45,9 @@
       "target": "nrbridge/protocol/pre_sr_wire.h",
       "initial_sha256": "bc52ffa09da608b33652a955f00fe9bd3675b2251674cbd09ff8f9f97c0f7067",
       "changes": "include relocation only",
-      "migrated_sha256": "bc52ffa09da608b33652a955f00fe9bd3675b2251674cbd09ff8f9f97c0f7067"
+      "migrated_sha256": "ce58be9c930d878aba3359ffe06d5ebb82d00ed5830db68c6d823381320779a6",
+      "initial_migrated_sha256": "bc52ffa09da608b33652a955f00fe9bd3675b2251674cbd09ff8f9f97c0f7067",
+      "update": "Astra-reviewed daily ring64 v2; bounded consumed-file cleanup, uint64 counters; finite diagnostics retained"
     },
     {
       "source": "/home/arinp/Code/nrbridge-dev/native/tools/nr_dev/helper_runtime/runtime_frame.h",
@@ -49,7 +55,9 @@
       "target": "nrbridge/runtime/runtime_frame.h",
       "initial_sha256": "4aafe4cd982ef8fa35ec2b3b046ecb19d2f8c949705b9063b93995c16becd985",
       "changes": "include relocation only",
-      "migrated_sha256": "4aafe4cd982ef8fa35ec2b3b046ecb19d2f8c949705b9063b93995c16becd985"
+      "migrated_sha256": "03dff62923fc204421bb6d501bc346265e1123534a4a6d12ee39a1fe94eb68a6",
+      "initial_migrated_sha256": "4aafe4cd982ef8fa35ec2b3b046ecb19d2f8c949705b9063b93995c16becd985",
+      "update": "Astra-reviewed daily ring64 v2; bounded consumed-file cleanup, uint64 counters; finite diagnostics retained"
     },
     {
       "source": "/home/arinp/Code/nrbridge-dev/native/tools/nr_dev/helper_runtime/wine_runtime_model.cpp",
@@ -57,7 +65,9 @@
       "target": "nrbridge/runtime/wine_runtime_model.cpp",
       "initial_sha256": "dc35e80e0170cbc89942bbbc877823bf835ab33e92004720fd55f1dbfbff9dc3",
       "changes": "include relocation and optional explicit runtime resource selection; NR algorithm, model settings and retirement unchanged",
-      "migrated_sha256": "0116284841d8d73098f305cff851972d7690aef35e580b724ee8889745d0476d"
+      "migrated_sha256": "c2d0ef16eab3b5086447b37972bd93c9ad1035cdc4b66d4bea8bee104d7ea67a",
+      "initial_migrated_sha256": "0116284841d8d73098f305cff851972d7690aef35e580b724ee8889745d0476d",
+      "update": "Astra-reviewed daily ring64 v2; bounded consumed-file cleanup, uint64 counters; finite diagnostics retained"
     },
     {
       "source": "/home/arinp/Code/nrbridge-dev/native/gpu/shadps4/video_core/renderer_vulkan/native_runtime_model.h",
@@ -65,7 +75,9 @@
       "target": "nrbridge/protocol/native_runtime_model.h",
       "initial_sha256": "67fa656294fa38c6aca66f011a64211ae9fe79e44aad2f9a93fbe5cfcfcc732b",
       "changes": "byte-identical",
-      "migrated_sha256": "67fa656294fa38c6aca66f011a64211ae9fe79e44aad2f9a93fbe5cfcfcc732b"
+      "migrated_sha256": "92c16609685a651a405842126b6160fd02376c2be034d2142f365bda119a0205",
+      "initial_migrated_sha256": "67fa656294fa38c6aca66f011a64211ae9fe79e44aad2f9a93fbe5cfcfcc732b",
+      "update": "Astra-reviewed daily ring64 v2; bounded consumed-file cleanup, uint64 counters; finite diagnostics retained"
     },
     {
       "source": "/home/arinp/Code/nrbridge-dev/inputs/helper-f527/effective-generated-spec.json",
