@@ -9,6 +9,7 @@
 #include "dlssnr/NrPreUpscale.h"
 #include "dlssnr/NrGpuLifetime.h"
 #include "dlssnr/DlssNr_ExposureScan.h"
+#include <shaders/checker_guard/CheckerGuard.h>
 #include <upscalers/dlss/DLSSFeature_Dx12.h>
 #include <shaders/output_scaling/OS_Dx12.h>
 
@@ -1169,6 +1170,12 @@ NVSDK_NGX_API NVSDK_NGX_Result NVSDK_NGX_D3D12_EvaluateFeature(ID3D12GraphicsCom
         DlssNr::UsePreUpscale(DlssNr::EnabledAtD3D12Seam(), DlssNr::BeforeSrAtD3D12Seam(),
                               cfg.DlssNrDualFeature.value_or_default(), feature == NVSDK_NGX_Feature_SuperSampling);
 
+    // Speckle cleanup runs first, so both the pre-SR model and the upscaler read
+    // the cleaned render-resolution colour. The game's colour is restored after
+    // the upscaler; only the parameter block is swapped, the game's texture is read-only.
+    const bool checkerCleaned =
+        feature == NVSDK_NGX_Feature_SuperSampling && CheckerGuard::BeginBeforeUpscale(InCmdList, InParameters);
+
     auto beforeUpscale = [&]() -> ID3D12Resource*
     {
         DlssNr::EvaluateBeforeUpscale(InCmdList, InParameters);
@@ -1189,6 +1196,9 @@ NVSDK_NGX_API NVSDK_NGX_Result NVSDK_NGX_D3D12_EvaluateFeature(ID3D12GraphicsCom
                 { return NVNGXProxy::D3D12_EvaluateFeature()(InCmdList, InFeatureHandle, InParameters, InCallback); },
                 afterUpscale);
             LOG_DEBUG("Native DLSS EvaluateFeature result: 0x{:X}", (uint32_t) result);
+
+            if (checkerCleaned)
+                CheckerGuard::EndBeforeUpscale(InParameters);
 
             // Neural Rendering runs over what the upscaler just wrote, on the same list, so frame
             // generation interpolates from enhanced frames and the model still costs one run per
@@ -1222,6 +1232,9 @@ NVSDK_NGX_API NVSDK_NGX_Result NVSDK_NGX_D3D12_EvaluateFeature(ID3D12GraphicsCom
     const auto optiResult = DlssNr::EvaluateWithNr<ID3D12Resource, NVSDK_NGX_Result_Success>(
         InParameters, NVSDK_NGX_Parameter_Color, preUpscaleRequested, postAllowed, beforeUpscale,
         [&]() { return TryEvaluateOptiFeature(InCmdList, InFeatureHandle, InParameters, InCallback); }, afterUpscale);
+
+    if (checkerCleaned)
+        CheckerGuard::EndBeforeUpscale(InParameters);
 
     // Same pass, for OptiScaler's own upscalers rather than native DLSS.
     //

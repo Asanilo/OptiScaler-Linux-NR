@@ -2079,7 +2079,14 @@ void DlssNr_Dx12::Dispatch(ID3D12GraphicsCommandList* cmdList, ID3D12Resource* c
 
     // What the model works at. The frame and its edit stay full resolution; only the model's input and
     // answer shrink, and the resolve enlarges the answer while compositing.
+    // Pre-SR normally runs the model at the whole render resolution, which the
+    // upscaler already made small. PreSrReduced lets it use WorkingScale there
+    // too: the cheapest model frame, and steadier long intervals.
     float workScale = cfg.DlssNrWorkingScale.value_or_default();
+
+    if (preUpscale && !cfg.DlssNrPreSrReduced.value_or_default())
+        workScale = 1.0f;
+
     workScale = workScale < 0.25f ? 0.25f : (workScale > 1.0f ? 1.0f : workScale);
     const auto workWidth = (unsigned int) (width * workScale + 0.5f);
     const auto workHeight = (unsigned int) (height * workScale + 0.5f);
