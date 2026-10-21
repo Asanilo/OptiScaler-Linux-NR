@@ -234,6 +234,45 @@ void RenderMenu(Config* config, float menuResScale)
                     if (ImGui::Combo("Sky cache view", &view, views, IM_ARRAYSIZE(views)))
                         config->DlssNrCacheDebugView = static_cast<uint32_t>(view);
                 }
+                if (ImGui::CollapsingHeader("Sky 1.3 anti-ghosting"))
+                {
+                    const auto toggle = [&](const char* label, auto& setting)
+                    {
+                        bool value = setting.value_or_default();
+                        if (ImGui::Checkbox(label, &value))
+                            setting = value;
+                    };
+                    const auto slider = [&](const char* label, auto& setting, float low, float high)
+                    {
+                        float value = setting.value_or_default();
+                        if (ImGui::SliderFloat(label, &value, low, high, "%.3f"))
+                            setting = value;
+                    };
+                    toggle("Fingerprint rejection", config->DlssNrCacheFingerprint);
+                    toggle("Surroundings check", config->DlssNrCacheContext);
+                    toggle("Same-surface fill", config->DlssNrCacheSurfaceFill);
+                    toggle("Guided filter", config->DlssNrCacheGuided);
+                    slider("Guided strength", config->DlssNrCacheGuidedStrength, 0.0f, 1.0f);
+                    toggle("Aging", config->DlssNrCacheAging);
+                    slider("Age half-life (frames)", config->DlssNrCacheAgeHalfLife, 1.0f, 32.0f);
+                    toggle("Age toward broad edit", config->DlssNrCacheAgeNeutral);
+                    toggle("Noise-aware checks", config->DlssNrCacheNoiseAware);
+                    toggle("Soft refresh", config->DlssNrCacheSoftRefresh);
+                    toggle("Adaptive speed", config->DlssNrCacheAdaptiveSpeed);
+                    int adaptiveMin = static_cast<int>(config->DlssNrCacheAdaptiveMin.value_or_default());
+                    if (ImGui::SliderInt("Fast-motion interval floor", &adaptiveMin, 1, 8, "%d frames"))
+                        config->DlssNrCacheAdaptiveMin = static_cast<uint32_t>(adaptiveMin);
+                    toggle("Anti light pop-in", config->DlssNrCacheAntiPop);
+                    slider("Anti pop-in rate (stops/s)", config->DlssNrCacheAntiPopRate, 0.1f, 4.0f);
+                    slider("Motion priority", config->DlssNrCacheMotionPriority, 0.0f, 1.0f);
+                    slider("GPU budget (ms, 0 off)", config->DlssNrCacheBudgetMs, 0.0f, 20.0f);
+                    int crossfadeFrames = static_cast<int>(config->DlssNrCacheCrossfadeFrames.value_or_default());
+                    if (ImGui::SliderInt("Crossfade walk cap (0 = interval)", &crossfadeFrames, 0, 16, "%d frames"))
+                        config->DlssNrCacheCrossfadeFrames = static_cast<uint32_t>(crossfadeFrames);
+                    toggle("Show cache timings", config->DlssNrShowStats);
+                    HelpMarker("Defaults follow Sky 1.3. Fingerprint/context/surface fill are on; guided filter, "
+                               "aging and the GPU budget are off. The cache itself stays off until enabled above.");
+                }
                 const auto status = DlssNr::GetEditCacheStatus();
                 if (status.active)
                     ImGui::TextDisabled("Sky: effective interval %u; cache refreshes %llu; cached frames %llu",
