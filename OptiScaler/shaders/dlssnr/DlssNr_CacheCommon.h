@@ -30,8 +30,33 @@ enum DlssNrCacheMode : uint32_t
     DlssNrCacheMode_JbuUpsample = 6,  // a below-size model answer -> full size, guided by the frame
     DlssNrCacheMode_DumpPack = 7,     // the measurement dump's per-frame images
     DlssNrCacheMode_Temporal = 10,    // the temporal stabiliser: shown edit vs last frame's, clamped
-    DlssNrCacheMode_Copy = 11         // pre-SR: the game's colour into the texture the pass rewrites
+    DlssNrCacheMode_Copy = 11,        // pre-SR: the game's colour into the texture the pass rewrites
+    DlssNrCacheMode_Context = 12,     // anti-ghosting: this frame's surroundings (log luma, 1/4 size)
+    DlssNrCacheMode_GuidedDown = 13,  // guided filter: the frame and the edit's local sums (1/2 size)
+    DlssNrCacheMode_GuidedCoef = 14,  // guided filter: per-window linear model of the edit on the frame
+    DlssNrCacheMode_GuidedApply = 15, // guided filter: the edit rebuilt from the frame, then composed
+    DlssNrCacheMode_DilateMotion = 16, // once per frame: each depth texel's nearest-surface motion, in uv
+    DlssNrCacheMode_RegionalLow = 17, // the 12 px tent of an edit, at a quarter of the frame
+    DlssNrCacheMode_AsyncWarp = 18,   // CacheAsync: the background answer carried to this frame
+    DlssNrCacheMode_PulseProbe = 19   // ShowStats: the regional step and the detail of the edit on screen
 };
+
+// Anti-ghosting switches (GhostFlags). Each one off is the cache exactly as it was before it.
+enum DlssNrCacheGhostFlag : uint32_t
+{
+    DlssNrCacheGhost_Fingerprint = 1u,  // reject a carried edit whose source no longer matches the frame
+    DlssNrCacheGhost_Context = 2u,      // ... including its surroundings (an object that moved away)
+    DlssNrCacheGhost_Aging = 4u,        // carried detail fades with how far it has travelled
+    DlssNrCacheGhost_AgeNeutral = 8u,   // ... the whole edit, rather than toward its broad part
+    DlssNrCacheGhost_Guided = 16u,      // guided filter: the carried edit keeps structure only where the frame has it
+    DlssNrCacheGhost_SurfaceFill = 32u  // rejected pixels borrow only from the same surface, at every scale
+};
+
+// The guided filter's window, in half-size texels each side (1 = 6 pixels across at full size).
+constexpr uint32_t kDlssNrCacheGuidedRadius = 1;
+
+// Per-frame counters, one row each: rejected by depth, rejected by the fingerprint, motion (1/8 px).
+constexpr uint32_t kDlssNrCacheStatRows = 3;
 
 // The first pyramid level is a quarter of the frame on each side, and each level below a quarter of
 // the one above. Three levels reach 1/64, coarse enough that a disocclusion the size of a character
@@ -39,8 +64,8 @@ enum DlssNrCacheMode : uint32_t
 constexpr uint32_t kDlssNrCachePyramidStep = 4;
 constexpr uint32_t kDlssNrCachePyramidLevels = 3;
 
-// One counter per frame slot -- pixels whose history was rejected -- and four slots, matching the
-// readback ring.
+// One counter per frame slot and row (see kDlssNrCacheStatRows) and four slots, matching the readback
+// ring.
 constexpr uint32_t kDlssNrCacheStatSlots = 4;
 constexpr uint32_t kDlssNrCacheStatsWidth = kDlssNrCacheStatSlots;
 
@@ -125,6 +150,51 @@ struct alignas(256) DlssNrCacheConstants
     // Pre-SR: this frame's change of camera jitter, in uv, added to every reprojection. 0 otherwise.
     float JitterDeltaX;
     float JitterDeltaY;
+
+    // Anti-ghosting (DlssNrCacheGhostFlag). 0 is the cache exactly as it was without it.
+    uint32_t GhostFlags;
+    // Fingerprint: stops outside this frame's 3x3 range (luma, chroma) before doubt starts; none left at twice.
+    float PrintTolerance;
+    // Fingerprint: stops of change of the surroundings (a ~10 pixel neighbourhood's mean luma).
+    float ContextTolerance;
+    // Aging: frames of motion over which the carried detail halves.
+    float AgeHalfLife;
+    // Aging: pixels of motion that count as one frame of staleness.
+    float StalePixels;
+    // Guided filter: regularisation (log luma squared) and how much of the rebuilt edit is taken.
+    float GuidedEps;
+    float GuidedStrength;
+    // The context grid (a quarter of the frame) and the guided filter's (a half).
+    uint32_t ContextWidth;
+    uint32_t ContextHeight;
+    uint32_t HalfWidth;
+    uint32_t HalfHeight;
+
+    // Anti light pop-in: the most, in stops, the edit's regional light may move in one frame where the
+    // frame itself did not change there (0 is off), and how much the frame's own regional luma may change,
+    // in stops, before the region counts as changed.
+    float AntiPopStep;
+    float AntiPopFrameTolerance;
+
+    // Noise-aware checks: the colour test against the 3x3 range of this frame (not the pixel alone), and the
+    // anti-flicker faded in with trust and soft-limited rather than switched on and clamped. 0 is as before.
+    uint32_t NoiseAware;
+
+    // The per-frame dilated motion (mode 16) is ready at t19: the passes read it instead of searching the
+    // 3x3 nearest surface themselves. And the regional lows of mode 10 are precomputed at t20 / t21.
+    uint32_t DilatedReady;
+    uint32_t RegionalReady;
+
+    // CacheAsync: the capture's model frame is the background answer carried to this frame (mode 18), and a
+    // pixel it could not reach holds nothing of its own. 0 is as before.
+    uint32_t AsyncWarp;
+
+    // The pulse probe (mode 19): this frame's and last frame's surroundings are bound.
+    uint32_t ProbeContext;
+
+    // Soft refresh: with the keyframe crossfade, a pixel without a carried edit starts the walk to the model's
+    // answer from what was on screen (0 is as before: the answer at once). Last frame's edit is at t6.
+    uint32_t SoftRefresh;
 };
 static_assert(sizeof(DlssNrCacheConstants) == 256);
 static_assert(offsetof(DlssNrCacheConstants, Temporal) == 136);

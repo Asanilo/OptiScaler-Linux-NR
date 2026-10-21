@@ -57,12 +57,17 @@ def main():
     fixture = output / "cache-fixture-config"
     fixture.mkdir(exist_ok=True)
     fields = re.findall(r"^    CustomOptional<[^>]+> DlssNrCache\w+ \{ [^}]+ \};$", (REPO / "OptiScaler/Config.h").read_text(), re.M)
-    if len(fields) != 18:
-        raise SystemExit("Expected 18 production cache config declarations")
+    if len(fields) < 18:
+        raise SystemExit("Expected at least 18 production cache config declarations")
     (fixture / "Config.h").write_text("#pragma once\n#include <cstdint>\n"
         "template<class T> struct CustomOptional { T value; T value_or_default() const { return value; } "
         "CustomOptional& operator=(T v) { value=v; return *this; } };\nclass Config { public:\n"
-        "CustomOptional<bool> UsePrecompiledShaders { true };\n" + "\n".join(fields) +
+        "CustomOptional<bool> UsePrecompiledShaders { true };\n"
+        "CustomOptional<bool> DlssNrShowStats { false };\n"
+        "CustomOptional<float> DlssNrMotionFade { 0.0f };\n"
+        "CustomOptional<float> DlssNrMotionFadeStart { 6.0f };\n"
+        "CustomOptional<float> DlssNrMotionFadeEnd { 30.0f };\n"
+        "CustomOptional<bool> DlssNrMotionFadeSkipModel { true };\n" + "\n".join(fields) +
         "\nstatic Config* Instance() { static Config cfg; return &cfg; }\n};\n")
     lifetime_obj = output / "NrGpuLifetime.o"
     subprocess.run(strict + ["-DNR_LIFETIME_STANDALONE", "-I" + str(REPO / "tests/standalone"),

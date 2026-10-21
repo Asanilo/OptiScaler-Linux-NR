@@ -3,6 +3,7 @@
 #include "DlssNr_EditCache_Dx12.h"
 
 #include <Config.h>
+#include <State.h>
 #include <Util.h>
 
 #include <algorithm>
@@ -14,12 +15,19 @@
 
 namespace
 {
-void Barrier(ID3D12GraphicsCommandList* cmd, ID3D12Resource* res, D3D12_RESOURCE_STATES from, D3D12_RESOURCE_STATES to)
+// MSVC's std::format is not available in the C++17 LLVM-MinGW fixture. These
+// are log-only strings; snprintf keeps the same shape on both compilers.
+template <typename... Args> std::string Fmt(const char* format, Args... args)
 {
-    if (res == nullptr)
-        return;
-    DlssNr::GpuLifetime::Hold(cmd, res);
-    if (from == to)
+    char buffer[512] = {};
+    std::snprintf(buffer, sizeof(buffer), format, args...);
+    return buffer;
+}
+
+void Barrier(ID3D12GraphicsCommandList* cmd, ID3D12Resource* res, D3D12_RESOURCE_STATES from,
+             D3D12_RESOURCE_STATES to)
+{
+    if (res == nullptr || from == to)
         return;
 
     D3D12_RESOURCE_BARRIER b {};
@@ -53,7 +61,8 @@ ID3D12Resource* CreateTexture(ID3D12Device* device, DXGI_FORMAT format, unsigned
 
     ID3D12Resource* res = nullptr;
 
-    if (FAILED(device->CreateCommittedResource(&heap, D3D12_HEAP_FLAG_NONE, &desc, state, nullptr, IID_PPV_ARGS(&res))))
+    if (FAILED(device->CreateCommittedResource(&heap, D3D12_HEAP_FLAG_NONE, &desc, state, nullptr,
+                                               IID_PPV_ARGS(&res))))
         return nullptr;
 
     return res;
@@ -76,8 +85,8 @@ ID3D12Resource* CreateReadback(ID3D12Device* device, unsigned long long bytes)
 
     ID3D12Resource* res = nullptr;
 
-    if (FAILED(device->CreateCommittedResource(&heap, D3D12_HEAP_FLAG_NONE, &desc, D3D12_RESOURCE_STATE_COPY_DEST,
-                                               nullptr, IID_PPV_ARGS(&res))))
+    if (FAILED(device->CreateCommittedResource(&heap, D3D12_HEAP_FLAG_NONE, &desc,
+                                               D3D12_RESOURCE_STATE_COPY_DEST, nullptr, IID_PPV_ARGS(&res))))
         return nullptr;
 
     return res;
@@ -167,8 +176,8 @@ bool WriteNpy(const std::filesystem::path& path, const char* descr, unsigned int
         return false;
 
     char dict[256];
-    snprintf(dict, sizeof(dict), "{'descr': '%s', 'fortran_order': False, 'shape': (%u, %u, %u), }", descr, height,
-             width, channels);
+    snprintf(dict, sizeof(dict), "{'descr': '%s', 'fortran_order': False, 'shape': (%u, %u, %u), }", descr,
+             height, width, channels);
 
     std::string header(dict);
     const size_t preamble = 10; // magic (6) + version (2) + header length (2)
@@ -254,6 +263,8 @@ DlssNrEditCache_Dx12::~DlssNrEditCache_Dx12()
 
     SAFE_RELEASE(_dummySrv);
     SAFE_RELEASE(_dummyUav);
+    SAFE_RELEASE(_stampHeap);
+    SAFE_RELEASE(_stampReadback);
     // Shader_Dx12's destructor skips partially initialized objects. These may
     // already exist when later allocation/heap setup failed. Recordings pin
     // successful GPU uses independently, including destruction before submit.
@@ -266,10 +277,18 @@ void DlssNrEditCache_Dx12::Park(ID3D12Resource*& res)
     if (res == nullptr)
         return;
 
-    // Every GPU use pins its own reference to the actual recording. Dropping
-    // this owner is safe even if the old generation remains queued or replayable.
+    // Every GPU use pins its own reference to the actual recording (see Pass).
+    // Dropping this owner is safe even if the old generation remains queued or
+    // replayable; the recording's completion releases the last reference.
     res->Release();
     res = nullptr;
+}
+
+void DlssNrEditCache_Dx12::TickRetired()
+{
+    // Retained as a no-op: Park() releases immediately because Pass() pins the
+    // recording. The vector stays for source compatibility with older callers.
+    _retired.clear();
 }
 
 void DlssNrEditCache_Dx12::ReleaseAll(bool immediately)
@@ -277,10 +296,14 @@ void DlssNrEditCache_Dx12::ReleaseAll(bool immediately)
     _finalValid = false;
 
     // The pre-SR copy target belongs to the caller and is not here.
-    ID3D12Resource** all[] = { &_finalRaw,    &_finalHist[0], &_finalHist[1], &_histTarget[0], &_histTarget[1],
-                               &_histEdit[0], &_histEdit[1],  &_histGuide[0], &_histGuide[1],  &_level[0],
-                               &_level[1],    &_level[2],     &_levelGuide,   &_stats,         &_modelUp,
-                               &_accMv[0],    &_accMv[1] };
+    ID3D12Resource** all[] = { &_finalRaw,     &_finalHist[0], &_finalHist[1], &_histTarget[0], &_histTarget[1],
+                               &_histEdit[0],  &_histEdit[1],  &_histGuide[0], &_histGuide[1],  &_level[0],
+                               &_level[1],     &_level[2],     &_levelGuide,   &_stats,         &_modelUp,
+                               &_accMv[0],     &_accMv[1],     &_histPrint[0], &_histPrint[1],  &_histMeta[0],
+                               &_histMeta[1],  &_context,      &_contextPrev,  &_guideSum[0],   &_guideSum[1],
+                               &_guideCoef[0], &_dilatedMv,    &_regNow,       &_regPrev,
+                               &_guideCoef[1], &_guidedOut,    &_levelGuideCoarse[0], &_levelGuideCoarse[1],
+                               &_asyncWarp,    &_pulse[0],     &_pulse[1],     &_pulseStats };
 
     for (ID3D12Resource** r : all)
     {
@@ -309,6 +332,30 @@ void DlssNrEditCache_Dx12::ReleaseAll(bool immediately)
         _statsCompletion[i].reset();
     }
 
+    for (unsigned int i = 0; i < kPulseSlots; ++i)
+    {
+        if (immediately)
+        {
+            SAFE_RELEASE(_pulseReadback[i]);
+        }
+        else
+        {
+            Park(_pulseReadback[i]);
+        }
+
+        _pulseFrame[i] = 0;
+    }
+
+    _pulsePrevValid = false;
+
+    if (immediately)
+    {
+        for (auto& r : _retired)
+            r.resource->Release();
+
+        _retired.clear();
+    }
+
     _width = _height = 0;
     _accWidth = _accHeight = 0;
     _accFormat = DXGI_FORMAT_UNKNOWN;
@@ -325,12 +372,6 @@ bool DlssNrEditCache_Dx12::EnsureResources(ID3D12Device* device, unsigned int wi
     if (_width != 0)
         LOG_INFO("DLSS-NR edit cache: {}x{} -> {}x{}, rebuilding", _width, _height, width, height);
 
-    if (_dumpWanted > 0 && _dumpCaptured > 0)
-    {
-        LOG_WARN("DLSS-NR edit cache: cancelling incomplete dump after resize/format change");
-        DumpRelease(); // Any pending GPU copies retain their own recording references.
-        _dumpWanted = 0;
-    }
     ReleaseAll(false);
 
     for (unsigned int i = 0; i < 2; ++i)
@@ -342,18 +383,18 @@ bool DlssNrEditCache_Dx12::EnsureResources(ID3D12Device* device, unsigned int wi
     }
 
     for (unsigned int l = 0; l < kDlssNrCachePyramidLevels; ++l)
-        _level[l] =
-            CreateTexture(device, DXGI_FORMAT_R16G16B16A16_FLOAT, LevelDim(width, l), LevelDim(height, l), true, kUav);
+        _level[l] = CreateTexture(device, DXGI_FORMAT_R16G16B16A16_FLOAT, LevelDim(width, l), LevelDim(height, l),
+                                  true, kUav);
 
     _levelGuide = CreateTexture(device, DXGI_FORMAT_R32G32_FLOAT, LevelDim(width, 0), LevelDim(height, 0), true, kUav);
     _finalRaw = CreateTexture(device, DXGI_FORMAT_R16G16B16A16_FLOAT, width, height, true, kUav);
 
     for (auto& h : _finalHist)
         h = CreateTexture(device, DXGI_FORMAT_R16G16B16A16_FLOAT, width, height, true, kUav);
-    _stats = CreateTexture(device, DXGI_FORMAT_R32_UINT, kDlssNrCacheStatsWidth, 1, true, kUav);
+    _stats = CreateTexture(device, DXGI_FORMAT_R32_UINT, kDlssNrCacheStatsWidth, kDlssNrCacheStatRows, true, kUav);
 
     for (auto& rb : _statsReadback)
-        rb = CreateReadback(device, 256);
+        rb = CreateReadback(device, 256 * kDlssNrCacheStatRows);
 
     bool ok = _stats != nullptr && _levelGuide != nullptr && _finalRaw != nullptr && _finalHist[0] != nullptr &&
               _finalHist[1] != nullptr;
@@ -388,8 +429,8 @@ bool DlssNrEditCache_Dx12::EnsureAccumulator(ID3D12Device* device, ID3D12Resourc
     const DXGI_FORMAT readable = ReadableFormat(md.Format);
 
     // The game's own precision where it is a two-channel float, so the model reads what it would have.
-    const DXGI_FORMAT want =
-        (readable == DXGI_FORMAT_R32G32_FLOAT) ? DXGI_FORMAT_R32G32_FLOAT : DXGI_FORMAT_R16G16_FLOAT;
+    const DXGI_FORMAT want = (readable == DXGI_FORMAT_R32G32_FLOAT) ? DXGI_FORMAT_R32G32_FLOAT
+                                                                    : DXGI_FORMAT_R16G16_FLOAT;
 
     // A change of the motion texture's shape retires the accumulator.
     if (_accWidth != (unsigned int) md.Width || _accHeight != md.Height || _accFormat != want)
@@ -424,11 +465,79 @@ bool DlssNrEditCache_Dx12::EnsureAccumulator(ID3D12Device* device, ID3D12Resourc
     return true;
 }
 
+// Anti-ghosting resources, for the switches that need them and no more. A switch that cannot get its
+// memory is turned off for the frame -- the cache as it was -- rather than failing the pass.
+bool DlssNrEditCache_Dx12::EnsureGhostResources(ID3D12Device* device)
+{
+    const bool print = (_ghostFlags & DlssNrCacheGhost_Fingerprint) != 0;
+    const bool meta = (_ghostFlags & (DlssNrCacheGhost_Fingerprint | DlssNrCacheGhost_Aging | DlssNrCacheGhost_Guided)) != 0;
+    // The surroundings serve the fingerprint and the anti pop-in, which keeps last frame's too.
+    const bool context = (print && (_ghostFlags & DlssNrCacheGhost_Context) != 0) || _antiPopStep > 0.0f;
+    const bool guided = (_ghostFlags & DlssNrCacheGhost_Guided) != 0;
+    const bool surface = (_ghostFlags & DlssNrCacheGhost_SurfaceFill) != 0;
+
+    auto want = [&](ID3D12Resource*& res, bool needed, DXGI_FORMAT format, unsigned int w, unsigned int h)
+    {
+        if (!needed)
+        {
+            Park(res);
+            return true;
+        }
+
+        if (res == nullptr)
+            res = CreateTexture(device, format, w, h, true, kUav);
+
+        return res != nullptr;
+    };
+
+    const unsigned int hw = (_width + 1) / 2;
+    const unsigned int hh = (_height + 1) / 2;
+    bool ok = true;
+
+    for (unsigned int i = 0; i < 2; ++i)
+    {
+        ok &= want(_histPrint[i], print, DXGI_FORMAT_R16G16B16A16_FLOAT, _width, _height);
+        ok &= want(_histMeta[i], meta, DXGI_FORMAT_R16G16B16A16_FLOAT, _width, _height);
+        ok &= want(_guideSum[i], guided, DXGI_FORMAT_R32G32B32A32_FLOAT, hw, hh);
+        ok &= want(_guideCoef[i], guided, DXGI_FORMAT_R16G16B16A16_FLOAT, hw, hh);
+        ok &= want(_levelGuideCoarse[i], surface, DXGI_FORMAT_R32G32_FLOAT, LevelDim(_width, i + 1),
+                   LevelDim(_height, i + 1));
+    }
+
+    ok &= want(_context, context, DXGI_FORMAT_R16G16B16A16_FLOAT, LevelDim(_width, 0), LevelDim(_height, 0));
+    ok &= want(_contextPrev, context, DXGI_FORMAT_R16G16B16A16_FLOAT, LevelDim(_width, 0), LevelDim(_height, 0));
+    ok &= want(_guidedOut, guided, DXGI_FORMAT_R16G16B16A16_FLOAT, _width, _height);
+
+    if (!ok)
+    {
+        LOG_ERROR("DLSS-NR edit cache: no memory for the anti-ghosting textures at {}x{}; they stand aside", _width,
+                  _height);
+
+        for (unsigned int i = 0; i < 2; ++i)
+        {
+            Park(_histPrint[i]);
+            Park(_histMeta[i]);
+            Park(_guideSum[i]);
+            Park(_guideCoef[i]);
+            Park(_levelGuideCoarse[i]);
+        }
+
+        Park(_context);
+        Park(_contextPrev);
+        Park(_guidedOut);
+        _ghostFlags = 0;
+        _antiPopStep = 0.0f;
+    }
+
+    return ok;
+}
+
 void DlssNrEditCache_Dx12::Invalidate()
 {
     _finalValid = false;
     _historyValid = false;
     _accReset = true;
+    _activeThisFrame = false;
     _cadence.ResetMotion();
 }
 
@@ -461,105 +570,387 @@ bool DlssNrEditCache_Dx12::ReserveDispatches(ID3D12GraphicsCommandList* cmd)
 
 bool DlssNrEditCache_Dx12::BeginFrame(ID3D12GraphicsCommandList* cmd, const Config& cfg, ID3D12Device* device,
                                       unsigned int width, unsigned int height, DXGI_FORMAT format, bool reset,
-                                      bool preSr)
+                                      bool preSr, bool async, bool asyncBusy)
 {
-    if (!_init || device != _device || !EnsureResources(device, width, height, format) || !ReserveDispatches(cmd))
+    ++_frame;
+    _async = async;
+    _activeThisFrame = false;
+
+    if (cmd == nullptr)
     {
         Invalidate();
-        _activeThisFrame = false;
+        return true; // no recording: run the model, which is what off would do
+    }
+
+    if (!async)
+        Park(_asyncWarp);
+    TickRetired();
+    _contextPrevValid = false; // set again by this frame's ContextPass, if it runs
+    _dilatedReady = false;     // set again by this frame's DilatePass
+
+    if (!EnsureResources(device, width, height, format))
+    {
+        Invalidate();
+        return true; // cannot cache: run the model, which is what off would do
+    }
+
+    // Local Linux/Proton ownership: reserve this recording's heap slots before
+    // any dispatch. Failure means the model runs fresh, never a half-recorded frame.
+    if (!ReserveDispatches(cmd))
+    {
+        Invalidate();
         return true;
     }
+
     ConsumeStats();
-    _exposure = nullptr;
-    const auto finite = [](float value, float low, float high, float fallback)
-    { return std::isfinite(value) ? std::clamp(value, low, high) : fallback; };
-    _depthTol = finite(cfg.DlssNrCacheDepthTolerance.value_or_default(), 0.005f, 1.0f, 0.1f);
-    _colourTol = finite(cfg.DlssNrCacheColourTolerance.value_or_default(), 0.05f, 8.0f, 0.5f);
-    _highDecay = finite(cfg.DlssNrCacheHighDecay.value_or_default(), 0.0f, 1.0f, 0.97f);
-    _refreshBlend = finite(cfg.DlssNrCacheRefreshBlend.value_or_default(), 0.05f, 1.0f, 1.0f);
-    _lowGain = finite(cfg.DlssNrCacheLowGain.value_or_default(), 0.0f, 4.0f, 1.0f);
-    _highGain = finite(cfg.DlssNrCacheHighGain.value_or_default(), 0.0f, 4.0f, 1.0f);
-    _bilateral = cfg.DlssNrCacheBilateral.value_or_default();
-    _stabilize = finite(cfg.DlssNrCacheStabilize.value_or_default(), 0.0f, 4.0f, 0.5f);
-    _despeckle = cfg.DlssNrCacheDespeckle.value_or_default();
-    // Sky leaves fine-detail temporal blending and crossfade to SR on jittered
-    // pre-SR input. Regional luminance stabilization remains independently active.
-    _temporal = preSr ? 0.0f : finite(cfg.DlssNrCacheTemporal.value_or_default(), 0.0f, 0.9f, 0.5f);
-    _lowTemporal = finite(cfg.DlssNrCacheLowTemporal.value_or_default(), 0.0f, 0.95f, 0.95f);
-    _debugView = std::min(cfg.DlssNrCacheDebugView.value_or_default(), 3u);
-    _modelHistory = std::min(cfg.DlssNrCacheModelHistory.value_or_default(), 2u);
-    const unsigned int interval = std::clamp(cfg.DlssNrCacheInterval.value_or_default(), 1u, 16u);
-    const bool adaptive = cfg.DlssNrCacheAdaptive.value_or_default();
-    const float threshold = finite(cfg.DlssNrCacheAdaptiveThreshold.value_or_default(), 0.001f, 1.0f, 0.1f);
-    _crossfadeOn = cfg.DlssNrCacheCrossfade.value_or_default() && !preSr;
-    const std::array<float, 17> settings { _depthTol,         _colourTol,
-                                           _highDecay,        _refreshBlend,
-                                           _lowGain,          _highGain,
-                                           _stabilize,        _temporal,
-                                           _lowTemporal,      float(_bilateral),
-                                           float(_despeckle), float(_crossfadeOn),
-                                           float(_debugView), float(_modelHistory),
-                                           float(interval),   float(adaptive),
-                                           threshold };
-    if (!_settingsKey || *_settingsKey != settings || reset)
-        Invalidate();
-    _settingsKey = settings;
-    const auto decision =
-        _cadence.Begin(interval, adaptive, threshold, _historyValid, reset, _dumpWanted > 0 && !_dumpObserve);
-    _intervalNow = decision.interval;
-    _crossfade = decision.crossfade;
-    switch (decision.reason)
+
+    // The overlay's timings: only measured while they are shown.
+    _timing = cfg.DlssNrShowStats.value_or_default();
+
+    if (_timing)
     {
-    case DlssNr::EditCacheCadence::Reason::Cached:
-        return false;
-    case DlssNr::EditCacheCadence::Reason::NoHistory:
-        _refreshReason = "no history";
-        break;
-    case DlssNr::EditCacheCadence::Reason::Reset:
-        _refreshReason = "the game or the model reset";
-        break;
-    case DlssNr::EditCacheCadence::Reason::Measurement:
-        _refreshReason = "measurement dump";
-        break;
-    case DlssNr::EditCacheCadence::Reason::Interval:
-        _refreshReason = _cadence.regime == 0   ? "interval (still: slower)"
-                         : _cadence.regime == 2 ? "interval (fast motion: faster)"
-                                                : "interval";
-        break;
+        ConsumeStamps();
+        ConsumePulse();
     }
+    else
+        std::fill(std::begin(_stageSeen), std::end(_stageSeen), false);
+
+    // Latched once so every pass of this frame agrees, however the menu moves mid-frame.
+    _depthTol = std::clamp(cfg.DlssNrCacheDepthTolerance.value_or_default(), 0.005f, 1.0f);
+    _colourTol = std::clamp(cfg.DlssNrCacheColourTolerance.value_or_default(), 0.05f, 8.0f);
+    _highDecay = std::clamp(cfg.DlssNrCacheHighDecay.value_or_default(), 0.0f, 1.0f);
+    _refreshBlend = std::clamp(cfg.DlssNrCacheRefreshBlend.value_or_default(), 0.05f, 1.0f);
+    _lowGain = std::clamp(cfg.DlssNrCacheLowGain.value_or_default(), 0.0f, 4.0f);
+    _highGain = std::clamp(cfg.DlssNrCacheHighGain.value_or_default(), 0.0f, 4.0f);
+    _bilateral = cfg.DlssNrCacheBilateral.value_or_default();
+    _stabilize = std::clamp(cfg.DlssNrCacheStabilize.value_or_default(), 0.0f, 4.0f);
+    _despeckle = cfg.DlssNrCacheDespeckle.value_or_default();
+    // Before the upscaler, the high band's temporal blend and the keyframe crossfade (below) stand aside.
+    // Each model answer there belongs to one jitter -- the scene sampled a fraction of a pixel elsewhere
+    // -- so blending two answers lays two copies of the detail a fraction of a pixel apart, and the
+    // upscaler, whose own accumulation already does this job properly, averages them into blur
+    // (measured in Control: detail x1.05 with them, x1.15 without, against x1.20 for vanilla).
+    // The regional light (luminance stability) is broad enough not to care, and stays.
+    _temporal = preSr ? 0.0f : std::clamp(cfg.DlssNrCacheTemporal.value_or_default(), 0.0f, 0.9f);
+    _noiseAware = cfg.DlssNrCacheNoiseAware.value_or_default();
+    _lowTemporal = std::clamp(cfg.DlssNrCacheLowTemporal.value_or_default(), 0.0f, 0.95f);
+    _softRefresh = cfg.DlssNrCacheSoftRefresh.value_or_default();
+
+    // Anti light pop-in: a rate in stops per second, turned into this frame's step with the real time
+    // between frames (smoothed), so the fade takes the same time at 40 fps as at 120.
+    {
+        LARGE_INTEGER now, freq;
+        QueryPerformanceCounter(&now);
+        QueryPerformanceFrequency(&freq);
+
+        if (_lastBeginTicks != 0)
+        {
+            const double dt = std::clamp((double) (now.QuadPart - _lastBeginTicks) / (double) freq.QuadPart,
+                                         1.0 / 500.0, 1.0 / 10.0);
+            _frameSeconds = _frameSeconds * 0.9 + dt * 0.1;
+        }
+
+        _lastBeginTicks = now.QuadPart;
+
+        const float rate = std::clamp(cfg.DlssNrCacheAntiPopRate.value_or_default(), 0.1f, 20.0f);
+        _antiPopStep = cfg.DlssNrCacheAntiPop.value_or_default() ? rate * (float) _frameSeconds : 0.0f;
+    }
+    _debugView = cfg.DlssNrCacheDebugView.value_or_default();
+    _modelHistory = cfg.DlssNrCacheModelHistory.value_or_default();
+
+    // Anti-ghosting. A change of switches changes what the history holds, so it starts again from a
+    // model run rather than reading a fingerprint or an age that was never written.
+    uint32_t ghost = 0;
+
+    if (cfg.DlssNrCacheFingerprint.value_or_default())
+    {
+        ghost |= DlssNrCacheGhost_Fingerprint;
+
+        if (cfg.DlssNrCacheContext.value_or_default())
+            ghost |= DlssNrCacheGhost_Context;
+    }
+
+    if (cfg.DlssNrCacheSurfaceFill.value_or_default())
+        ghost |= DlssNrCacheGhost_SurfaceFill;
+
+    if (cfg.DlssNrCacheAging.value_or_default())
+    {
+        ghost |= DlssNrCacheGhost_Aging;
+
+        if (cfg.DlssNrCacheAgeNeutral.value_or_default())
+            ghost |= DlssNrCacheGhost_AgeNeutral;
+    }
+
+    if (cfg.DlssNrCacheGuided.value_or_default())
+        ghost |= DlssNrCacheGhost_Guided;
+
+    // With the model on every frame nothing is ever carried: the anti-ghosting would only cost time (the
+    // anti pop-in, which acts on the model's own answers, stays). In the background it is never every frame.
+    const unsigned int intervalFloor = async ? kAsyncMinInterval : 1u;
+
+    if (std::max(std::clamp(cfg.DlssNrCacheInterval.value_or_default(), 1u, 16u), intervalFloor) <= 1)
+        ghost = 0;
+
+    _ghostFlags = ghost;
+    EnsureGhostResources(device);
+
+    if (_ghostFlags != _ghostFlagsLast)
+    {
+        _historyValid = false;
+        _ghostFlagsLast = _ghostFlags;
+    }
+
+    _printTol = std::clamp(cfg.DlssNrCacheFingerprintTolerance.value_or_default(), 0.02f, 4.0f);
+    _ageHalfLife = std::clamp(cfg.DlssNrCacheAgeHalfLife.value_or_default(), 0.5f, 64.0f);
+    _guidedStrength = std::clamp(cfg.DlssNrCacheGuidedStrength.value_or_default(), 0.0f, 1.0f);
+    _crossfadeFrames = std::min(cfg.DlssNrCacheCrossfadeFrames.value_or_default(), 16u);
+    _adaptiveSpeed = cfg.DlssNrCacheAdaptiveSpeed.value_or_default();
+    _adaptiveMin = std::max(std::clamp(cfg.DlssNrCacheAdaptiveMin.value_or_default(), 1u, 16u), intervalFloor);
+    _motionPriority = std::clamp(cfg.DlssNrCacheMotionPriority.value_or_default(), 0.0f, 1.0f);
+    _budgetMs = std::clamp(cfg.DlssNrCacheBudgetMs.value_or_default(), 0.0f, 100.0f);
+    _stillMax = std::clamp(cfg.DlssNrCacheStillMax.value_or_default(), 4u, 16u);
+    _stillHold = cfg.DlssNrCacheStillHold.value_or_default();
+
+    const unsigned int interval = std::max(std::clamp(cfg.DlssNrCacheInterval.value_or_default(), 1u, 16u), intervalFloor);
+    const bool adaptive = cfg.DlssNrCacheAdaptive.value_or_default();
+    const float threshold = std::clamp(cfg.DlssNrCacheAdaptiveThreshold.value_or_default(), 0.001f, 1.0f);
+    const bool bySpeed = adaptive && _adaptiveSpeed && interval > 1;
+
+    const char* why = nullptr;
+
+    // Steady in motion: past its end speed the edit is given back to the game's frame anyway, so the model's answer
+    // is barely seen -- it runs one frame in eight there, and at its usual cadence the moment the view slows. The
+    // speed is the frame's mean motion at this pass's size, each pixel counted up to 32 pixels (the counter's
+    // range): the mean never quite reaches 30, so it engages at 80% of the end speed and at most 24, and lets go
+    // a fifth lower, so it does not flicker on and off at the edge.
+    const float fastAt = std::clamp(cfg.DlssNrMotionFadeEnd.value_or_default() * 0.8f, 1.0f, 24.0f);
+    const bool fastFaded = cfg.DlssNrMotionFadeSkipModel.value_or_default() &&
+                           cfg.DlssNrMotionFade.value_or_default() >= 0.75f && _speed >= 0.0f &&
+                           _speed >= (_fastFaded ? fastAt * 0.8f : fastAt);
+    const auto pickInterval = [&]() {
+        const unsigned int n = bySpeed ? SpeedInterval(interval) : EffectiveInterval(interval, adaptive, threshold);
+        return fastFaded ? std::max(n, 8u) : n;
+    };
+
+    if (fastFaded != _fastFaded)
+    {
+        _fastFaded = fastFaded;
+        LOG_INFO("DLSS-NR edit cache: {} ({:.1f} px per frame)",
+                 fastFaded ? "fast turn, the model runs one frame in eight" : "the view slowed, the model's cadence is back",
+                 _speed);
+    }
+
+    if (asyncBusy)
+    {
+        // CacheAsync: an answer is on its way, and nothing starts another run until it has landed. The cadence
+        // is still followed, for the overlay and the speed regime.
+        _intervalNow = pickInterval();
+    }
+    else if (!_historyValid)
+        why = "no history";
+    else if (_refreshNext)
+        why = "the model's queue was behind last frame";
+    else if (reset)
+        why = "the game or the model reset";
+    else if (_dumpWanted > 0 && !_dumpObserve)
+        why = "measurement dump";
+    else if (_frame - _lastRefresh >= (_intervalNow = pickInterval()))
+        why = fastFaded       ? "interval (fast turn, given back: slower)"
+              : _regime == 0 ? "interval (still: slower)"
+              : _regime == 2 ? "interval (fast motion: faster)"
+                             : "interval";
+    else if (bySpeed && !fastFaded && _frame - _lastRefresh >= _floorNow && _staleNow >= threshold)
+        why = "too much of the edit rejected";
+
+    // Keyframe crossfade step for this frame: the share of the remaining way to the model's latest answer,
+    // so the shown edit reaches it exactly when the model runs next -- or, with CrossfadeFrames, within
+    // that many frames: at long intervals a walk over the whole of it kept the previous answer on screen
+    // for up to twice the interval, which is a trail of its own.
+    _crossfadeOn = cfg.DlssNrCacheCrossfade.value_or_default() && !preSr;
+    const unsigned int intervalNow = std::max(1u, _intervalNow);
+    const unsigned int span = _crossfadeFrames > 0 ? std::min(intervalNow, _crossfadeFrames) : intervalNow;
+    const unsigned int since = (unsigned int) (_frame - _lastRefresh);
+    _crossfadeSpan = span;
+
+    if (why == nullptr)
+    {
+        _crossfade = since >= span ? 1.0f : 1.0f / (float) (span - since);
+        _guidedNow = (_ghostFlags & DlssNrCacheGhost_Guided) != 0 && _debugView == 0;
+        ++_cachedFrames;
+        return false;
+    }
+
+    _crossfade = 1.0f / (float) span;
+    _guidedNow = false; // the model's own answer is left alone
+    _refreshNext = false;
+
+    _refreshReason = why;
+    _lastRefresh = _frame;
     _cumulativeRejected = 0.0f;
+    _staleNow = 0.0f;
+    ++_refreshes;
     return true;
+}
+
+// The camera-speed regime. The configured interval is what the cache uses while the view moves at an
+// ordinary pace -- about a tenth of a percent of the frame's width per frame, 2.6 pixels at 1440p -- and
+// it shortens in proportion as the view moves faster, down to CacheAdaptiveMin: the further the picture
+// travels between two model runs, the more of the carried edit no longer belongs to it. Standing still
+// it lengthens, as the three-regime cadence did. Into a shorter interval quickly, back out slowly: a lag
+// one way costs a little performance, the other way ghosting.
+unsigned int DlssNrEditCache_Dx12::SpeedInterval(unsigned int interval)
+{
+    // Motion priority lowers the ordinary pace the interval is measured against: at 1 the model runs at the
+    // shortest interval from a fifth of the speed. Ghosting only exists in motion; standing still the long
+    // interval costs nothing in quality.
+    const float ref = std::max(0.001f * (float) _width, 0.5f) / (1.0f + 4.0f * _motionPriority);
+    unsigned int minimum = std::min(_adaptiveMin, interval);
+
+    // The GPU budget: the average pass over an interval of n is (refresh + (n - 1) cached) / n, so the
+    // shortest n that stays under the budget is (refresh - cached) / (budget - cached), rounded up. It
+    // raises the floor -- motion then spends the budget, never more.
+    _budgetFloor = 0;
+
+    if (_budgetMs > 0.0f && _costRefresh > 0.0 && _costCached > 0.0)
+    {
+        const double spare = (double) _budgetMs - _costCached;
+        const unsigned int need =
+            spare <= 0.0 ? interval : (unsigned int) std::ceil((_costRefresh - _costCached) / spare - 1e-6);
+        _budgetFloor = std::clamp(need, 1u, interval);
+        minimum = std::max(minimum, _budgetFloor);
+    }
+
+    _floorNow = minimum;
+    unsigned int wanted = interval;
+    const unsigned int still = std::max(interval, std::min(interval * 2u, _stillMax));
+
+    // StillHold. A still view is not motionless: a character breathes, papers and debris drift, and their
+    // motion lifts the frame's mean above the threshold now and then (Control, camera at rest: 0.0 to 0.4 px/f
+    // against 0.21). With one threshold each of those readings restarted the 20 frames the longer interval
+    // waits for, so Balanced never got there, and three of them were enough to leave it. Held, the view
+    // enters below a quarter of the reference pace, leaves only above three quarters, and a reading that
+    // disagrees takes a frame off the count instead of starting it again.
+    const bool holding = _stillHold && still > interval && _speedInterval == still;
+
+    if (_speed >= 0.0f && _speed < (holding ? 0.75f : 0.25f) * ref)
+        wanted = still;
+    else if (_speed >= 0.0f)
+        wanted = std::clamp((unsigned int) std::lround((float) interval * ref / std::max(_speed, ref)), minimum, interval);
+
+    if (_speedInterval == 0)
+        _speedInterval = wanted;
+
+    if (wanted == _speedInterval)
+    {
+        if (_stillHold && _speedCandidate == still && still > _speedInterval && _speedFrames > 0)
+        {
+            --_speedFrames;
+        }
+        else
+        {
+            _speedCandidate = wanted;
+            _speedFrames = 0;
+        }
+    }
+    else
+    {
+        if (wanted != _speedCandidate)
+        {
+            _speedCandidate = wanted;
+            _speedFrames = 0;
+        }
+
+        if (++_speedFrames >= (wanted < _speedInterval ? 3u : 20u))
+        {
+            _speedInterval = wanted;
+            _speedFrames = 0;
+        }
+    }
+
+    // The hysteresis smooths what motion asks for; the budget is a limit and holds at once.
+    const unsigned int result = std::max(_speedInterval, minimum);
+    _regime = result > interval ? 0 : result < interval ? 2 : 1;
+    return result;
+}
+
+// The interval actually used. With adaptation on, a regular cadence per regime instead of runs fired
+// early whenever enough was revealed: the early runs made the cadence irregular (2, 3, 2, 2, 3...) and an
+// irregular refresh is visible as flicker in its own right. Each regime holds until the motion has
+// clearly left it, so the cadence does not hop either.
+//
+//   still   (almost nothing revealed)  twice the interval, up to 8 -- standing still costs least
+//   moving                              the interval as set
+//   fast    (more than the threshold)   half the interval -- more of the frame is new each frame
+unsigned int DlssNrEditCache_Dx12::EffectiveInterval(unsigned int interval, bool adaptive, float threshold)
+{
+    if (!adaptive || interval <= 1)
+    {
+        _regime = 1;
+        return interval;
+    }
+
+    // Standing still is not zero: TAA jitter on thin things alone rejects about 0.6% of the frame in
+    // Control. The floor for "still" sits above that, or the regime never engages.
+    const int wanted = _motion > threshold ? 2 : (_motion < std::max(0.015f, threshold * 0.15f) ? 0 : 1);
+
+    if (wanted == _regime)
+    {
+        _regimeCandidate = wanted;
+        _regimeFrames = 0;
+    }
+    else
+    {
+        if (wanted != _regimeCandidate)
+        {
+            _regimeCandidate = wanted;
+            _regimeFrames = 0;
+        }
+
+        // Into fast motion quickly, out of it and into stillness slowly: a lag there costs a little
+        // performance, a lag the other way costs flicker.
+        const unsigned int needed = wanted == 2 ? 4u : 30u;
+
+        if (++_regimeFrames >= needed)
+        {
+            _regime = wanted;
+            _regimeFrames = 0;
+        }
+    }
+
+    switch (_regime)
+    {
+    case 0: return std::min(interval * 2u, 8u);
+    case 2: return std::max(1u, (interval + 1u) / 2u);
+    default: return interval;
+    }
 }
 
 void DlssNrEditCache_Dx12::ConsumeStats()
 {
-    std::array<unsigned int, kDlssNrCacheStatSlots> order { 0, 1, 2, 3 };
-    std::sort(order.begin(), order.end(),
-              [this](unsigned int a, unsigned int b) { return _statsFrame[a] < _statsFrame[b]; });
-    for (const unsigned int s : order)
+    for (unsigned int s = 0; s < kDlssNrCacheStatSlots; ++s)
     {
-        // Map only after every actual submit completed and the recording is no
-        // longer replayable. A discarded, never-submitted copy contains no sample.
-        if (!_statsPending[s] || _statsReadback[s] == nullptr)
+        // Local Linux/Proton path: the copy is fence-tracked. Keep the frame
+        // distance as a cheap early-out, but never map before the recording is
+        // actually complete.
+        if (!_statsPending[s] || _frame - _statsFrame[s] < 3 || _statsReadback[s] == nullptr)
             continue;
-        if (DlssNr::GpuLifetime::Discarded(_statsCompletion[s]))
-        {
-            _statsPending[s] = false;
-            _statsCompletion[s].reset();
-            continue;
-        }
         if (!DlssNr::GpuLifetime::ReadbackReady(_statsCompletion[s]))
             continue;
 
         _statsPending[s] = false;
+        _statsCompletion[s].reset();
 
         void* mapped = nullptr;
-        D3D12_RANGE range { 0, kDlssNrCacheStatsWidth * sizeof(uint32_t) };
+        D3D12_RANGE range { 0, 256 * (kDlssNrCacheStatRows - 1) + kDlssNrCacheStatsWidth * sizeof(uint32_t) };
 
         if (FAILED(_statsReadback[s]->Map(0, &range, &mapped)) || mapped == nullptr)
             continue;
 
-        const uint32_t rejected = ((const uint32_t*) mapped)[s];
+        // One row per counter, 256 bytes apart (the copy's row pitch).
+        const auto row = [&](unsigned int r) { return ((const uint32_t*) ((const uint8_t*) mapped + 256 * r))[s]; };
+        const uint32_t rejected = row(0);
+        const uint32_t rejectedPrint = row(1);
+        const uint32_t motion8 = row(2);
 
         D3D12_RANGE nothing { 0, 0 };
         _statsReadback[s]->Unmap(0, &nothing);
@@ -568,13 +959,24 @@ void DlssNrEditCache_Dx12::ConsumeStats()
 
         const float fraction = std::min(1.0f, rejected / total);
         _lastRejected = fraction;
+        _printRejected = std::min(1.0f, rejectedPrint / total);
+
+        // The camera's speed: the frame's mean motion, smoothed over a few readings.
+        const float speed = (float) motion8 / 8.0f / total;
+        _speed = _speed < 0.0f ? speed : _speed * 0.75f + speed * 0.25f;
 
         // How much is being revealed, smoothed over a few readings: the motion the regimes follow.
-        _cadence.ObserveRejected(fraction);
+        _motion = _motion * 0.75f + fraction * 0.25f;
 
         // Only what happened since the last refresh decides the next one.
-        if (_statsFrame[s] > _cadence.lastRefresh)
+        if (_statsFrame[s] > _lastRefresh)
+        {
             _cumulativeRejected += fraction;
+
+            // What is no longer covered by a believed edit right now: the frame's revealed pixels plus
+            // everything the fingerprint has rejected since the model ran (it never takes a pixel back).
+            _staleNow = fraction + _printRejected;
+        }
     }
 }
 
@@ -602,7 +1004,7 @@ DlssNrCacheConstants DlssNrEditCache_Dx12::BaseConstants(const DlssNrCacheInputs
     c.DebugView = _debugView;
     c.StatsSlot = _statsSlot;
     c.Passthrough = in.passthrough ? 1u : 0u;
-    c.FrameIndex = (uint32_t) _cadence.frame;
+    c.FrameIndex = (uint32_t) _frame;
     c.UseGameExposure = (in.useGameExposure && in.exposure != nullptr && !in.passthrough) ? 1u : 0u;
     c.ExposurePreMul = in.exposurePreMul;
     c.MaxLumaEdit = std::log2(std::max(in.maxRatio, 1.0f)) + 0.5f;
@@ -611,10 +1013,27 @@ DlssNrCacheConstants DlssNrEditCache_Dx12::BaseConstants(const DlssNrCacheInputs
     c.CrossfadeOn = _crossfadeOn ? 1u : 0u;
     c.Crossfade = _crossfade;
     c.Temporal = _debugView == 0 ? _temporal : 0.0f;
-    c.LowTemporal = _debugView == 0 ? _lowTemporal : 0.0f;
+    c.LowTemporal = _lowTemporal;
+    c.SoftRefresh = _softRefresh ? 1u : 0u;
     c.TemporalValid = _finalValid ? 1u : 0u;
     c.JitterDeltaX = in.jitterDeltaX;
     c.JitterDeltaY = in.jitterDeltaY;
+    c.GhostFlags = _ghostFlags;
+    c.PrintTolerance = _printTol;
+    c.ContextTolerance = _printTol;
+    c.AgeHalfLife = _ageHalfLife;
+    c.StalePixels = 4.0f;
+    c.GuidedEps = 0.005f; // measured best of 0.005, 0.02 and 0.1: larger flattens real detail
+    c.GuidedStrength = _guidedStrength;
+    c.ContextWidth = LevelDim(_width, 0);
+    c.ContextHeight = LevelDim(_height, 0);
+    c.HalfWidth = (_width + 1) / 2;
+    c.HalfHeight = (_height + 1) / 2;
+    // Needs last frame's surroundings to tell a re-grade from a real change; without them it stands aside.
+    c.AntiPopStep = (_debugView == 0 && _contextPrevValid) ? _antiPopStep : 0.0f;
+    c.AntiPopFrameTolerance = 0.15f;
+    c.NoiseAware = _noiseAware ? 1u : 0u;
+    c.DilatedReady = _dilatedReady ? 1u : 0u;
     return c;
 }
 
@@ -625,34 +1044,46 @@ bool DlssNrEditCache_Dx12::Pass(ID3D12GraphicsCommandList* cmd, const DlssNrCach
     if (!_init || cmd == nullptr || _device == nullptr)
         return false;
 
+    // Every dispatch claims a heap slot reserved for this recording. A failure
+    // here is a failure before the dispatch, never a partially recorded frame.
     if (!_activeThisFrame || _reservedUsed >= _reservedCount)
         return false;
+
     const uint32_t slot = _reservedSlots[_reservedUsed++];
     auto token = DlssNr::GpuLifetime::Begin(cmd);
     if (!token || token != _recording)
         return false;
+
     for (auto* resource : srv)
         DlssNr::GpuLifetime::Hold(token, resource);
     for (auto* resource : uav)
         DlssNr::GpuLifetime::Hold(token, resource);
     for (IUnknown* resource :
          { static_cast<IUnknown*>(_dummySrv), static_cast<IUnknown*>(_dummyUav), static_cast<IUnknown*>(_stats),
-           static_cast<IUnknown*>(_exposure), static_cast<IUnknown*>(_constantBuffers[slot]),
-           static_cast<IUnknown*>(_rootSignature), static_cast<IUnknown*>(_pipelineState),
-           static_cast<IUnknown*>(_frameHeaps[slot].GetHeapCSU()) })
+           static_cast<IUnknown*>(_exposure), static_cast<IUnknown*>(_dilatedMv),
+           static_cast<IUnknown*>(_pulse[0]), static_cast<IUnknown*>(_pulse[1]),
+           static_cast<IUnknown*>(_pulseStats), static_cast<IUnknown*>(_asyncWarp),
+           static_cast<IUnknown*>(_stampHeap), static_cast<IUnknown*>(_stampReadback),
+           static_cast<IUnknown*>(_constantBuffers[slot]), static_cast<IUnknown*>(_rootSignature),
+           static_cast<IUnknown*>(_pipelineState), static_cast<IUnknown*>(_frameHeaps[slot].GetHeapCSU()) })
         DlssNr::GpuLifetime::Hold(token, resource);
+
     FrameDescriptorHeap& heap = _frameHeaps[slot];
 
     for (uint32_t i = 0; i < kSrvCount; ++i)
     {
-        if (i == 10)
-        {
-            MakeSrv(_device, srv[10] != nullptr ? srv[10] : (_exposure != nullptr ? _exposure : _dummySrv),
-                    heap.GetSrvCPU(10));
-            continue;
-        }
+        ID3D12Resource* r = srv[i];
 
-        MakeSrv(_device, srv[i] != nullptr ? srv[i] : _dummySrv, heap.GetSrvCPU(i));
+        if (i == 10)
+            r = r != nullptr ? r : (_exposure != nullptr ? _exposure : _dummySrv);
+        else if (i == 19 && r == nullptr && constants.DilatedReady != 0 && _dilatedMv != nullptr)
+            r = _dilatedMv;
+
+        if (r == nullptr)
+            r = _dummySrv;
+
+        DlssNr::GpuLifetime::Hold(token, r);
+        MakeSrv(_device, r, heap.GetSrvCPU(i));
     }
 
     for (uint32_t i = 0; i < kUavCount; ++i)
@@ -662,6 +1093,7 @@ bool DlssNrEditCache_Dx12::Pass(ID3D12GraphicsCommandList* cmd, const DlssNrCach
         if (r == nullptr)
             r = (i == 5) ? _stats : _dummyUav;
 
+        DlssNr::GpuLifetime::Hold(token, r);
         MakeUav(_device, r != nullptr ? r : _dummyUav, heap.GetUavCPU(i));
     }
 
@@ -677,10 +1109,11 @@ bool DlssNrEditCache_Dx12::Pass(ID3D12GraphicsCommandList* cmd, const DlssNrCach
     return true;
 }
 
-bool DlssNrEditCache_Dx12::Accumulate(ID3D12GraphicsCommandList* cmd, const DlssNrCacheInputs& in)
+void DlssNrEditCache_Dx12::Accumulate(ID3D12GraphicsCommandList* cmd, const DlssNrCacheInputs& in)
 {
-    if (_modelHistory != 1 || _accMv[0] == nullptr || in.motion == nullptr)
-        return false;
+    // CacheAsync carries the background answer along the same chain, whatever the model is handed.
+    if ((_modelHistory != 1 && !_async) || _accMv[0] == nullptr || in.motion == nullptr)
+        return;
 
     ID3D12Resource* prev = _accMv[_accCur];
     ID3D12Resource* next = _accMv[1 - _accCur];
@@ -696,21 +1129,27 @@ bool DlssNrEditCache_Dx12::Accumulate(ID3D12GraphicsCommandList* cmd, const Dlss
     Barrier(cmd, prev, kUav, kSrv);
     ID3D12Resource* srv[kSrvCount] = { nullptr, nullptr, nullptr, nullptr, in.motion, prev };
     ID3D12Resource* uav[kUavCount] = { next };
-    const bool recorded = Pass(cmd, c, srv, uav, Groups(c.Width), Groups(c.Height));
+    Pass(cmd, c, srv, uav, Groups(c.Width), Groups(c.Height));
     Barrier(cmd, prev, kSrv, kUav);
-    if (!recorded)
-        return false;
+
     _accCur = 1 - _accCur;
     _accReset = false;
-    return true;
 }
 
-bool DlssNrEditCache_Dx12::BuildCoarseLevels(ID3D12GraphicsCommandList* cmd)
+void DlssNrEditCache_Dx12::BuildCoarseLevels(ID3D12GraphicsCommandList* cmd)
 {
     DlssNrCacheInputs none {};
     DlssNrCacheConstants c = BaseConstants(none);
     c.Mode = DlssNrCacheMode_Downsample;
-    bool recorded = true;
+
+    // The same-surface fill reads every level bilaterally: each one carries its guide down with it.
+    const bool surface = (_ghostFlags & DlssNrCacheGhost_SurfaceFill) != 0 && _levelGuideCoarse[0] != nullptr &&
+                         _levelGuideCoarse[1] != nullptr;
+
+    if (!surface)
+        c.GhostFlags &= ~DlssNrCacheGhost_SurfaceFill;
+    else
+        Barrier(cmd, _levelGuide, kUav, kSrv);
 
     for (unsigned int l = 1; l < kDlssNrCachePyramidLevels; ++l)
     {
@@ -719,122 +1158,341 @@ bool DlssNrEditCache_Dx12::BuildCoarseLevels(ID3D12GraphicsCommandList* cmd)
         c.Width = LevelDim(_width, l);
         c.Height = LevelDim(_height, l);
 
+        ID3D12Resource* guideIn = l == 1 ? _levelGuide : _levelGuideCoarse[0];
+
         Barrier(cmd, _level[l - 1], kUav, kSrv);
-        ID3D12Resource* srv[kSrvCount] = { nullptr, nullptr, nullptr, nullptr, nullptr, _level[l - 1] };
-        ID3D12Resource* uav[kUavCount] = { _level[l] };
-        if (recorded)
-            recorded = Pass(cmd, c, srv, uav, Groups(c.Width), Groups(c.Height));
+
+        if (surface && l > 1)
+            Barrier(cmd, guideIn, kUav, kSrv);
+
+        ID3D12Resource* srv[kSrvCount] = { nullptr, nullptr, nullptr, nullptr, nullptr, _level[l - 1],
+                                           surface ? guideIn : nullptr };
+        ID3D12Resource* uav[kUavCount] = { _level[l], surface ? _levelGuideCoarse[l - 1] : nullptr };
+        Pass(cmd, c, srv, uav, Groups(c.Width), Groups(c.Height));
     }
 
     // Every level is read by the apply; the last one written goes over with the rest.
     Barrier(cmd, _level[kDlssNrCachePyramidLevels - 1], kUav, kSrv);
-    Barrier(cmd, _levelGuide, kUav, kSrv);
-    if (!recorded)
-        RestoreCoarseLevels(cmd);
-    return recorded;
+
+    if (surface)
+        Barrier(cmd, _levelGuideCoarse[1], kUav, kSrv);
+    else
+        Barrier(cmd, _levelGuide, kUav, kSrv);
 }
 
-void DlssNrEditCache_Dx12::RestoreCoarseLevels(ID3D12GraphicsCommandList* cmd)
+// Once per frame, before anything reprojects: each depth texel's nearest-surface motion. Every pass read it
+// with a 3x3 depth search per pixel -- three to four times over the same depth texels at display resolution.
+// The result is the same; it is left readable for the rest of the frame.
+void DlssNrEditCache_Dx12::DilatePass(ID3D12GraphicsCommandList* cmd, const DlssNrCacheInputs& in)
 {
-    for (auto* level : _level)
-        Barrier(cmd, level, kSrv, kUav);
-    Barrier(cmd, _levelGuide, kSrv, kUav);
+    const unsigned int w = std::max(in.depthWidth, 1u);
+    const unsigned int h = std::max(in.depthHeight, 1u);
+
+    if (_dilatedMv != nullptr)
+    {
+        const D3D12_RESOURCE_DESC d = _dilatedMv->GetDesc();
+
+        if ((unsigned int) d.Width != w || d.Height != h)
+        {
+            Park(_dilatedMv);
+            _dilatedIsSrv = false;
+        }
+    }
+
+    if (_dilatedMv == nullptr)
+    {
+        _dilatedMv = CreateTexture(_device, DXGI_FORMAT_R32G32_FLOAT, w, h, true, kUav);
+        _dilatedIsSrv = false;
+
+        if (_dilatedMv == nullptr)
+            return; // the passes search for themselves, as before
+    }
+
+    if (_dilatedIsSrv)
+        Barrier(cmd, _dilatedMv, kSrv, kUav);
+
+    DlssNrCacheConstants c = BaseConstants(in);
+    c.Mode = DlssNrCacheMode_DilateMotion;
+    c.Width = w;
+    c.Height = h;
+
+    ID3D12Resource* srv[kSrvCount] = { nullptr, nullptr, nullptr, in.depth, in.motion };
+    ID3D12Resource* uav[kUavCount] = { _dilatedMv };
+    Pass(cmd, c, srv, uav, Groups(w), Groups(h));
+
+    Barrier(cmd, _dilatedMv, kUav, kSrv);
+    _dilatedIsSrv = true;
+    _dilatedReady = true;
 }
 
-bool DlssNrEditCache_Dx12::ApplyPass(ID3D12GraphicsCommandList* cmd, ID3D12Resource* target, ID3D12Resource* original,
-                                     const DlssNrCacheInputs& in)
+// Anti-ghosting: this frame's surroundings, a quarter of the frame. frame is readable; _context is left
+// readable for the reprojection or the capture, which hand it back.
+void DlssNrEditCache_Dx12::ContextPass(ID3D12GraphicsCommandList* cmd, ID3D12Resource* frame,
+                                       const DlssNrCacheInputs& in)
+{
+    // Last frame's surroundings become the previous ones; they count only if built on the frame just before.
+    std::swap(_context, _contextPrev);
+    _contextPrevValid = _contextPrev != nullptr && _contextFrame != 0 && _contextFrame + 1 == _frame;
+    _contextFrame = _frame;
+
+    DlssNrCacheConstants c = BaseConstants(in);
+    c.Mode = DlssNrCacheMode_Context;
+    c.Width = LevelDim(_width, 0);
+    c.Height = LevelDim(_height, 0);
+    c.SourceWidth = _width;
+    c.SourceHeight = _height;
+
+    ID3D12Resource* srv[kSrvCount] = { nullptr, nullptr, frame };
+    ID3D12Resource* uav[kUavCount] = { _context };
+    Pass(cmd, c, srv, uav, Groups(c.Width), Groups(c.Height));
+    Barrier(cmd, _context, kUav, kSrv);
+    Stamp(cmd, 0);
+}
+
+// The guided filter, on a cached frame: _finalRaw holds Apply's edit. Writes the frame to target, or, with
+// the temporal stabiliser after it, its edit to _guidedOut.
+void DlssNrEditCache_Dx12::GuidedPass(ID3D12GraphicsCommandList* cmd, ID3D12Resource* target,
+                                      ID3D12Resource* original, const DlssNrCacheInputs& in, bool toTemporal)
+{
+    const unsigned int hw = (_width + 1) / 2;
+    const unsigned int hh = (_height + 1) / 2;
+    DlssNrCacheConstants c = BaseConstants(in);
+
+    Barrier(cmd, _finalRaw, kUav, kSrv);
+
+    c.Mode = DlssNrCacheMode_GuidedDown;
+    c.Width = hw;
+    c.Height = hh;
+    c.SourceWidth = _width;
+    c.SourceHeight = _height;
+    {
+        ID3D12Resource* srv[kSrvCount] = { nullptr, nullptr, original, nullptr, nullptr, _finalRaw };
+        ID3D12Resource* uav[kUavCount] = { _guideSum[0], _guideSum[1] };
+        Pass(cmd, c, srv, uav, Groups(hw), Groups(hh));
+    }
+
+    Barrier(cmd, _guideSum[0], kUav, kSrv);
+    Barrier(cmd, _guideSum[1], kUav, kSrv);
+
+    c.Mode = DlssNrCacheMode_GuidedCoef;
+    {
+        ID3D12Resource* srv[kSrvCount] = {};
+        srv[14] = _guideSum[0];
+        srv[15] = _guideSum[1];
+        ID3D12Resource* uav[kUavCount] = { _guideCoef[0], _guideCoef[1] };
+        Pass(cmd, c, srv, uav, Groups(hw), Groups(hh));
+    }
+
+    Barrier(cmd, _guideSum[0], kSrv, kUav);
+    Barrier(cmd, _guideSum[1], kSrv, kUav);
+    Barrier(cmd, _guideCoef[0], kUav, kSrv);
+    Barrier(cmd, _guideCoef[1], kUav, kSrv);
+
+    c.Mode = DlssNrCacheMode_GuidedApply;
+    c.Width = _width;
+    c.Height = _height;
+    {
+        ID3D12Resource* srv[kSrvCount] = { nullptr, nullptr, original, nullptr, nullptr, _finalRaw };
+        srv[12] = _histMeta[_cur];
+        srv[14] = _guideCoef[0];
+        srv[15] = _guideCoef[1];
+        ID3D12Resource* uav[kUavCount] = { target, nullptr, nullptr, toTemporal ? _guidedOut : nullptr };
+        Pass(cmd, c, srv, uav, Groups(_width), Groups(_height));
+    }
+
+    Barrier(cmd, _guideCoef[0], kSrv, kUav);
+    Barrier(cmd, _guideCoef[1], kSrv, kUav);
+    Barrier(cmd, _finalRaw, kSrv, kUav);
+}
+
+void DlssNrEditCache_Dx12::ApplyPass(ID3D12GraphicsCommandList* cmd, ID3D12Resource* target,
+                                     ID3D12Resource* original, const DlssNrCacheInputs& in)
 {
     // _histEdit/_histGuide[_cur] were just written; the levels are all SRV from BuildCoarseLevels.
+    ID3D12Resource* meta = _histMeta[_cur];
+    const bool surface = (_ghostFlags & DlssNrCacheGhost_SurfaceFill) != 0 && _levelGuideCoarse[0] != nullptr &&
+                         _levelGuideCoarse[1] != nullptr;
+
     Barrier(cmd, _histEdit[_cur], kUav, kSrv);
     Barrier(cmd, _histGuide[_cur], kUav, kSrv);
+    Barrier(cmd, meta, kUav, kSrv);
 
     DlssNrCacheConstants c = BaseConstants(in);
     c.Mode = DlssNrCacheMode_Apply;
 
-    const bool stabilise = c.Temporal > 0.0f || c.LowTemporal > 0.0f;
+    if (!surface)
+        c.GhostFlags &= ~DlssNrCacheGhost_SurfaceFill;
 
-    ID3D12Resource* srv[kSrvCount] = { _histEdit[_cur], _histGuide[_cur], original,  in.depth, nullptr,
+    // Mode 10 runs for the temporal stabiliser, the anti pop-in and the luminance stability, which live in the
+    // same pass. Before the upscaler the stabiliser stands aside, but the luminance stability was meant to stay
+    // (it is too broad to care about the jitter) -- and it only ran when the anti pop-in did. With that off (the
+    // x8 preset) the whole picture's light jumped on every model run: 0.018 stop against 0.004 on the other
+    // frames (The Last of Us, pre-SR, 8 frames between runs). CacheLowTemporal 0 is the pass as before.
+    const bool stabilise = c.Temporal > 0.0f || c.AntiPopStep > 0.0f || c.LowTemporal > 0.0f;
+    const bool guided = _guidedNow && c.DebugView == 0 && _guideSum[0] != nullptr && meta != nullptr;
+
+    if (!guided)
+        c.GhostFlags &= ~DlssNrCacheGhost_Guided;
+
+    ID3D12Resource* srv[kSrvCount] = { _histEdit[_cur], _histGuide[_cur], original, in.depth, nullptr,
                                        _level[0],       _levelGuide,      _level[1], _level[2] };
-    ID3D12Resource* uav[kUavCount] = { target, nullptr, nullptr, stabilise ? _finalRaw : nullptr };
-    const bool recorded = Pass(cmd, c, srv, uav, Groups(_width), Groups(_height));
+    srv[12] = meta;
+    srv[16] = surface ? _levelGuideCoarse[0] : nullptr;
+    srv[17] = surface ? _levelGuideCoarse[1] : nullptr;
+    ID3D12Resource* uav[kUavCount] = { target, nullptr, nullptr, (stabilise || guided) ? _finalRaw : nullptr };
+    Pass(cmd, c, srv, uav, Groups(_width), Groups(_height));
+    Stamp(cmd, 3);
+
+    if (guided)
+    {
+        GuidedPass(cmd, target, original, in, stabilise);
+        Stamp(cmd, 4);
+    }
 
     Barrier(cmd, _histEdit[_cur], kSrv, kUav);
     Barrier(cmd, _histGuide[_cur], kSrv, kUav);
+    Barrier(cmd, meta, kSrv, kUav);
 
-    RestoreCoarseLevels(cmd);
-    if (!recorded)
-        return false;
-    return !stabilise || TemporalPass(cmd, target, original, in);
+    for (auto* l : _level)
+        Barrier(cmd, l, kSrv, kUav);
+
+    Barrier(cmd, _levelGuide, kSrv, kUav);
+
+    if (surface)
+    {
+        Barrier(cmd, _levelGuideCoarse[0], kSrv, kUav);
+        Barrier(cmd, _levelGuideCoarse[1], kSrv, kUav);
+    }
+
+    if (stabilise)
+    {
+        TemporalPass(cmd, target, original, in, guided ? _guidedOut : _finalRaw);
+        Stamp(cmd, 5);
+    }
 }
 
-bool DlssNrEditCache_Dx12::TemporalPass(ID3D12GraphicsCommandList* cmd, ID3D12Resource* target,
-                                        ID3D12Resource* original, const DlssNrCacheInputs& in)
+void DlssNrEditCache_Dx12::TemporalPass(ID3D12GraphicsCommandList* cmd, ID3D12Resource* target,
+                                        ID3D12Resource* original, const DlssNrCacheInputs& in, ID3D12Resource* edit)
 {
     // _histGuide[_cur] is this frame's guide, _histGuide[1 - _cur] last frame's: what the history was
     // shot on, for the depth test of its reprojection.
     ID3D12Resource* prev = _finalHist[_finalCur];
     ID3D12Resource* next = _finalHist[1 - _finalCur];
 
-    Barrier(cmd, _finalRaw, kUav, kSrv);
+    DlssNrCacheConstants c = BaseConstants(in);
+    c.Mode = DlssNrCacheMode_Temporal;
+
+    // The anti pop-in reads this frame's and last frame's surroundings.
+    const bool contexts = c.AntiPopStep > 0.0f && _context != nullptr && _contextPrev != nullptr;
+
+    Barrier(cmd, edit, kUav, kSrv);
     Barrier(cmd, prev, kUav, kSrv);
     Barrier(cmd, _histGuide[_cur], kUav, kSrv);
     Barrier(cmd, _histGuide[1 - _cur], kUav, kSrv);
 
-    DlssNrCacheConstants c = BaseConstants(in);
-    c.Mode = DlssNrCacheMode_Temporal;
+    if (contexts)
+    {
+        Barrier(cmd, _context, kUav, kSrv);
+        Barrier(cmd, _contextPrev, kUav, kSrv);
+    }
+    else
+    {
+        c.AntiPopStep = 0.0f;
+    }
 
-    ID3D12Resource* srv[kSrvCount] = { nullptr,   _histGuide[_cur], original, in.depth,
-                                       in.motion, _finalRaw,        prev,     _histGuide[1 - _cur] };
+    // The regional lows the luminance stability and the anti pop-in read: the 12 px tent of this frame's edit
+    // and of last frame's shown one, at a quarter of the frame -- one bilinear read each in mode 10 instead
+    // of nine taps each per pixel.
+    const bool split = c.LowTemporal > 0.0f || c.AntiPopStep > 0.0f;
+    const unsigned int qw = LevelDim(_width, 0);
+    const unsigned int qh = LevelDim(_height, 0);
+
+    if (split)
+    {
+        for (ID3D12Resource** r : { &_regNow, &_regPrev })
+        {
+            if (*r == nullptr)
+                *r = CreateTexture(_device, DXGI_FORMAT_R16G16B16A16_FLOAT, qw, qh, true, kUav);
+        }
+    }
+
+    const bool regional = split && _regNow != nullptr && _regPrev != nullptr;
+
+    if (regional)
+    {
+        DlssNrCacheConstants r = BaseConstants(in);
+        r.Mode = DlssNrCacheMode_RegionalLow;
+        r.Width = qw;
+        r.Height = qh;
+        r.SourceWidth = _width;
+        r.SourceHeight = _height;
+
+        ID3D12Resource* srvNow[kSrvCount] = { nullptr, nullptr, nullptr, nullptr, nullptr, edit };
+        ID3D12Resource* uavNow[kUavCount] = { _regNow };
+        Pass(cmd, r, srvNow, uavNow, Groups(qw), Groups(qh));
+
+        ID3D12Resource* srvPrev[kSrvCount] = { nullptr, nullptr, nullptr, nullptr, nullptr, prev };
+        ID3D12Resource* uavPrev[kUavCount] = { _regPrev };
+        Pass(cmd, r, srvPrev, uavPrev, Groups(qw), Groups(qh));
+
+        Barrier(cmd, _regNow, kUav, kSrv);
+        Barrier(cmd, _regPrev, kUav, kSrv);
+        c.RegionalReady = 1u;
+    }
+
+    ID3D12Resource* srv[kSrvCount] = { nullptr, _histGuide[_cur], original, in.depth, in.motion,
+                                       edit,    prev,             _histGuide[1 - _cur] };
+    srv[13] = contexts ? _context : nullptr;
+    srv[18] = contexts ? _contextPrev : nullptr;
+    srv[20] = regional ? _regNow : nullptr;
+    srv[21] = regional ? _regPrev : nullptr;
     ID3D12Resource* uav[kUavCount] = { target, nullptr, nullptr, next };
-    const bool recorded = Pass(cmd, c, srv, uav, Groups(_width), Groups(_height));
+    Pass(cmd, c, srv, uav, Groups(_width), Groups(_height));
 
-    Barrier(cmd, _finalRaw, kSrv, kUav);
+    if (regional)
+    {
+        Barrier(cmd, _regNow, kSrv, kUav);
+        Barrier(cmd, _regPrev, kSrv, kUav);
+    }
+
+    if (contexts)
+    {
+        Barrier(cmd, _context, kSrv, kUav);
+        Barrier(cmd, _contextPrev, kSrv, kUav);
+    }
+
+    Barrier(cmd, edit, kSrv, kUav);
     Barrier(cmd, prev, kSrv, kUav);
     Barrier(cmd, _histGuide[_cur], kSrv, kUav);
     Barrier(cmd, _histGuide[1 - _cur], kSrv, kUav);
 
-    if (!recorded)
-        return false;
     _finalCur = 1 - _finalCur;
     _finalValid = true;
-    return true;
 }
 
 bool DlssNrEditCache_Dx12::RunCached(ID3D12GraphicsCommandList* cmd, ID3D12Device* device, ID3D12Resource* target,
-                                     ID3D12Resource* keep, const DlssNrCacheInputs& in)
+                                     ID3D12Resource* keep, const DlssNrCacheInputs& in, bool accumulate)
 {
-    if (!_activeThisFrame || !_historyValid || target == nullptr || keep == nullptr || in.depth == nullptr ||
-        in.motion == nullptr)
+    if (!_init || target == nullptr || keep == nullptr || in.depth == nullptr || in.motion == nullptr)
         return false;
 
     _exposure = in.useGameExposure ? in.exposure : nullptr;
+    StampBegin(cmd);
 
-    if (_modelHistory == 1 && (!EnsureAccumulator(device, in.motion) || !Accumulate(cmd, in)))
-        return false;
+    if (accumulate && (_modelHistory == 1 || _async) && EnsureAccumulator(device, in.motion))
+        Accumulate(cmd, in);
 
     const unsigned int prev = _cur;
     const unsigned int next = 1 - _cur;
 
-    int statsSlot = -1;
-    for (unsigned int i = 0; i < kDlssNrCacheStatSlots; ++i)
-    {
-        const unsigned int slot = (_statsSlot + i) % kDlssNrCacheStatSlots;
-        if (!_statsPending[slot] && DlssNr::GpuLifetime::Reusable(_statsCompletion[slot]))
-        {
-            statsSlot = (int) slot;
-            break;
-        }
-    }
     DlssNrCacheConstants c = BaseConstants(in);
-    c.StatsSlot = statsSlot >= 0 ? (unsigned int) statsSlot : 0u;
 
     // This frame's counters start from zero.
     c.Mode = DlssNrCacheMode_ClearStats;
     {
         ID3D12Resource* srv[kSrvCount] = {};
         ID3D12Resource* uav[kUavCount] = {};
-        if (!Pass(cmd, c, srv, uav, 1, 1))
-            return false;
+        Pass(cmd, c, srv, uav, 1, 1);
     }
 
     {
@@ -844,38 +1502,59 @@ bool DlssNrEditCache_Dx12::RunCached(ID3D12GraphicsCommandList* cmd, ID3D12Devic
         cmd->ResourceBarrier(1, &uavBarrier);
     }
 
+    DilatePass(cmd, in);
+
     // Reproject: last frame's history onto this one, validated, plus the first pyramid level.
     Barrier(cmd, target, kUav, kSrv);
     Barrier(cmd, _histEdit[prev], kUav, kSrv);
     Barrier(cmd, _histGuide[prev], kUav, kSrv);
     Barrier(cmd, _histTarget[prev], kUav, kSrv);
+    Barrier(cmd, _histPrint[prev], kUav, kSrv);
+    Barrier(cmd, _histMeta[prev], kUav, kSrv);
+
+    // Anti-ghosting and anti pop-in: the surroundings the fingerprint and the pop test compare with.
+    const bool context = _context != nullptr && ((_ghostFlags & DlssNrCacheGhost_Context) != 0 || _antiPopStep > 0.0f);
+
+    if (context)
+        ContextPass(cmd, target, in);
 
     c.Mode = DlssNrCacheMode_Reproject;
-    bool reprojected = false;
 
     {
         ID3D12Resource* srv[kSrvCount] = { _histEdit[prev], _histGuide[prev], target,  in.depth,
                                            in.motion,       nullptr,          nullptr, nullptr,
-                                           nullptr,         nullptr,          nullptr, _histTarget[prev] };
-        ID3D12Resource* uav[kUavCount] = { _histEdit[next], _histGuide[next], keep, _level[0], _levelGuide,
-                                           _stats,          _histTarget[next] };
-        reprojected = Pass(cmd, c, srv, uav, Groups(_width), Groups(_height));
+                                           nullptr,         _histPrint[prev], nullptr, _histTarget[prev] };
+        srv[12] = _histMeta[prev];
+        srv[13] = context ? _context : nullptr;
+        ID3D12Resource* uav[kUavCount] = { _histEdit[next], _histGuide[next], keep,
+                                           _level[0],       _levelGuide,      _stats,
+                                           _histTarget[next], _histPrint[next], _histMeta[next] };
+        Pass(cmd, c, srv, uav, Groups(_width), Groups(_height));
+        Stamp(cmd, 1);
     }
 
     Barrier(cmd, _histEdit[prev], kSrv, kUav);
     Barrier(cmd, _histGuide[prev], kSrv, kUav);
     Barrier(cmd, _histTarget[prev], kSrv, kUav);
+    Barrier(cmd, _histPrint[prev], kSrv, kUav);
+    Barrier(cmd, _histMeta[prev], kSrv, kUav);
+
+    if (context)
+        Barrier(cmd, _context, kSrv, kUav);
+
     Barrier(cmd, target, kSrv, kUav);
 
-    if (!reprojected)
-        return false;
-
-    // A busy readback ring drops telemetry, never overwrites a pending GPU copy.
-    if (statsSlot >= 0)
+    // The counters go home on a readback looked at three frames from now.
+    // Local Linux/Proton rule: never overwrite a slot whose copy has not
+    // completed. A busy ring drops this frame's counters instead.
+    if (_statsPending[_statsSlot] && !DlssNr::GpuLifetime::ReadbackReady(_statsCompletion[_statsSlot]))
     {
-        const unsigned int slot = (unsigned int) statsSlot;
-        _statsCompletion[slot] = _recording;
-        DlssNr::GpuLifetime::Hold(_recording, _statsReadback[slot]);
+        ++_statsDropped;
+        _statsSlot = (_statsSlot + 1) % kDlssNrCacheStatSlots;
+    }
+    else
+    {
+        const unsigned int slot = _statsSlot;
 
         D3D12_TEXTURE_COPY_LOCATION src {};
         src.pResource = _stats;
@@ -886,7 +1565,7 @@ bool DlssNrEditCache_Dx12::RunCached(ID3D12GraphicsCommandList* cmd, ID3D12Devic
         dst.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
         dst.PlacedFootprint.Footprint.Format = DXGI_FORMAT_R32_UINT;
         dst.PlacedFootprint.Footprint.Width = kDlssNrCacheStatsWidth;
-        dst.PlacedFootprint.Footprint.Height = 1;
+        dst.PlacedFootprint.Footprint.Height = kDlssNrCacheStatRows;
         dst.PlacedFootprint.Footprint.Depth = 1;
         dst.PlacedFootprint.Footprint.RowPitch = 256;
 
@@ -894,24 +1573,22 @@ bool DlssNrEditCache_Dx12::RunCached(ID3D12GraphicsCommandList* cmd, ID3D12Devic
         cmd->CopyTextureRegion(&dst, 0, 0, 0, &src, nullptr);
         Barrier(cmd, _stats, D3D12_RESOURCE_STATE_COPY_SOURCE, kUav);
 
-        _statsFrame[slot] = _cadence.frame;
+        _statsFrame[slot] = _frame;
         _statsPending[slot] = true;
+        // The counters are read on the CPU, so the copy must complete on the GPU
+        // first. Hold the recording that carries the copy, not a frame counter.
+        _statsCompletion[slot] = DlssNr::GpuLifetime::Begin(cmd);
+        DlssNr::GpuLifetime::Hold(_statsCompletion[slot], _statsReadback[slot]);
         _statsSlot = (slot + 1) % kDlssNrCacheStatSlots;
     }
-    else
-        ++_statsDropped;
 
     _cur = next;
 
     // keep now holds the untouched frame; the apply reads it and writes target.
     Barrier(cmd, keep, kUav, kSrv);
-    const bool applied = BuildCoarseLevels(cmd) && ApplyPass(cmd, target, keep, in);
-    if (!applied)
-    {
-        Barrier(cmd, keep, kSrv, kUav);
-        Invalidate();
-        return false;
-    }
+    BuildCoarseLevels(cmd);
+    Stamp(cmd, 2);
+    ApplyPass(cmd, target, keep, in);
 
     if (_dumpWanted > 0 && _dumpObserve)
     {
@@ -920,8 +1597,10 @@ bool DlssNrEditCache_Dx12::RunCached(ID3D12GraphicsCommandList* cmd, ID3D12Devic
         Barrier(cmd, target, kSrv, kUav);
     }
 
+    if (_timing)
+        PulseProbe(cmd, target, keep, in);
+
     Barrier(cmd, keep, kSrv, kUav);
-    _cadence.CachedRecorded();
     return true;
 }
 
@@ -929,23 +1608,27 @@ ID3D12Resource* DlssNrEditCache_Dx12::ModelMotion(ID3D12GraphicsCommandList* cmd
                                                   const DlssNrCacheInputs& in, bool& resetModel)
 {
     resetModel = false;
-    _exposure = in.useGameExposure ? in.exposure : nullptr;
 
+    // CacheAsync: the background answer is carried from this frame on, whatever the model is handed.
     if (_modelHistory == 2)
     {
         resetModel = true;
+
+        if (_async)
+            _accReset = true;
+
         return nullptr;
     }
 
-    if (_modelHistory != 1)
-        return nullptr;
-    if (in.motion == nullptr || !EnsureAccumulator(device, in.motion) || !Accumulate(cmd, in))
+    if (_modelHistory != 1 || in.motion == nullptr || !EnsureAccumulator(device, in.motion))
     {
-        // A refresh cannot use one-frame vectors after missing several model frames.
-        resetModel = true;
-        _accReset = true;
+        if (_async)
+            _accReset = true;
+
         return nullptr;
     }
+
+    Accumulate(cmd, in);
 
     // Read by the model now; EndFrame puts it back.
     Barrier(cmd, _accMv[_accCur], kUav, kSrv);
@@ -956,13 +1639,15 @@ ID3D12Resource* DlssNrEditCache_Dx12::ModelMotion(ID3D12GraphicsCommandList* cmd
     return _accMv[_accCur];
 }
 
-bool DlssNrEditCache_Dx12::CaptureRefresh(ID3D12GraphicsCommandList* cmd, ID3D12Device* device, ID3D12Resource* target,
-                                          ID3D12Resource* original, const DlssNrCacheInputs& in)
+bool DlssNrEditCache_Dx12::CaptureRefresh(ID3D12GraphicsCommandList* cmd, ID3D12Device* device,
+                                          ID3D12Resource* target, ID3D12Resource* original,
+                                          const DlssNrCacheInputs& in, ID3D12Resource* nrFrame)
 {
-    if (!_activeThisFrame || target == nullptr || original == nullptr || in.depth == nullptr || in.motion == nullptr)
+    if (!_init || target == nullptr || original == nullptr || in.depth == nullptr || in.motion == nullptr)
         return false;
 
     _exposure = in.useGameExposure ? in.exposure : nullptr;
+    StampBegin(cmd);
 
     const unsigned int prev = _cur;
     const unsigned int next = 1 - _cur;
@@ -971,29 +1656,50 @@ bool DlssNrEditCache_Dx12::CaptureRefresh(ID3D12GraphicsCommandList* cmd, ID3D12
     Barrier(cmd, _histEdit[prev], kUav, kSrv);
     Barrier(cmd, _histGuide[prev], kUav, kSrv);
     Barrier(cmd, _histTarget[prev], kUav, kSrv);
+    Barrier(cmd, _histPrint[prev], kUav, kSrv);
+    Barrier(cmd, _histMeta[prev], kUav, kSrv);
+
+    DilatePass(cmd, in);
+
+    // Anti-ghosting: the fingerprint stored with the model's answer includes the surroundings (and the
+    // anti pop-in compares them with last frame's).
+    const bool context = _context != nullptr && ((_ghostFlags & DlssNrCacheGhost_Context) != 0 || _antiPopStep > 0.0f);
+
+    if (context)
+        ContextPass(cmd, original, in);
 
     DlssNrCacheConstants c = BaseConstants(in);
     c.Mode = DlssNrCacheMode_Capture;
-    bool captured = false;
+    c.AsyncWarp = nrFrame != nullptr ? 1u : 0u;
+
+    // Soft refresh: last frame's edit on screen (the temporal stabiliser's), for the pixels that have nothing
+    // carried to walk from.
+    ID3D12Resource* shown = (_softRefresh && _crossfadeOn && _finalValid) ? _finalHist[_finalCur] : nullptr;
+    c.SoftRefresh = shown != nullptr ? 1u : 0u;
+    Barrier(cmd, shown, kUav, kSrv);
     {
         ID3D12Resource* srv[kSrvCount] = { _histEdit[prev], _histGuide[prev], original, in.depth,
-                                           in.motion,       target,           nullptr,  nullptr,
-                                           nullptr,         nullptr,          nullptr,  _histTarget[prev] };
-        ID3D12Resource* uav[kUavCount] = { _histEdit[next], _histGuide[next], nullptr,          _level[0],
-                                           _levelGuide,     nullptr,          _histTarget[next] };
-        captured = Pass(cmd, c, srv, uav, Groups(_width), Groups(_height));
+                                           in.motion,       nrFrame != nullptr ? nrFrame : target, shown, nullptr,
+                                           nullptr,         _histPrint[prev], nullptr,  _histTarget[prev] };
+        srv[12] = _histMeta[prev];
+        srv[13] = context ? _context : nullptr;
+        ID3D12Resource* uav[kUavCount] = { _histEdit[next], _histGuide[next], nullptr, _level[0], _levelGuide, nullptr,
+                                           _histTarget[next], _histPrint[next], _histMeta[next] };
+        Pass(cmd, c, srv, uav, Groups(_width), Groups(_height));
+        Stamp(cmd, 6);
     }
+
+    Barrier(cmd, shown, kSrv, kUav);
 
     Barrier(cmd, _histEdit[prev], kSrv, kUav);
     Barrier(cmd, _histGuide[prev], kSrv, kUav);
     Barrier(cmd, _histTarget[prev], kSrv, kUav);
+    Barrier(cmd, _histPrint[prev], kSrv, kUav);
+    Barrier(cmd, _histMeta[prev], kSrv, kUav);
 
-    if (!captured)
-    {
-        Barrier(cmd, target, kSrv, kUav);
-        Invalidate();
-        return false;
-    }
+    if (context)
+        Barrier(cmd, _context, kSrv, kUav);
+
     const bool wasValid = _historyValid;
     _cur = next;
     _historyValid = true;
@@ -1008,17 +1714,16 @@ bool DlssNrEditCache_Dx12::CaptureRefresh(ID3D12GraphicsCommandList* cmd, ID3D12
     const bool rewrite = (_refreshBlend < 0.999f && wasValid) || std::abs(_lowGain - 1.0f) > 1e-3f ||
                          std::abs(_highGain - 1.0f) > 1e-3f || _debugView != 0 || (_stabilize > 0.0f && wasValid) ||
                          _despeckle || (_crossfadeOn && wasValid && _crossfade < 0.999f) || _temporal > 0.0f ||
-                         _lowTemporal > 0.0f;
+                         _antiPopStep > 0.0f || // a pop lands on the frame the model runs: that is where it is held
+                         nrFrame != nullptr;    // the background answer: target is still the game's frame
 
     Barrier(cmd, target, kSrv, kUav);
 
     if (rewrite)
     {
-        if (!BuildCoarseLevels(cmd) || !ApplyPass(cmd, target, original, in))
-        {
-            Invalidate();
-            return false;
-        }
+        BuildCoarseLevels(cmd);
+        Stamp(cmd, 2);
+        ApplyPass(cmd, target, original, in);
     }
 
     if (_dumpWanted > 0 && _dumpObserve)
@@ -1028,26 +1733,79 @@ bool DlssNrEditCache_Dx12::CaptureRefresh(ID3D12GraphicsCommandList* cmd, ID3D12
         Barrier(cmd, target, kSrv, kUav);
     }
 
-    _cadence.RefreshRecorded();
+    if (_timing)
+        PulseProbe(cmd, target, original, in);
+
     return true;
+}
+
+bool DlssNrEditCache_Dx12::ConsumeAsync(ID3D12GraphicsCommandList* cmd, ID3D12Device* device, ID3D12Resource* target,
+                                        ID3D12Resource* keep, ID3D12Resource* composed, ID3D12Resource* launchFrame,
+                                        ID3D12Resource* launchDepth, const DlssNrCacheInputs& in)
+{
+    if (!_init || target == nullptr || keep == nullptr || composed == nullptr || launchFrame == nullptr ||
+        launchDepth == nullptr || in.depth == nullptr || in.motion == nullptr || !EnsureAccumulator(device, in.motion))
+        return false;
+
+    if (_asyncWarp == nullptr)
+        _asyncWarp = CreateTexture(device, DXGI_FORMAT_R16G16B16A16_FLOAT, _width, _height, true, kUav);
+
+    if (_asyncWarp == nullptr)
+        return false;
+
+    _exposure = in.useGameExposure ? in.exposure : nullptr;
+
+    // The motion from this frame back to the one the model saw, chained since that frame.
+    Accumulate(cmd, in);
+    ID3D12Resource* acc = _accMv[_accCur];
+
+    // This frame stands in for a frame the model runs on: the crossfade starts its walk, nothing is guided.
+    _crossfade = 1.0f / (float) std::max(_crossfadeSpan, 1u);
+    _guidedNow = false;
+
+    DlssNrCacheConstants c = BaseConstants(in);
+    c.Mode = DlssNrCacheMode_AsyncWarp;
+
+    Barrier(cmd, target, kUav, kSrv);
+    Barrier(cmd, acc, kUav, kSrv);
+    {
+        ID3D12Resource* srv[kSrvCount] = { nullptr,  nullptr,     target,      in.depth, in.motion,
+                                           composed, launchFrame, launchDepth, acc };
+        ID3D12Resource* uav[kUavCount] = { keep, _asyncWarp };
+        Pass(cmd, c, srv, uav, Groups(_width), Groups(_height));
+    }
+    Barrier(cmd, acc, kSrv, kUav);
+    Barrier(cmd, target, kSrv, kUav);
+    Barrier(cmd, keep, kUav, kSrv);
+    Barrier(cmd, _asyncWarp, kUav, kSrv);
+
+    const bool ok = CaptureRefresh(cmd, device, target, keep, in, _asyncWarp);
+
+    Barrier(cmd, _asyncWarp, kSrv, kUav);
+    Barrier(cmd, keep, kSrv, kUav);
+    return ok;
 }
 
 void DlssNrEditCache_Dx12::EndFrame(ID3D12GraphicsCommandList* cmd)
 {
+    StampEnd(cmd);
+
+    // Readable for the frame; back to its resting state, as every resource here ends a frame.
+    if (_dilatedIsSrv && _dilatedMv != nullptr)
+    {
+        Barrier(cmd, _dilatedMv, kSrv, kUav);
+        _dilatedIsSrv = false;
+    }
+
+    _dilatedReady = false;
+
     if (_accInModelState && _accMv[_accCur] != nullptr)
         Barrier(cmd, _accMv[_accCur], kSrv, kUav);
 
     _accInModelState = false;
 
-    if (_dumpWanted > 0 && _dumpCaptured >= _dumpWanted &&
-        std::all_of(_dumpFrames.begin(), _dumpFrames.end(),
-                    [](const auto& frame) { return DlssNr::GpuLifetime::ReadbackReady(frame.completion); }))
+    if (_dumpWanted > 0 && _dumpCaptured >= _dumpWanted && _dumpWriteAt != 0 && _frame >= _dumpWriteAt)
         DumpWrite();
-    // Unused reservations never held descriptors referenced by this recording.
-    for (unsigned int i = _reservedUsed; i < _reservedCount; ++i)
-        _slotUse[_reservedSlots[i]].reset();
-    _reservedCount = _reservedUsed = 0;
-    _activeThisFrame = false;
 }
 
 ID3D12Resource* DlssNrEditCache_Dx12::UpsampleModel(ID3D12GraphicsCommandList* cmd, ID3D12Device* device,
@@ -1193,12 +1951,11 @@ void DlssNrEditCache_Dx12::DumpRecord(ID3D12GraphicsCommandList* cmd, ID3D12Devi
 
     ID3D12Resource* srv[kSrvCount] = { nullptr, nullptr, original, in.depth, in.motion, target };
     ID3D12Resource* uav[kUavCount] = { _dumpTex[0], _dumpTex[2], nullptr, _dumpTex[1] };
-    if (!Pass(cmd, c, srv, uav, Groups(_width), Groups(_height)))
-        return;
+    Pass(cmd, c, srv, uav, Groups(_width), Groups(_height));
 
     DumpFrame& f = _dumpFrames[_dumpCaptured];
     f.whitePoint = in.passthrough ? 1.0f : in.whitePoint;
-    f.completion = DlssNr::GpuLifetime::Begin(cmd);
+    f.sinceRun = (unsigned int) (_frame - _lastRefresh);
 
     for (int i = 0; i < 3; ++i)
     {
@@ -1208,7 +1965,6 @@ void DlssNrEditCache_Dx12::DumpRecord(ID3D12GraphicsCommandList* cmd, ID3D12Devi
 
         D3D12_TEXTURE_COPY_LOCATION dst {};
         dst.pResource = f.readback[i];
-        DlssNr::GpuLifetime::Hold(cmd, f.readback[i]);
         dst.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
         dst.PlacedFootprint = f.layout[i];
 
@@ -1219,28 +1975,24 @@ void DlssNrEditCache_Dx12::DumpRecord(ID3D12GraphicsCommandList* cmd, ID3D12Devi
 
     ++_dumpCaptured;
 
-    // EndFrame writes only after the actual copy recordings are complete.
+    // Written well after the last copy, once the GPU is certainly past it: this path has no fence.
     if (_dumpCaptured >= _dumpWanted)
-        _dumpWriteAt = _cadence.frame;
+        _dumpWriteAt = _frame + 8;
 }
 
 void DlssNrEditCache_Dx12::DumpWrite()
 {
-    // Each capture has a unique directory; old failures/evidence are never erased.
-    FILETIME now {};
-    GetSystemTimeAsFileTime(&now);
-    const auto stamp = (uint64_t(now.dwHighDateTime) << 32) | now.dwLowDateTime;
-    const auto dir = Util::DllPath().remove_filename() / "dlssnr-cachedump" / std::to_string(stamp);
+    const auto dir = Util::DllPath().remove_filename() / "dlssnr-cachedump";
     std::error_code ec;
-    if (!std::filesystem::create_directories(dir, ec) || ec)
-        return;
+    std::filesystem::remove_all(dir, ec);
+    std::filesystem::create_directories(dir, ec);
 
     static const char* kNames[3] = { "orig", "nr", "geo" };
     static const char* kDescr[3] = { "<f2", "<f2", "<f4" };
     static const unsigned int kBpp[3] = { 8, 8, 16 };
 
     std::string whitePoints;
-    bool complete = true;
+    std::string sinceRun;
 
     for (unsigned int k = 0; k < _dumpCaptured; ++k)
     {
@@ -1251,17 +2003,12 @@ void DlssNrEditCache_Dx12::DumpWrite()
             void* mapped = nullptr;
 
             if (FAILED(f.readback[i]->Map(0, nullptr, &mapped)) || mapped == nullptr)
-            {
-                complete = false;
                 continue;
-            }
 
             char name[64];
             snprintf(name, sizeof(name), "frame_%03u_%s.npy", k, kNames[i]);
-            complete =
-                WriteNpy(dir / name, kDescr[i], _height, _width, 4, (const unsigned char*) mapped + f.layout[i].Offset,
-                         (size_t) _width * kBpp[i], f.layout[i].Footprint.RowPitch) &&
-                complete;
+            WriteNpy(dir / name, kDescr[i], _height, _width, 4, (const unsigned char*) mapped + f.layout[i].Offset,
+                     (size_t) _width * kBpp[i], f.layout[i].Footprint.RowPitch);
 
             D3D12_RANGE nothing { 0, 0 };
             f.readback[i]->Unmap(0, &nothing);
@@ -1270,6 +2017,7 @@ void DlssNrEditCache_Dx12::DumpWrite()
         char wp[32];
         snprintf(wp, sizeof(wp), "%s%.6f", k == 0 ? "" : ", ", f.whitePoint);
         whitePoints += wp;
+        sinceRun += Fmt("%s%u", k == 0 ? "" : ", ", f.sinceRun);
     }
 
     std::ofstream manifest(dir / "manifest.json");
@@ -1278,19 +2026,16 @@ void DlssNrEditCache_Dx12::DumpWrite()
              << "  \"width\": " << _width << ",\n"
              << "  \"height\": " << _height << ",\n"
              << "  \"white_points\": [" << whitePoints << "],\n"
+             << "  \"frames_since_model\": [" << sinceRun << "],\n"
              << "  \"epsilon_rule\": \"white_point / 512\",\n"
              << "  \"observe\": " << (_dumpObserve ? "true" : "false") << ",\n"
              << "  \"orig\": \"the frame as the upscaler wrote it, linear, RGBA float16\",\n"
-             << "  \"nr\": \"the displayed NR edit applied to this fresh frame; observe mode can skip model runs\",\n"
+             << "  \"nr\": \"the same frame after Neural Rendering (the model ran on every dumped frame)\",\n"
              << "  \"geo\": \"float32: [0:2] uv offset to the PREVIOUS frame (prev_uv = uv + geo.xy), "
                 "[2] pseudo-linear depth (proportional to view depth), [3] log2 luma of orig\"\n"
              << "}\n";
 
-    manifest.close();
-    complete = complete && bool(manifest);
-    if (!complete)
-        LOG_ERROR("DLSS-NR edit cache: dump in {} is incomplete", dir.string());
-    _dumpWritten = complete ? _dumpCaptured : 0u;
+    _dumpWritten = _dumpCaptured;
     LOG_INFO("DLSS-NR edit cache: wrote {} dumped frames to {}", _dumpCaptured, dir.string());
 
     DumpRelease();
@@ -1307,28 +2052,350 @@ void DlssNrEditCache_Dx12::DumpRelease()
 
     for (auto& f : _dumpFrames)
         for (auto& r : f.readback)
-            SAFE_RELEASE(r); // The recording pins any copies still queued or replayable.
+            SAFE_RELEASE(r); // readback memory: nothing on the GPU references it once written
 
     _dumpFrames.clear();
     _dumpCaptured = 0;
     _dumpWriteAt = 0;
 }
 
+// The pulse probe. target (UNORDERED_ACCESS) holds the frame on screen, original (NON_PIXEL_SHADER_RESOURCE) the
+// untouched one; both are left so. Mode 19 at a quarter of the frame, its sums copied home with the frame's
+// position in the model's cycle.
+void DlssNrEditCache_Dx12::PulseProbe(ID3D12GraphicsCommandList* cmd, ID3D12Resource* target,
+                                      ID3D12Resource* original, const DlssNrCacheInputs& in)
+{
+    const unsigned int qw = LevelDim(_width, 0);
+    const unsigned int qh = LevelDim(_height, 0);
+
+    for (ID3D12Resource** r : { &_pulse[0], &_pulse[1] })
+    {
+        if (*r == nullptr)
+            *r = CreateTexture(_device, DXGI_FORMAT_R32_FLOAT, qw, qh, true, kUav);
+    }
+
+    if (_pulseStats == nullptr)
+        _pulseStats = CreateTexture(_device, DXGI_FORMAT_R32_UINT, kPulseSlots, 3, true, kUav);
+
+    const unsigned int slot = _pulseSlot;
+
+    if (_pulseReadback[slot] == nullptr)
+        _pulseReadback[slot] = CreateReadback(_device, 256 * 3);
+
+    if (_pulse[0] == nullptr || _pulse[1] == nullptr || _pulseStats == nullptr || _pulseReadback[slot] == nullptr)
+        return;
+
+    ID3D12Resource* now = _pulse[_pulseCur];
+    ID3D12Resource* prev = _pulse[1 - _pulseCur];
+
+    // Last frame's surroundings and this frame's, where both were built (the anti pop-in and the fingerprint's
+    // context build them): the step is only counted where the frame itself stayed put.
+    const bool contexts = _context != nullptr && _contextPrev != nullptr && _contextFrame == _frame && _contextPrevValid;
+
+    DlssNrCacheConstants c = BaseConstants(in);
+    c.StatsSlot = slot;
+
+    c.Mode = DlssNrCacheMode_ClearStats;
+    {
+        ID3D12Resource* srv[kSrvCount] = {};
+        ID3D12Resource* uav[kUavCount] = {};
+        uav[5] = _pulseStats;
+        Pass(cmd, c, srv, uav, 1, 1);
+    }
+
+    D3D12_RESOURCE_BARRIER uavBarrier {};
+    uavBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_UAV;
+    uavBarrier.UAV.pResource = _pulseStats;
+    cmd->ResourceBarrier(1, &uavBarrier);
+
+    Barrier(cmd, target, kUav, kSrv);
+    Barrier(cmd, prev, kUav, kSrv);
+
+    if (contexts)
+    {
+        Barrier(cmd, _context, kUav, kSrv);
+        Barrier(cmd, _contextPrev, kUav, kSrv);
+    }
+
+    c.Mode = DlssNrCacheMode_PulseProbe;
+    c.Width = qw;
+    c.Height = qh;
+    c.SourceWidth = _width;
+    c.SourceHeight = _height;
+    c.HistoryValid = _pulsePrevValid && _pulsePrevFrame + 1 == _frame ? 1u : 0u;
+    c.ProbeContext = contexts ? 1u : 0u;
+    {
+        ID3D12Resource* srv[kSrvCount] = { nullptr, nullptr, original, in.depth, in.motion, target, prev };
+        srv[13] = contexts ? _context : nullptr;
+        srv[18] = contexts ? _contextPrev : nullptr;
+        ID3D12Resource* uav[kUavCount] = { now };
+        uav[5] = _pulseStats;
+        Pass(cmd, c, srv, uav, Groups(qw), Groups(qh));
+    }
+
+    if (contexts)
+    {
+        Barrier(cmd, _context, kSrv, kUav);
+        Barrier(cmd, _contextPrev, kSrv, kUav);
+    }
+
+    Barrier(cmd, prev, kSrv, kUav);
+    Barrier(cmd, target, kSrv, kUav);
+
+    {
+        D3D12_TEXTURE_COPY_LOCATION src {};
+        src.pResource = _pulseStats;
+        src.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
+
+        D3D12_TEXTURE_COPY_LOCATION dst {};
+        dst.pResource = _pulseReadback[slot];
+        dst.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
+        dst.PlacedFootprint.Footprint.Format = DXGI_FORMAT_R32_UINT;
+        dst.PlacedFootprint.Footprint.Width = kPulseSlots;
+        dst.PlacedFootprint.Footprint.Height = 3;
+        dst.PlacedFootprint.Footprint.Depth = 1;
+        dst.PlacedFootprint.Footprint.RowPitch = 256;
+
+        Barrier(cmd, _pulseStats, kUav, D3D12_RESOURCE_STATE_COPY_SOURCE);
+        cmd->CopyTextureRegion(&dst, 0, 0, 0, &src, nullptr);
+        Barrier(cmd, _pulseStats, D3D12_RESOURCE_STATE_COPY_SOURCE, kUav);
+    }
+
+    _pulseFrame[slot] = _frame;
+    _pulsePhase[slot] = (unsigned int) std::min<unsigned long long>(_frame - _lastRefresh, Status::kPulsePhases - 1);
+    _pulseSlot = (slot + 1) % kPulseSlots;
+    _pulseCur = 1 - _pulseCur;
+    _pulsePrevValid = true;
+    _pulsePrevFrame = _frame;
+}
+
+// The probe's sums, four frames late, sorted by frame since the model ran; to the log every 240 frames.
+void DlssNrEditCache_Dx12::ConsumePulse()
+{
+    for (unsigned int s = 0; s < kPulseSlots; ++s)
+    {
+        if (_pulseFrame[s] == 0 || _frame - _pulseFrame[s] < 4 || _pulseReadback[s] == nullptr)
+            continue;
+
+        void* mapped = nullptr;
+        D3D12_RANGE range { 0, 256 * 3 };
+
+        if (SUCCEEDED(_pulseReadback[s]->Map(0, &range, &mapped)) && mapped != nullptr)
+        {
+            const uint32_t* row0 = (const uint32_t*) mapped;
+            const uint32_t* row1 = (const uint32_t*) ((const unsigned char*) mapped + 256);
+            const uint32_t* row2 = (const uint32_t*) ((const unsigned char*) mapped + 512);
+            const unsigned int p = _pulsePhase[s];
+            const double texels = (double) LevelDim(_width, 0) * (double) LevelDim(_height, 0);
+
+            _pulseSum[p] += row0[s] * 1e-4;
+            _pulseWeight[p] += row1[s] * 1e-3;
+            _pulseDetailSum[p] += texels > 0.0 ? row2[s] * 1e-4 / texels : 0.0;
+            ++_pulseDetailCount[p];
+            ++_pulseMeasured;
+
+            D3D12_RANGE nothing { 0, 0 };
+            _pulseReadback[s]->Unmap(0, &nothing);
+        }
+
+        _pulseFrame[s] = 0;
+    }
+
+    if (_pulseMeasured < 240)
+        return;
+
+    std::string steps, details;
+    double all = 0.0, allWeight = 0.0;
+    unsigned int phases = 0;
+
+    for (int p = 0; p < Status::kPulsePhases; ++p)
+    {
+        if (_pulseDetailCount[p] == 0)
+            continue;
+
+        phases = (unsigned int) p + 1;
+        const double step = _pulseWeight[p] > 1e-6 ? _pulseSum[p] / _pulseWeight[p] : -1.0;
+        const double detail = _pulseDetailSum[p] / _pulseDetailCount[p];
+        _pulseShownStep[p] = (float) step;
+        _pulseShownDetail[p] = (float) detail;
+        steps += Fmt(" %.4f", step);
+        details += Fmt(" %.4f", detail);
+        all += _pulseSum[p];
+        allWeight += _pulseWeight[p];
+    }
+
+    _pulseShownPhases = phases;
+    LOG_INFO("DLSS-NR pulse (model every {} frames): regional step {:.4f} stop per frame; by frame since the "
+             "model ran:{} | detail:{}",
+             std::max(1u, _intervalNow), allWeight > 1e-6 ? all / allWeight : -1.0, steps, details);
+
+    std::fill(std::begin(_pulseSum), std::end(_pulseSum), 0.0);
+    std::fill(std::begin(_pulseWeight), std::end(_pulseWeight), 0.0);
+    std::fill(std::begin(_pulseDetailSum), std::end(_pulseDetailSum), 0.0);
+    std::fill(std::begin(_pulseDetailCount), std::end(_pulseDetailCount), 0u);
+    _pulseMeasured = 0;
+}
+
+const char* DlssNrEditCache_Dx12::StageName(int stage)
+{
+    static const char* kNames[Status::kStages] = { "context", "reproject", "pyramid", "apply",
+                                                   "guided",  "temporal",  "capture" };
+    return stage >= 0 && stage < Status::kStages ? kNames[stage] : "";
+}
+
+// Timestamps on the game's own list: one at the start, one after each pass, resolved at the end of the
+// frame into a ring read several frames later (there is no fence on this path, as for the counters).
+void DlssNrEditCache_Dx12::StampBegin(ID3D12GraphicsCommandList* cmd)
+{
+    _stampOpen = false;
+
+    if (!_timing || cmd == nullptr || _device == nullptr)
+        return;
+
+    if (_stampHeap == nullptr)
+    {
+        D3D12_QUERY_HEAP_DESC qd {};
+        qd.Type = D3D12_QUERY_HEAP_TYPE_TIMESTAMP;
+        qd.Count = kStampSlots * kStampsPerFrame;
+
+        if (FAILED(_device->CreateQueryHeap(&qd, IID_PPV_ARGS(&_stampHeap))))
+        {
+            _stampHeap = nullptr;
+            _timing = false;
+            return;
+        }
+
+        _stampReadback = CreateReadback(_device, kStampSlots * kStampsPerFrame * sizeof(UINT64));
+
+        if (_stampReadback == nullptr)
+        {
+            SAFE_RELEASE(_stampHeap);
+            _timing = false;
+            return;
+        }
+    }
+
+    _stampOpen = true;
+    _stampCount[_stampSlot] = 1;
+    _stampStage[_stampSlot][0] = -1;
+    cmd->EndQuery(_stampHeap, D3D12_QUERY_TYPE_TIMESTAMP, _stampSlot * kStampsPerFrame);
+}
+
+void DlssNrEditCache_Dx12::Stamp(ID3D12GraphicsCommandList* cmd, int stage)
+{
+    if (!_stampOpen || _stampCount[_stampSlot] >= kStampsPerFrame)
+        return;
+
+    const unsigned int i = _stampCount[_stampSlot]++;
+    _stampStage[_stampSlot][i] = stage;
+    cmd->EndQuery(_stampHeap, D3D12_QUERY_TYPE_TIMESTAMP, _stampSlot * kStampsPerFrame + i);
+}
+
+void DlssNrEditCache_Dx12::StampEnd(ID3D12GraphicsCommandList* cmd)
+{
+    if (!_stampOpen)
+        return;
+
+    _stampOpen = false;
+    cmd->ResolveQueryData(_stampHeap, D3D12_QUERY_TYPE_TIMESTAMP, _stampSlot * kStampsPerFrame,
+                          _stampCount[_stampSlot], _stampReadback, _stampSlot * kStampsPerFrame * sizeof(UINT64));
+    _stampFrame[_stampSlot] = _frame;
+    _stampSlot = (_stampSlot + 1) % kStampSlots;
+}
+
+void DlssNrEditCache_Dx12::ConsumeStamps()
+{
+    auto* queue = (ID3D12CommandQueue*) State::Instance().currentCommandQueue;
+    UINT64 frequency = 0;
+
+    if (_stampReadback == nullptr || queue == nullptr || FAILED(queue->GetTimestampFrequency(&frequency)) ||
+        frequency == 0)
+        return;
+
+    for (unsigned int s = 0; s < kStampSlots; ++s)
+    {
+        // Four frames of distance before the slot is read; it is written again eight frames on.
+        if (_stampFrame[s] == 0 || _frame - _stampFrame[s] < 4 || _stampCount[s] < 2)
+            continue;
+
+        D3D12_RANGE range { s * kStampsPerFrame * sizeof(UINT64), (s + 1) * kStampsPerFrame * sizeof(UINT64) };
+        void* mapped = nullptr;
+
+        if (SUCCEEDED(_stampReadback->Map(0, &range, &mapped)) && mapped != nullptr)
+        {
+            const UINT64* t = (const UINT64*) mapped + s * kStampsPerFrame;
+
+            for (unsigned int i = 1; i < _stampCount[s]; ++i)
+            {
+                const int stage = _stampStage[s][i];
+
+                if (stage < 0 || stage >= Status::kStages || t[i] < t[i - 1])
+                    continue;
+
+                const double ms = (double) (t[i] - t[i - 1]) * 1000.0 / (double) frequency;
+                _stageMs[stage] = _stageSeen[stage] ? _stageMs[stage] * 0.9 + ms * 0.1 : ms;
+                _stageSeen[stage] = true;
+            }
+
+            // And to the log every few hundred frames, so a run can be compared with another without
+            // reading the screen.
+            if (_frame - _timingLogFrame >= 300)
+            {
+                _timingLogFrame = _frame;
+                std::string line;
+
+                for (int k = 0; k < Status::kStages; ++k)
+                {
+                    if (_stageSeen[k])
+                        line += Fmt(" %s %.3f", StageName(k), _stageMs[k]);
+                }
+
+                LOG_INFO("DLSS-NR edit cache GPU ms:{}", line);
+            }
+
+            D3D12_RANGE nothing { 0, 0 };
+            _stampReadback->Unmap(0, &nothing);
+        }
+
+        _stampFrame[s] = 0;
+    }
+}
+
 DlssNrEditCache_Dx12::Status DlssNrEditCache_Dx12::GetStatus() const
 {
     Status s {};
     s.active = _historyValid;
-    s.refreshes = _cadence.refreshes;
-    s.cached = _cadence.cached;
-    s.framesSinceRefresh = (unsigned int) (_cadence.frame - _cadence.lastRefresh);
+    s.refreshes = _refreshes;
+    s.cached = _cachedFrames;
+    s.framesSinceRefresh = (unsigned int) (_frame - _lastRefresh);
     s.lastRejected = _lastRejected;
     s.cumulativeRejected = _cumulativeRejected;
     s.lastRefreshReason = _refreshReason;
-    s.regime = _cadence.regime;
-    s.interval = _intervalNow;
-    s.readbacksPending = (unsigned int) std::count(std::begin(_statsPending), std::end(_statsPending), true);
-    s.statsDropped = _statsDropped;
+    s.regime = _regime;
     s.dumpWritten = _dumpWritten;
     s.dumpActive = _dumpWanted > 0;
+    s.ghostFlags = _ghostFlags;
+    s.intervalNow = std::max(1u, _intervalNow);
+    s.interval = s.intervalNow;
+    s.statsDropped = _statsDropped;
+    for (bool pending : _statsPending)
+        s.readbacksPending += pending ? 1u : 0u;
+    s.printRejected = _printRejected;
+    s.speed = std::max(_speed, 0.0f);
+    s.budgetFloor = _budgetFloor;
+    s.costRefresh = _costRefresh;
+    s.costCached = _costCached;
+
+    for (int i = 0; i < Status::kStages; ++i)
+        s.stageMs[i] = _stageSeen[i] ? _stageMs[i] : -1.0;
+
+    s.pulsePhases = _timing ? _pulseShownPhases : 0;
+
+    for (int i = 0; i < Status::kPulsePhases; ++i)
+    {
+        s.pulseStep[i] = _pulseShownStep[i];
+        s.pulseDetail[i] = _pulseShownDetail[i];
+    }
+
     return s;
 }

@@ -352,6 +352,9 @@ class Config
     //
     // Experimental: colour at this point is jittered per frame and the model takes no jitter offset.
     CustomOptional<bool> DlssNrPreUpscale { false };
+    // Before the upscaler, run the model at WorkingScale of the render resolution too
+    // (edge-aware enlargement), instead of the whole render resolution.
+    CustomOptional<bool> DlssNrPreSrReduced { false };
     // Every-frame edit stabilisation; independent from placement and model cost.
     CustomOptional<bool> DlssNrStabilizationEnabled { false };
     CustomOptional<float> DlssNrStabilizationStep { 0.5f };
@@ -379,6 +382,42 @@ class Config
     CustomOptional<float> DlssNrCacheLowTemporal { 0.95f };
     CustomOptional<uint32_t> DlssNrCacheModelHistory { 1 };
     CustomOptional<uint32_t> DlssNrCacheDebugView { 0 };
+    CustomOptional<uint32_t> DlssNrCacheDumpFrames { 12 };
+    // Sky 1.3 anti-ghosting: fingerprint, context, surface fill, guided filter, aging.
+    CustomOptional<bool> DlssNrCacheFingerprint { true };
+    CustomOptional<bool> DlssNrCacheContext { true };
+    CustomOptional<float> DlssNrCacheFingerprintTolerance { 0.25f };
+    CustomOptional<bool> DlssNrCacheSoftRefresh { true };
+    CustomOptional<bool> DlssNrCacheSurfaceFill { true };
+    CustomOptional<uint32_t> DlssNrCacheCrossfadeFrames { 0 };
+    CustomOptional<bool> DlssNrCacheGuided { false };
+    CustomOptional<float> DlssNrCacheGuidedStrength { 1.0f };
+    CustomOptional<bool> DlssNrCacheAging { false };
+    CustomOptional<float> DlssNrCacheAgeHalfLife { 8.0f };
+    CustomOptional<bool> DlssNrCacheAgeNeutral { false };
+    // Motion-aware cadence, GPU budget and the still-view hold.
+    CustomOptional<bool> DlssNrCacheAdaptiveSpeed { true };
+    CustomOptional<uint32_t> DlssNrCacheAdaptiveMin { 2 };
+    CustomOptional<bool> DlssNrCacheAntiPop { true };
+    CustomOptional<float> DlssNrCacheAntiPopRate { 0.75f };
+    CustomOptional<float> DlssNrCacheMotionPriority { 0.5f };
+    CustomOptional<float> DlssNrCacheBudgetMs { 0.0f };
+    CustomOptional<uint32_t> DlssNrCacheStillMax { 8 };
+    CustomOptional<bool> DlssNrCacheStillHold { true };
+    CustomOptional<bool> DlssNrCacheNoiseAware { true };
+    CustomOptional<bool> DlssNrCacheAsync { false };
+    // Overlay timing and the fast-motion fade shared with the composition pass.
+    CustomOptional<bool> DlssNrShowStats { false };
+    CustomOptional<float> DlssNrMotionFade { 0.0f };
+    CustomOptional<float> DlssNrMotionFadeStart { 6.0f };
+    CustomOptional<float> DlssNrMotionFadeEnd { 30.0f };
+    CustomOptional<bool> DlssNrMotionFadeSkipModel { true };
+
+    // Speckle cleanup before the upscaler (Sky 1.3). Removes ray-traced AO dots
+    // that the upscaler would put on a regular grid; off by default.
+    CustomOptional<bool> FGSpeckleCleanup { false };
+    CustomOptional<float> FGSpeckleCleanupStrength { 1.0f };
+    CustomOptional<bool> FGSpeckleCleanupDebug { false };
 
     // Split the upscaler in two and put the model between the halves.
     //
