@@ -50,7 +50,7 @@ bool CG_Dx12::Dispatch(ID3D12GraphicsCommandList* cmdList, ID3D12Resource* colou
         }
 
         if (view != DXGI_FORMAT_UNKNOWN)
-            CreateShaderResourceView(_device, depth, heap.GetSrvCPU(2), view, false);
+            CreateShaderResourceView(_device, depth, heap.GetSrvCPU(2), view);
         else
             CreateShaderResourceView(_device, depth, heap.GetSrvCPU(2));
     }

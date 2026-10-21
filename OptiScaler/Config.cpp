@@ -1282,8 +1282,7 @@ bool Config::SaveIni()
         ini.SetValue("DlssNr", "WorkingScale",
                      GetFloatValue(Instance()->DlssNrWorkingScale.value_for_config()).c_str());
         ini.SetValue("DlssNr", "PreUpscale", GetBoolValue(Instance()->DlssNrPreUpscale.value_for_config()).c_str());
-        ini.SetValue("DlssNr", "PreSrReduced",
-                     GetBoolValue(Instance()->DlssNrPreSrReduced.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "PreSrReduced", GetBoolValue(Instance()->DlssNrPreSrReduced.value_for_config()).c_str());
         ini.SetValue("DlssNr", "StabilizationEnabled",
                      GetBoolValue(Instance()->DlssNrStabilizationEnabled.value_for_config()).c_str());
         ini.SetValue("DlssNr", "StabilizationStep",
@@ -1333,8 +1332,7 @@ bool Config::SaveIni()
                      GetIntValue(Instance()->DlssNrCacheDumpFrames.value_for_config()).c_str());
         ini.SetValue("DlssNr", "CacheFingerprint",
                      GetBoolValue(Instance()->DlssNrCacheFingerprint.value_for_config()).c_str());
-        ini.SetValue("DlssNr", "CacheContext",
-                     GetBoolValue(Instance()->DlssNrCacheContext.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "CacheContext", GetBoolValue(Instance()->DlssNrCacheContext.value_for_config()).c_str());
         ini.SetValue("DlssNr", "CacheFingerprintTolerance",
                      GetFloatValue(Instance()->DlssNrCacheFingerprintTolerance.value_for_config()).c_str());
         ini.SetValue("DlssNr", "CacheSoftRefresh",
@@ -1343,12 +1341,10 @@ bool Config::SaveIni()
                      GetBoolValue(Instance()->DlssNrCacheSurfaceFill.value_for_config()).c_str());
         ini.SetValue("DlssNr", "CacheCrossfadeFrames",
                      GetIntValue(Instance()->DlssNrCacheCrossfadeFrames.value_for_config()).c_str());
-        ini.SetValue("DlssNr", "CacheGuided",
-                     GetBoolValue(Instance()->DlssNrCacheGuided.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "CacheGuided", GetBoolValue(Instance()->DlssNrCacheGuided.value_for_config()).c_str());
         ini.SetValue("DlssNr", "CacheGuidedStrength",
                      GetFloatValue(Instance()->DlssNrCacheGuidedStrength.value_for_config()).c_str());
-        ini.SetValue("DlssNr", "CacheAging",
-                     GetBoolValue(Instance()->DlssNrCacheAging.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "CacheAging", GetBoolValue(Instance()->DlssNrCacheAging.value_for_config()).c_str());
         ini.SetValue("DlssNr", "CacheAgeHalfLife",
                      GetFloatValue(Instance()->DlssNrCacheAgeHalfLife.value_for_config()).c_str());
         ini.SetValue("DlssNr", "CacheAgeNeutral",
@@ -1357,8 +1353,7 @@ bool Config::SaveIni()
                      GetBoolValue(Instance()->DlssNrCacheAdaptiveSpeed.value_for_config()).c_str());
         ini.SetValue("DlssNr", "CacheAdaptiveMin",
                      GetIntValue(Instance()->DlssNrCacheAdaptiveMin.value_for_config()).c_str());
-        ini.SetValue("DlssNr", "CacheAntiPop",
-                     GetBoolValue(Instance()->DlssNrCacheAntiPop.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "CacheAntiPop", GetBoolValue(Instance()->DlssNrCacheAntiPop.value_for_config()).c_str());
         ini.SetValue("DlssNr", "CacheAntiPopRate",
                      GetFloatValue(Instance()->DlssNrCacheAntiPopRate.value_for_config()).c_str());
         ini.SetValue("DlssNr", "CacheMotionPriority",
@@ -1371,12 +1366,9 @@ bool Config::SaveIni()
                      GetBoolValue(Instance()->DlssNrCacheStillHold.value_for_config()).c_str());
         ini.SetValue("DlssNr", "CacheNoiseAware",
                      GetBoolValue(Instance()->DlssNrCacheNoiseAware.value_for_config()).c_str());
-        ini.SetValue("DlssNr", "CacheAsync",
-                     GetBoolValue(Instance()->DlssNrCacheAsync.value_for_config()).c_str());
-        ini.SetValue("DlssNr", "ShowStats",
-                     GetBoolValue(Instance()->DlssNrShowStats.value_for_config()).c_str());
-        ini.SetValue("DlssNr", "MotionFade",
-                     GetFloatValue(Instance()->DlssNrMotionFade.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "CacheAsync", GetBoolValue(Instance()->DlssNrCacheAsync.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "ShowStats", GetBoolValue(Instance()->DlssNrShowStats.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "MotionFade", GetFloatValue(Instance()->DlssNrMotionFade.value_for_config()).c_str());
         ini.SetValue("DlssNr", "MotionFadeStart",
                      GetFloatValue(Instance()->DlssNrMotionFadeStart.value_for_config()).c_str());
         ini.SetValue("DlssNr", "MotionFadeEnd",

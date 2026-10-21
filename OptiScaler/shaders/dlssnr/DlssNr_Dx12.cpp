@@ -2084,7 +2084,7 @@ void DlssNr_Dx12::Dispatch(ID3D12GraphicsCommandList* cmdList, ID3D12Resource* c
     // too: the cheapest model frame, and steadier long intervals.
     float workScale = cfg.DlssNrWorkingScale.value_or_default();
 
-    if (preUpscale && !cfg.DlssNrPreSrReduced.value_or_default())
+    if (frame.PreUpscale && !cfg.DlssNrPreSrReduced.value_or_default())
         workScale = 1.0f;
 
     workScale = workScale < 0.25f ? 0.25f : (workScale > 1.0f ? 1.0f : workScale);

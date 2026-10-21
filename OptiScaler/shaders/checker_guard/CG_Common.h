@@ -40,7 +40,7 @@ struct alignas(256) CGConstants
 
     UINT depthWidth; // the depth texture (0: no depth, the surface test is skipped)
     UINT depthHeight;
-    UINT depthInverted; // 1: reversed Z
+    UINT depthInverted;    // 1: reversed Z
     float planarTolerance; // second difference of 1/z over its largest value, beyond which it is not a surface
 };
 

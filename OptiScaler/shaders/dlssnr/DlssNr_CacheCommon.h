@@ -21,35 +21,35 @@
 
 enum DlssNrCacheMode : uint32_t
 {
-    DlssNrCacheMode_ClearStats = 0,   // zero this frame's counters
-    DlssNrCacheMode_Reproject = 1,    // history -> this frame, validated; builds the first pyramid level
-    DlssNrCacheMode_Capture = 2,      // a frame the model ran on -> fresh history
-    DlssNrCacheMode_Downsample = 3,   // one pyramid level -> the next, coverage weighted
-    DlssNrCacheMode_Apply = 4,        // the frame x the reconstructed edit -> output
-    DlssNrCacheMode_AccumulateMv = 5, // motion since the model last ran, for its own history
-    DlssNrCacheMode_JbuUpsample = 6,  // a below-size model answer -> full size, guided by the frame
-    DlssNrCacheMode_DumpPack = 7,     // the measurement dump's per-frame images
-    DlssNrCacheMode_Temporal = 10,    // the temporal stabiliser: shown edit vs last frame's, clamped
-    DlssNrCacheMode_Copy = 11,        // pre-SR: the game's colour into the texture the pass rewrites
-    DlssNrCacheMode_Context = 12,     // anti-ghosting: this frame's surroundings (log luma, 1/4 size)
-    DlssNrCacheMode_GuidedDown = 13,  // guided filter: the frame and the edit's local sums (1/2 size)
-    DlssNrCacheMode_GuidedCoef = 14,  // guided filter: per-window linear model of the edit on the frame
-    DlssNrCacheMode_GuidedApply = 15, // guided filter: the edit rebuilt from the frame, then composed
+    DlssNrCacheMode_ClearStats = 0,    // zero this frame's counters
+    DlssNrCacheMode_Reproject = 1,     // history -> this frame, validated; builds the first pyramid level
+    DlssNrCacheMode_Capture = 2,       // a frame the model ran on -> fresh history
+    DlssNrCacheMode_Downsample = 3,    // one pyramid level -> the next, coverage weighted
+    DlssNrCacheMode_Apply = 4,         // the frame x the reconstructed edit -> output
+    DlssNrCacheMode_AccumulateMv = 5,  // motion since the model last ran, for its own history
+    DlssNrCacheMode_JbuUpsample = 6,   // a below-size model answer -> full size, guided by the frame
+    DlssNrCacheMode_DumpPack = 7,      // the measurement dump's per-frame images
+    DlssNrCacheMode_Temporal = 10,     // the temporal stabiliser: shown edit vs last frame's, clamped
+    DlssNrCacheMode_Copy = 11,         // pre-SR: the game's colour into the texture the pass rewrites
+    DlssNrCacheMode_Context = 12,      // anti-ghosting: this frame's surroundings (log luma, 1/4 size)
+    DlssNrCacheMode_GuidedDown = 13,   // guided filter: the frame and the edit's local sums (1/2 size)
+    DlssNrCacheMode_GuidedCoef = 14,   // guided filter: per-window linear model of the edit on the frame
+    DlssNrCacheMode_GuidedApply = 15,  // guided filter: the edit rebuilt from the frame, then composed
     DlssNrCacheMode_DilateMotion = 16, // once per frame: each depth texel's nearest-surface motion, in uv
-    DlssNrCacheMode_RegionalLow = 17, // the 12 px tent of an edit, at a quarter of the frame
-    DlssNrCacheMode_AsyncWarp = 18,   // CacheAsync: the background answer carried to this frame
-    DlssNrCacheMode_PulseProbe = 19   // ShowStats: the regional step and the detail of the edit on screen
+    DlssNrCacheMode_RegionalLow = 17,  // the 12 px tent of an edit, at a quarter of the frame
+    DlssNrCacheMode_AsyncWarp = 18,    // CacheAsync: the background answer carried to this frame
+    DlssNrCacheMode_PulseProbe = 19    // ShowStats: the regional step and the detail of the edit on screen
 };
 
 // Anti-ghosting switches (GhostFlags). Each one off is the cache exactly as it was before it.
 enum DlssNrCacheGhostFlag : uint32_t
 {
-    DlssNrCacheGhost_Fingerprint = 1u,  // reject a carried edit whose source no longer matches the frame
-    DlssNrCacheGhost_Context = 2u,      // ... including its surroundings (an object that moved away)
-    DlssNrCacheGhost_Aging = 4u,        // carried detail fades with how far it has travelled
-    DlssNrCacheGhost_AgeNeutral = 8u,   // ... the whole edit, rather than toward its broad part
-    DlssNrCacheGhost_Guided = 16u,      // guided filter: the carried edit keeps structure only where the frame has it
-    DlssNrCacheGhost_SurfaceFill = 32u  // rejected pixels borrow only from the same surface, at every scale
+    DlssNrCacheGhost_Fingerprint = 1u, // reject a carried edit whose source no longer matches the frame
+    DlssNrCacheGhost_Context = 2u,     // ... including its surroundings (an object that moved away)
+    DlssNrCacheGhost_Aging = 4u,       // carried detail fades with how far it has travelled
+    DlssNrCacheGhost_AgeNeutral = 8u,  // ... the whole edit, rather than toward its broad part
+    DlssNrCacheGhost_Guided = 16u,     // guided filter: the carried edit keeps structure only where the frame has it
+    DlssNrCacheGhost_SurfaceFill = 32u // rejected pixels borrow only from the same surface, at every scale
 };
 
 // The guided filter's window, in half-size texels each side (1 = 6 pixels across at full size).
