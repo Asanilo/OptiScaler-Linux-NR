@@ -217,6 +217,43 @@ def cmd_dedupe(args) -> int:
     return 0 if not errors else 1
 
 
+def cmd_break_links(args) -> int:
+    """Give mutable snapshots their own inode while keeping log/image dedupe."""
+    workspace = args.workspace
+    suffixes = {s.lower() for s in args.suffix}
+    targets = []
+    for root_name in DEDUPE_ROOTS:
+        root = workspace / root_name
+        if not root.is_dir():
+            continue
+        for path, st in walk_files(root):
+            if st.st_nlink > 1 and path.suffix.lower() in suffixes:
+                targets.append(path)
+    print(f"{len(targets)} hardlinked files with suffixes {sorted(suffixes)}")
+    if not args.apply:
+        for path in targets[:20]:
+            print(f"  would copy {path}")
+        print("dry-run: pass --apply to give these snapshots a private inode")
+        return 0
+    broken = []
+    errors = []
+    for path in targets:
+        try:
+            st = path.stat()
+            tmp = path.with_name(path.name + ".unlink-tmp")
+            shutil.copy2(path, tmp)
+            os.replace(tmp, path)
+            os.utime(path, ns=(st.st_atime_ns, st.st_mtime_ns))
+            broken.append({"path": str(path), "bytes": st.st_size})
+        except OSError as exc:
+            errors.append({"path": str(path), "error": str(exc)})
+    receipt_path = receipt(workspace, "break-links", {"command": "break-links", "suffixes": sorted(suffixes),
+                                                     "broken": broken, "errors": errors})
+    print(f"broke {len(broken)} links, errors {len(errors)}")
+    print(f"receipt: {receipt_path}")
+    return 0 if not errors else 1
+
+
 def cmd_prune_pycache(args) -> int:
     workspace = args.workspace
     targets = []
@@ -291,6 +328,48 @@ def cmd_prune_builds(args) -> int:
     return 0
 
 
+def cmd_prune_cache(args) -> int:
+    """Reclaim content-addressed local build caches while keeping recent entries."""
+    workspace = args.workspace
+    cache = workspace / "build" / "cache"
+    if not cache.is_dir():
+        print("no build/cache directory")
+        return 0
+    now = time.time()
+    groups = {"cpu-tests": [], "gpu-fixtures": []}
+    cpu = cache / "cpu-tests"
+    if cpu.is_dir():
+        groups["cpu-tests"] = [p for p in cpu.iterdir() if p.is_dir()]
+    groups["gpu-fixtures"] = [p for p in cache.iterdir() if p.is_dir() and p.name.startswith("nr-gpu-")]
+
+    stale = []
+    for name, dirs in groups.items():
+        dirs.sort(key=lambda p: max((st.st_mtime for _, st in walk_files(p)), default=p.stat().st_mtime), reverse=True)
+        keep_last = args.keep_last if name == "cpu-tests" else max(1, args.keep_last // 2)
+        for index, path in enumerate(dirs):
+            newest = max((st.st_mtime for _, st in walk_files(path)), default=path.stat().st_mtime)
+            age = (now - newest) / 86400
+            size = sum(st.st_size for _, st in walk_files(path))
+            if index >= keep_last and age >= args.keep_days:
+                stale.append((path, size, age, name))
+    print(f"keeping the newest {args.keep_last} CPU keys and {max(1, args.keep_last // 2)} GPU fixture builds; "
+          f"stale threshold {args.keep_days} days")
+    for path, size, age, name in stale:
+        print(f"  stale {human(size):>10}  {name:<12} {path.name:<28} age={age:.1f}d")
+    print(f"stale total: {human(sum(s for _, s, _, _ in stale))}")
+    if not args.apply:
+        print("dry-run: pass --apply to remove stale cache entries")
+        return 0
+    removed = []
+    for path, size, age, name in stale:
+        shutil.rmtree(path)
+        removed.append({"path": str(path), "bytes": size, "age_days": round(age, 1), "group": name})
+    receipt_path = receipt(workspace, "prune-cache", {"command": "prune-cache", "removed": removed})
+    print(f"removed {len(removed)} cache entries, {human(sum(x['bytes'] for x in removed))}")
+    print(f"receipt: {receipt_path}")
+    return 0
+
+
 def cmd_git_gc(args) -> int:
     if not args.apply:
         print("dry-run: pass --apply to run `git gc` (reflogs and reachable objects kept)")
@@ -316,6 +395,11 @@ def main() -> int:
     p.add_argument("--apply", action="store_true")
     p.set_defaults(func=cmd_dedupe)
 
+    p = sub.add_parser("break-links", help="copy mutable snapshots so they no longer share an inode")
+    p.add_argument("--suffix", action="append", default=[".ini", ".txt", ".json"], help="file suffix to detach")
+    p.add_argument("--apply", action="store_true")
+    p.set_defaults(func=cmd_break_links)
+
     p = sub.add_parser("prune-pycache", help="remove regenerable Python bytecode")
     p.add_argument("--apply", action="store_true")
     p.set_defaults(func=cmd_prune_pycache)
@@ -326,6 +410,12 @@ def main() -> int:
     p.add_argument("--keep", type=int, default=12, help="recent scratch dirs to keep")
     p.add_argument("--include-receipts", action="store_true", help="also remove receipt-bearing dirs")
     p.set_defaults(func=cmd_prune_builds)
+
+    p = sub.add_parser("prune-cache", help="remove stale content-addressed local build caches")
+    p.add_argument("--apply", action="store_true")
+    p.add_argument("--keep-last", type=int, default=4, help="newest CPU keys / GPU fixture builds to keep")
+    p.add_argument("--keep-days", type=float, default=14.0, help="minimum age before a cache entry is stale")
+    p.set_defaults(func=cmd_prune_cache)
 
     p = sub.add_parser("git-gc", help="compact Git object database")
     p.add_argument("--apply", action="store_true")

@@ -64,6 +64,8 @@ python3 tools/workspace_maintenance.py dedupe            # dry-run
 python3 tools/workspace_maintenance.py dedupe --apply
 python3 tools/workspace_maintenance.py prune-pycache --apply
 python3 tools/workspace_maintenance.py prune-builds      # dry-run
+python3 tools/workspace_maintenance.py prune-cache       # dry-run
+python3 tools/workspace_maintenance.py break-links --apply
 python3 tools/workspace_maintenance.py git-gc --apply
 ```
 
@@ -76,12 +78,21 @@ Rules enforced by the tool:
   `native-shader-compiler`, `nr-lifetime-prefix` and `acceptance-controls`, plus
   the 12 most recent scratch directories. Receipt-bearing directories are
   skipped unless `--include-receipts` is passed explicitly.
+- `break-links` gives mutable snapshots (`.ini`, `.txt`, `.json`) their own
+  inode. After the 2026-10-22 audit the remaining hardlinks are only immutable
+  evidence: `.log` (24), `.png` (5), `.raw` (68) and `.dll` (4). No `.ini`,
+  `.txt` or `.json` snapshot shares an inode, so a later in-place edit cannot
+  leak into another path.
+- `prune-cache` removes stale content-addressed entries under `build/cache/`
+  (`cpu-tests/<key>` and `nr-gpu-*`), keeping the newest four CPU keys and two
+  GPU fixture builds and never touching anything younger than 14 days.
 - `dll/`, `build_out/`, `.worktree/`, `build/toolchain/` and Git metadata are
   never cleanup targets.
 
 Suggested cadence: `dev_check.py` before every commit; `dedupe --apply` after
-adding a new test-evidence batch; `report` monthly; `git gc --apply` after large
-history imports or branch cleanup.
+adding a new test-evidence batch; `prune-cache --apply` monthly or after a
+header-heavy refactor; `report` monthly; `git gc --apply` after large history
+imports or branch cleanup.
 
 ## Cache retention
 
