@@ -1,0 +1,227 @@
+{
+  "schema": "nrbridge-helper-freeze-v1",
+  "frozen_utc": "2026-10-21T16:20:00Z",
+  "repository": "Asanilo/OptiScaler-Linux-NR",
+  "branch": "dev/nrbridge-helper-convergence-20261019",
+  "commit": "713f8ac99959fcdf470b2600c2645a1e5b24b7c8",
+  "commit_subject": "nrbridge: declare actual daily job capacity and unbounded wall in bootstrap",
+  "commit_date": "2026-10-20T20:11:12+08:00",
+  "nrbridge_tree": "6cdc70ff18a31609eeba8721ce6d9d08c6665a9e",
+  "freeze_tag": "nrbridge/helper-freeze-20261022",
+  "linux_nr_helper_base": "99bfd217",
+  "worktree": "/home/arinp/Code/dlss5_linux/OptiScaler-Linux-NR/.worktree/nrbridge",
+  "tracked_files": 30,
+  "files": [
+    {
+      "path": "nrbridge/README.md",
+      "mode": "100644",
+      "git_blob": "2cbdaa9208f915107fcd57176bb6ab04c418a3c3",
+      "sha256": "22288d19813a15f1ad2c13deffcc45b1e9c1faa3873549a60e049b3e5195b234",
+      "bytes": 8046
+    },
+    {
+      "path": "nrbridge/build.py",
+      "mode": "100644",
+      "git_blob": "669494b3d33b01f1228885aeadc4e530c86fbade",
+      "sha256": "97fd49b564920d79dd56bcd73dff427a772b45f7466f490e7934679d69a9c42d",
+      "bytes": 9987
+    },
+    {
+      "path": "nrbridge/build_support.py",
+      "mode": "100644",
+      "git_blob": "c38419568b43af3cf1ccc1aa3290689b0d6ce85e",
+      "sha256": "da681540e0a742965c5cf3df64eec13f1bf56fe2e1ff9eeb229e1d77f0df65da",
+      "bytes": 2220
+    },
+    {
+      "path": "nrbridge/forwarder/README.md",
+      "mode": "100644",
+      "git_blob": "1aead3f0430374d42996d340fd09163c8d077209",
+      "sha256": "ee1fa0b427ee2ee56c647976eac787fef865f3367ca60c421279b677662f13b7",
+      "bytes": 2541
+    },
+    {
+      "path": "nrbridge/forwarder/build.py",
+      "mode": "100644",
+      "git_blob": "ac7d988bf4bce018fe312e566e964410aeb08495",
+      "sha256": "0cba92237f0cf4e814380aa856a29f92d406518bb432044bd50c7fdc8cf5fc07",
+      "bytes": 8346
+    },
+    {
+      "path": "nrbridge/forwarder/parameter_abi.h",
+      "mode": "100644",
+      "git_blob": "8acfde3021ebe84553d13b12d21e9e1bc1ba1b71",
+      "sha256": "184b6f19d5d5248f02c3c69e8d62aaf1d7867b691b597e114bac1f64fe46a2be",
+      "bytes": 2632
+    },
+    {
+      "path": "nrbridge/forwarder/shutdown_bridge.cpp",
+      "mode": "100644",
+      "git_blob": "bf99af26bcb75bb47ea5a3f0a7c96dd74b235fad",
+      "sha256": "85b0ba5caf3b4571b13d33b7aeb627761b6d0984efa4b1a9a4220e16dca8887c",
+      "bytes": 712
+    },
+    {
+      "path": "nrbridge/forwarder/source-provenance.json",
+      "mode": "100644",
+      "git_blob": "2f99ec2a93041cc40a7609261540326b3d679359",
+      "sha256": "10c0a9dd430bc2f65f9236f8893480d5cf6a1f585cfdca0aaaaf906bcc624526",
+      "bytes": 4461
+    },
+    {
+      "path": "nrbridge/protocol/effective-spec.json",
+      "mode": "100644",
+      "git_blob": "de52020625c60a1455ef04b7f2bcbc6b8735b32e",
+      "sha256": "671c7644c69de5f681b099fb4c3d402ba36f1e4538e65cd5538441e2bd47643b",
+      "bytes": 32988
+    },
+    {
+      "path": "nrbridge/protocol/export.py",
+      "mode": "100644",
+      "git_blob": "98c3a49d988e90e4f3813b62a676ddd26073ce5d",
+      "sha256": "f546d5d30f7a0fb5ab4d21ef43a0596ba84c0089942094c192b1d763d60ecffb",
+      "bytes": 2344
+    },
+    {
+      "path": "nrbridge/protocol/native_runtime_model.h",
+      "mode": "100644",
+      "git_blob": "3008addb6a76347d776bdec7e398a0e5243a0d32",
+      "sha256": "92c16609685a651a405842126b6160fd02376c2be034d2142f365bda119a0205",
+      "bytes": 6638
+    },
+    {
+      "path": "nrbridge/protocol/pre_sr_wire.h",
+      "mode": "100644",
+      "git_blob": "1db079cab5ef0411fa3c449a695dda5c819656f8",
+      "sha256": "50c9ed37cdfbf948d07ce153b7b146a966c616ddef864cdab709c792f8395d4f",
+      "bytes": 9108
+    },
+    {
+      "path": "nrbridge/retirement.py",
+      "mode": "100644",
+      "git_blob": "531eb17dda022d44f4ba84a4c2e75edfabd19c85",
+      "sha256": "816ac320496c800608e441e02743e0267eaece831cf4f86ba25698b22aec2c92",
+      "bytes": 14564
+    },
+    {
+      "path": "nrbridge/runtime/fixture_util.h",
+      "mode": "100644",
+      "git_blob": "ec5fbfedfb137dfd130aa14f7968d5f711d55b93",
+      "sha256": "e84cc94db63d8fbdf5cf19ca3bec67c5901be54d2e440dea0f5acd273100f42d",
+      "bytes": 1637
+    },
+    {
+      "path": "nrbridge/runtime/lowres_production_adapter.h",
+      "mode": "100644",
+      "git_blob": "45779cb53d08868422e8c897c5606e05ee244194",
+      "sha256": "62bacf308b2e5be87ffddeceb3240654b5d08f967986e40509da3475eac66f06",
+      "bytes": 20746
+    },
+    {
+      "path": "nrbridge/runtime/runtime_config.h",
+      "mode": "100644",
+      "git_blob": "e1162b55e7d4b88fbd78b9a483ab5e7ba7eb0d25",
+      "sha256": "27d3d543f2e93e2d3ecb5fd5cb1aebccb8186d0b32f4a239eb19dcaa7cc69763",
+      "bytes": 1696
+    },
+    {
+      "path": "nrbridge/runtime/runtime_frame.h",
+      "mode": "100644",
+      "git_blob": "fd3f214f5ca135d9f375f5d5a772454017ccb9db",
+      "sha256": "03dff62923fc204421bb6d501bc346265e1123534a4a6d12ee39a1fe94eb68a6",
+      "bytes": 6750
+    },
+    {
+      "path": "nrbridge/runtime/runtime_types.h",
+      "mode": "100644",
+      "git_blob": "2d2e3eeda5356885b8e00e7da2e396811e5370f1",
+      "sha256": "3f4787589254cf77fb52323520cb3dcb21277260c539f6d232b84f4bc0789879",
+      "bytes": 1162
+    },
+    {
+      "path": "nrbridge/runtime/transport.h",
+      "mode": "100644",
+      "git_blob": "26b490af693c67a7e184e89da9708a4c92d5c938",
+      "sha256": "afde02b9cd4a89a750f744d21db1b06111298d6324bc4ab8578face1d88c450e",
+      "bytes": 14001
+    },
+    {
+      "path": "nrbridge/runtime/wine_runtime_model.cpp",
+      "mode": "100644",
+      "git_blob": "8b609b3ee7b00ae0fd1f08140ac8afdfe39780f1",
+      "sha256": "c2d0ef16eab3b5086447b37972bd93c9ad1035cdc4b66d4bea8bee104d7ea67a",
+      "bytes": 37094
+    },
+    {
+      "path": "nrbridge/shaders.py",
+      "mode": "100644",
+      "git_blob": "86844ee1d30ad282677a0ce40970a7c76f17b1be",
+      "sha256": "21a55ab939d3f14ca6fb3f2c82a41754d43270dc5b5bb68ad25f85abe9c04ffc",
+      "bytes": 1266
+    },
+    {
+      "path": "nrbridge/shaders/dlssnr-frozen.hlsl",
+      "mode": "100644",
+      "git_blob": "cc7b11ed23de04d68a577bd2b12463702b4145b5",
+      "sha256": "300ae85d8c9272bf923d7845673e3e88365de999dc9815dd02b48e6d45f18761",
+      "bytes": 40120
+    },
+    {
+      "path": "nrbridge/shaders/regenerate.py",
+      "mode": "100644",
+      "git_blob": "dbfe63f8b48e18728459a816bc793d9dfdb5bfdb",
+      "sha256": "90c51dfd26908a2e87c4393fc4cc559cb41a1830963b7f63daf131768c420f09",
+      "bytes": 1781
+    },
+    {
+      "path": "nrbridge/source-provenance.json",
+      "mode": "100644",
+      "git_blob": "d21fb7f3a1d2d812feefa0d208a32c3b5e9b7236",
+      "sha256": "426a2a8baceee0aa2b962445d13a34a3cc0dc1fd90c6aa40c888e3054594d7ef",
+      "bytes": 15210
+    },
+    {
+      "path": "nrbridge/tests/test_build.py",
+      "mode": "100644",
+      "git_blob": "48dcfc4a734c6fbc473d8b1eea53315da279e861",
+      "sha256": "f8123232b8cb77011b981ee6ee72413b0353777a1da9bf3a8d50f90367bd711c",
+      "bytes": 3283
+    },
+    {
+      "path": "nrbridge/tests/test_daily_transport.cpp",
+      "mode": "100644",
+      "git_blob": "9250efdc0251091a501b6a7cef36414965b1fd6a",
+      "sha256": "251a50a4f7c5bf82f935af68c1d9294282e85de19830d0500ba152a2e829f1b3",
+      "bytes": 4519
+    },
+    {
+      "path": "nrbridge/tests/test_protocol.cpp",
+      "mode": "100644",
+      "git_blob": "a4787e65a417b8da8b34c53ca5086f694d1c274c",
+      "sha256": "5e16cdc29aed287be410556806b0087fc1cfbf614623f9f9c488f7324c53fb63",
+      "bytes": 2824
+    },
+    {
+      "path": "nrbridge/tests/test_retirement.py",
+      "mode": "100644",
+      "git_blob": "67531d8f3ef835be77c1988757cb6657d0a35356",
+      "sha256": "957355ccc0de3d37a72473c836c88266d66fc357a9f16af3ef3e34c721bf9a11",
+      "bytes": 5602
+    },
+    {
+      "path": "nrbridge/tests/test_runtime_config.cpp",
+      "mode": "100644",
+      "git_blob": "94fd5dbda4e8d5e12516241ffd0f1552a296ed01",
+      "sha256": "1b3e7b8157a94d61c7e64f35fbe01ced62dfcc6eb176e632e2ebc611c2d199bc",
+      "bytes": 1418
+    },
+    {
+      "path": "nrbridge/tests/wire_check.cpp",
+      "mode": "100644",
+      "git_blob": "57f9c4eba840963698995268ce9ff89173875c1d",
+      "sha256": "e25bd70fbee39dad99b1fb70429ea4eabb1459cb0329900524e55e061b7c178c",
+      "bytes": 7228
+    }
+  ],
+  "migration_note": "Migrate from this exact commit/tree. Do not rewrite, delete or relocate shaders, forwarder, protocol or locked inputs before migration completes."
+}
