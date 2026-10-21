@@ -355,6 +355,15 @@ class Config
     // Before the upscaler, run the model at WorkingScale of the render resolution too
     // (edge-aware enlargement), instead of the whole render resolution.
     CustomOptional<bool> DlssNrPreSrReduced { false };
+
+    // Region mask (post-pass): 0 off, 1 give the near foreground (the character)
+    // back as the game drew it, 2 give the far scenery back instead.
+    CustomOptional<uint32_t> DlssNrRegionMask { 0 };
+    CustomOptional<float> DlssNrRegionMaskDistance { 40.0f };
+    CustomOptional<float> DlssNrRegionMaskSoftness { 0.5f };
+    CustomOptional<float> DlssNrRegionMaskStrength { 1.0f };
+    CustomOptional<bool> DlssNrRegionMaskIgnoreFloor { true };
+    CustomOptional<bool> DlssNrRegionMaskShow { false };
     // Every-frame edit stabilisation; independent from placement and model cost.
     CustomOptional<bool> DlssNrStabilizationEnabled { false };
     CustomOptional<float> DlssNrStabilizationStep { 0.5f };

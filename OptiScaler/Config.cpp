@@ -337,6 +337,12 @@ bool Config::Reload(std::filesystem::path iniPath)
             DlssNrWorkingScale.set_from_config(readFloat("DlssNr", "WorkingScale"));
             DlssNrPreUpscale.set_from_config(readBool("DlssNr", "PreUpscale"));
             DlssNrPreSrReduced.set_from_config(readBool("DlssNr", "PreSrReduced"));
+            DlssNrRegionMask.set_from_config(readUInt("DlssNr", "RegionMask"));
+            DlssNrRegionMaskDistance.set_from_config(readFloat("DlssNr", "RegionMaskDistance"));
+            DlssNrRegionMaskSoftness.set_from_config(readFloat("DlssNr", "RegionMaskSoftness"));
+            DlssNrRegionMaskStrength.set_from_config(readFloat("DlssNr", "RegionMaskStrength"));
+            DlssNrRegionMaskIgnoreFloor.set_from_config(readBool("DlssNr", "RegionMaskIgnoreFloor"));
+            DlssNrRegionMaskShow.set_from_config(readBool("DlssNr", "RegionMaskShow"));
             DlssNrStabilizationEnabled.set_from_config(readBool("DlssNr", "StabilizationEnabled"));
             DlssNrStabilizationStep.set_from_config(readFloat("DlssNr", "StabilizationStep"));
             DlssNrStabilizationDepthTolerance.set_from_config(readFloat("DlssNr", "StabilizationDepthTolerance"));
@@ -1283,6 +1289,17 @@ bool Config::SaveIni()
                      GetFloatValue(Instance()->DlssNrWorkingScale.value_for_config()).c_str());
         ini.SetValue("DlssNr", "PreUpscale", GetBoolValue(Instance()->DlssNrPreUpscale.value_for_config()).c_str());
         ini.SetValue("DlssNr", "PreSrReduced", GetBoolValue(Instance()->DlssNrPreSrReduced.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "RegionMask", GetIntValue(Instance()->DlssNrRegionMask.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "RegionMaskDistance",
+                     GetFloatValue(Instance()->DlssNrRegionMaskDistance.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "RegionMaskSoftness",
+                     GetFloatValue(Instance()->DlssNrRegionMaskSoftness.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "RegionMaskStrength",
+                     GetFloatValue(Instance()->DlssNrRegionMaskStrength.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "RegionMaskIgnoreFloor",
+                     GetBoolValue(Instance()->DlssNrRegionMaskIgnoreFloor.value_for_config()).c_str());
+        ini.SetValue("DlssNr", "RegionMaskShow",
+                     GetBoolValue(Instance()->DlssNrRegionMaskShow.value_for_config()).c_str());
         ini.SetValue("DlssNr", "StabilizationEnabled",
                      GetBoolValue(Instance()->DlssNrStabilizationEnabled.value_for_config()).c_str());
         ini.SetValue("DlssNr", "StabilizationStep",

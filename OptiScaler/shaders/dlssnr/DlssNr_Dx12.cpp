@@ -15,6 +15,7 @@
 #include "DlssNr_Dx12.h"
 #include "DepthPlane_Dx12.h"
 #include "NrStabilizer_Dx12.h"
+#include <shaders/region_mask/RegionMask_Dx12.h>
 #include "DlssNr_EditCache_Dx12.h"
 
 #include <Config.h>
@@ -255,6 +256,12 @@ struct NrState
     // reconstructing it by inverting the tone curve, which is what turned every light in the frame into
     // a string of coloured cells.
     ID3D12Resource* hdrCopy = nullptr;
+
+    // Region mask: a post-pass that gives part of the frame back as the game
+    // drew it. The edited frame is copied first because the pass reads it while
+    // writing the output. Allocated only while DlssNrRegionMask is 1 or 2.
+    RegionMask_Dx12* regionMask = nullptr;
+    ID3D12Resource* maskEdited = nullptr;
 
     // The frame shrunk for the model, when it is working below full resolution.
     ID3D12Resource* colorSmall = nullptr;
@@ -1406,6 +1413,78 @@ ID3D12Resource* CreateGuideClone(ID3D12Device* device, ID3D12Resource* source)
     device->CreateCommittedResource(&heap, D3D12_HEAP_FLAG_NONE, &desc, D3D12_RESOURCE_STATE_COPY_DEST, nullptr,
                                     IID_PPV_ARGS(&res));
     return res;
+}
+
+void ReportSkipOnce(const char* reason);
+
+// Region mask post-pass. The model has already edited the whole frame; this
+// decides what of that edit reaches the screen, chosen by depth. It stands
+// aside for the instruments (compare, debug view, capture), as the cache does.
+bool ApplyRegionMask(ID3D12GraphicsCommandList* cmdList, ID3D12Device* device, ID3D12Resource* target,
+                     ID3D12Resource* original, D3D12_RESOURCE_STATES originalState, ID3D12Resource* depth,
+                     unsigned int width, unsigned int height, unsigned int depthWidth, unsigned int depthHeight,
+                     bool depthInverted, const Config& cfg)
+{
+    const uint32_t mode = cfg.DlssNrRegionMask.value_or_default();
+
+    if (mode == 0 || mode > 2 || target == nullptr || original == nullptr || depth == nullptr ||
+        cfg.DlssNrCompare.value_or_default() == 1 || cfg.DlssNrDebugView.value_or_default() != 0 ||
+        Context().capture.isActive())
+        return false;
+
+    if (Context().nr.regionMask == nullptr)
+        Context().nr.regionMask = new RegionMask_Dx12("Region mask", device);
+
+    const D3D12_RESOURCE_DESC td = target->GetDesc();
+
+    if (Context().nr.maskEdited != nullptr)
+    {
+        const D3D12_RESOURCE_DESC have = Context().nr.maskEdited->GetDesc();
+
+        if (have.Width != td.Width || have.Height != td.Height || have.Format != td.Format)
+            ParkNrResource(Context().nr.maskEdited);
+    }
+
+    if (Context().nr.maskEdited == nullptr)
+    {
+        Context().nr.maskEdited = CreateScratch(device, TypedGuideFormat(td.Format), width, height);
+
+        if (Context().nr.maskEdited == nullptr)
+        {
+            ReportSkipOnce("the region mask could not get a texture, so the whole frame is edited");
+            return false;
+        }
+    }
+
+    constexpr auto read = D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE;
+    constexpr auto rest = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
+
+    Barrier(cmdList, Context().nr.maskEdited, rest, D3D12_RESOURCE_STATE_COPY_DEST);
+    Barrier(cmdList, target, rest, D3D12_RESOURCE_STATE_COPY_SOURCE);
+    cmdList->CopyResource(Context().nr.maskEdited, target);
+    Barrier(cmdList, target, D3D12_RESOURCE_STATE_COPY_SOURCE, rest);
+    Barrier(cmdList, Context().nr.maskEdited, D3D12_RESOURCE_STATE_COPY_DEST, read);
+    Barrier(cmdList, original, originalState, read);
+
+    RegionMaskConstants constants {};
+    constants.Width = width;
+    constants.Height = height;
+    constants.DepthWidth = depthWidth;
+    constants.DepthHeight = depthHeight;
+    constants.DepthInverted = depthInverted ? 1u : 0u;
+    constants.Mode = mode;
+    constants.IgnoreFloor = cfg.DlssNrRegionMaskIgnoreFloor.value_or_default() ? 1u : 0u;
+    constants.Show = cfg.DlssNrRegionMaskShow.value_or_default() ? 1u : 0u;
+    constants.Distance = std::max(cfg.DlssNrRegionMaskDistance.value_or_default(), 0.01f);
+    constants.Softness = std::max(cfg.DlssNrRegionMaskSoftness.value_or_default(), 0.01f);
+    constants.Strength = std::clamp(cfg.DlssNrRegionMaskStrength.value_or_default(), 0.0f, 1.0f);
+
+    const bool masked =
+        Context().nr.regionMask->Dispatch(cmdList, Context().nr.maskEdited, original, depth, target, constants);
+
+    Barrier(cmdList, original, read, originalState);
+    Barrier(cmdList, Context().nr.maskEdited, read, rest);
+    return masked;
 }
 
 // Hands back something the model can actually read: the guide itself when it is typed, or a typed copy
@@ -3071,6 +3150,8 @@ void DlssNr_Dx12::Dispatch(ID3D12GraphicsCommandList* cmdList, ID3D12Resource* c
         if (applied)
         {
             Context().nr.wroteTarget = true;
+            ApplyRegionMask(cmdList, device, target, Context().nr.hdrCopy, D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
+                            depthIn, width, height, guideWidth, guideHeight, Context().nr.guideDepthInverted, cfg);
             Context().capture.record(cmdList, device, "final_cached", target, D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
                                      isHdrBuffer ? "linear_hdr" : "game_tonemapped_unknown_transfer");
             Context().capture.record(cmdList, device, "cache_depth", depthIn,
@@ -3467,6 +3548,11 @@ void DlssNr_Dx12::Dispatch(ID3D12GraphicsCommandList* cmdList, ID3D12Resource* c
             Context().stabilizer->Invalidate();
             Context().lastStabilizerTime.reset();
         }
+
+        if (resolved)
+            ApplyRegionMask(cmdList, device, target, Context().nr.hdrCopy,
+                            D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, depthIn, width, height, guideWidth,
+                            guideHeight, Context().nr.guideDepthInverted, cfg);
 
         if (resolved && (cacheActive || cfg.DlssNrStabilizationEnabled.value_or_default()))
             Context().capture.record(cmdList, device, "final_filtered", target, D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
@@ -4252,6 +4338,18 @@ void ShutdownContext()
     {
         Context().nr.hdrCopy->Release();
         Context().nr.hdrCopy = nullptr;
+    }
+
+    if (Context().nr.maskEdited != nullptr)
+    {
+        Context().nr.maskEdited->Release();
+        Context().nr.maskEdited = nullptr;
+    }
+
+    if (Context().nr.regionMask != nullptr)
+    {
+        delete Context().nr.regionMask;
+        Context().nr.regionMask = nullptr;
     }
 
     if (Context().nr.colorSmall != nullptr)

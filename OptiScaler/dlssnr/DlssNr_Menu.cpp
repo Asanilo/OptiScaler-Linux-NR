@@ -282,6 +282,32 @@ void RenderMenu(Config* config, float menuResScale)
                 if (auto ms = DlssNr::LastEditCacheGpuTime(); ms.has_value())
                     ImGui::TextDisabled("Sky composition: %.3f ms (last completed GPU sample)", *ms);
             }
+            if (ImGui::CollapsingHeader("Region mask (post-pass)"))
+            {
+                int mask = static_cast<int>(config->DlssNrRegionMask.value_or_default());
+                const char* masks[] = { "Off", "Scenery only (keep the character)", "Foreground only" };
+                if (ImGui::Combo("Region", &mask, masks, IM_ARRAYSIZE(masks)))
+                    config->DlssNrRegionMask = static_cast<uint32_t>(mask);
+                HelpMarker("The model still sees and edits the whole frame; this only decides what of "
+                           "its edit reaches the screen, chosen by depth. Off by default.");
+                ImGui::BeginDisabled(mask == 0);
+                float distance = config->DlssNrRegionMaskDistance.value_or_default();
+                if (ImGui::SliderFloat("Near ends at (view depth / near)", &distance, 1.0f, 200.0f, "%.1f"))
+                    config->DlssNrRegionMaskDistance = distance;
+                float softness = config->DlssNrRegionMaskSoftness.value_or_default();
+                if (ImGui::SliderFloat("Edge softness (stops)", &softness, 0.01f, 4.0f, "%.2f"))
+                    config->DlssNrRegionMaskSoftness = softness;
+                float strength = config->DlssNrRegionMaskStrength.value_or_default();
+                if (ImGui::SliderFloat("Game frame strength", &strength, 0.0f, 1.0f, "%.2f"))
+                    config->DlssNrRegionMaskStrength = strength;
+                bool ignoreFloor = config->DlssNrRegionMaskIgnoreFloor.value_or_default();
+                if (ImGui::Checkbox("Near only on upright surfaces", &ignoreFloor))
+                    config->DlssNrRegionMaskIgnoreFloor = ignoreFloor;
+                bool show = config->DlssNrRegionMaskShow.value_or_default();
+                if (ImGui::Checkbox("Tint the masked region", &show))
+                    config->DlssNrRegionMaskShow = show;
+                ImGui::EndDisabled();
+            }
             ImGui::EndDisabled();
             ImGui::BeginDisabled(skyCache);
             bool stabilization = config->DlssNrStabilizationEnabled.value_or_default();

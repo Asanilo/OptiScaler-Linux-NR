@@ -1552,6 +1552,9 @@
     <ClCompile Include="shaders\checker_guard\CheckerGuard.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="shaders\region_mask\RegionMask_Dx12.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClInclude Include="dlssnr\EditCacheCadence.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -1571,6 +1574,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="shaders\checker_guard\precompiled\CG_Shader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="shaders\region_mask\RegionMask_Common.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="shaders\region_mask\RegionMask_Dx12.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="shaders\region_mask\precompiled\RegionMask_Shader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="shaders\dlssnr\precompile\DlssNr_Cache_Shader.h">
