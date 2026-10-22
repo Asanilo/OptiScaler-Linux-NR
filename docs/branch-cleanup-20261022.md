@@ -3,6 +3,10 @@
 Scope: `Asanilo/OptiScaler-Linux-NR` only. No branch, tag, worktree or build
 copy was created for archival; every removal is recorded here by tip SHA.
 
+> Final follow-up on the same day removed every remaining `poc/*` branch. See
+> the authoritative recovery table in
+> [`poc-branch-archive-20261022.md`](poc-branch-archive-20261022.md).
+
 ## Removed
 
 | Ref | Tip | Reason |
@@ -27,25 +31,15 @@ admin metadata. This reclaimed about 290 MiB of duplicate checkout.
 | `dlss-neural-rendering` | `7b7220bb` | 0 | default mainline baseline, tracked by origin |
 | `dev/nrbridge-helper-convergence-20261019` | `713f8ac9` | 2 | frozen Helper source and its worktree; tag `nrbridge/helper-freeze-20261022` |
 | `ci/linux-nr-build` | `fc876dde` | 1 | unmerged Linux NR CI workflow; local only |
-| `poc/nr-async-play-20261014` | `86837c4a` | 1 | unique isolated async-play PoC under `poc/game_nr/async-play` |
-| `poc/nr-pre-sr-game-20261013` | `a2045e2c` | 1 | unique Pre-SR120 PoC under `poc/game_nr/pre-sr-hot120` |
-| `poc/nr-sky-antiflicker-20261014` | `1efad4fb` | 1 | unique source-pinned Sky regional anti-flicker candidates |
-| `poc/nr-sky-antiflicker-masked-20261014` | `2a979016` | 3 | unique GPU-masked history and cold-once auditor |
 
-## Retained pending a decision
+## PoC branches (final state)
 
-These are fully merged (0 unique commits) but are kept because their branch
-names are referenced by provenance or PoC evidence files. Deleting the ref
-would not delete the commits, but would make those records less directly
-navigable. They are candidates for a later cleanup if the references are
-rewritten to SHAs.
-
-| Branch | Tip | Reference |
-| --- | --- | --- |
-| `poc/game-nr-20261011` | `5ebb2dc0` | many `poc/game_nr/*` provenance and build-index files |
-| `poc/nr-runtime-20261010` | `eaada4c2` | `nrbridge/forwarder/source-provenance.json` `original_branch` |
-| `poc/nr-async-pre-sr-20261014` | `57b62ecc` | `poc/game_nr/async-pre-sr/README.md` |
-| `poc/nr-async-pre-sr-play-20261014` | `f527d8f2` | `poc/game_nr/async-pre-sr-play/BUILD-EVIDENCE.json` |
+All eight `poc/*` refs were removed locally and from `origin` after the
+recovery check. The four merged tips are ancestors of `linux-nr`; the four
+unique tips have lightweight `archive/poc/*` tags. Exact SHAs, tags and
+recovery commands are in
+[`poc-branch-archive-20261022.md`](poc-branch-archive-20261022.md).
+Historical provenance keeps the old branch names unchanged.
 
 `origin/baseline/proton-20261009` still points at `7b7220bb`, the same commit as
 `dlss-neural-rendering`. It is retained as the frozen remote baseline named in
@@ -56,10 +50,12 @@ the handoff documents.
 - Worktrees: 2
   - `OptiScaler-Linux-NR` on `linux-nr`
   - `OptiScaler-Linux-NR/.worktree/nrbridge` on the frozen Helper branch
-- Local branches: 12
-- Origin branches: 12 including `HEAD`, the frozen baseline, `linux-nr`,
-  `dlss-neural-rendering`, the Helper branch and the retained PoCs.
-- No archive branch, archive tag, extra worktree or full build copy was created.
+- Local branches: 4 (`linux-nr`, `dlss-neural-rendering`,
+  `dev/nrbridge-helper-convergence-20261019`, `ci/linux-nr-build`).
+- Origin branches: 4 (the same minus the local-only CI branch), plus the
+  frozen `baseline/proton-20261009` reference and origin's symbolic `HEAD`.
+- PoC recovery refs: 4 lightweight tags under `archive/poc/`; no archive
+  branch, extra worktree or full build copy was created.
 
 ## Hardlink audit
 
