@@ -78,11 +78,14 @@ Rules enforced by the tool:
   `native-shader-compiler`, `nr-lifetime-prefix` and `acceptance-controls`, plus
   the 12 most recent scratch directories. Receipt-bearing directories are
   skipped unless `--include-receipts` is passed explicitly.
-- `break-links` gives mutable snapshots (`.ini`, `.txt`, `.json`) their own
-  inode. After the 2026-10-22 audit the remaining hardlinks are only immutable
-  evidence: `.log` (24), `.png` (5), `.raw` (68) and `.dll` (4). No `.ini`,
-  `.txt` or `.json` snapshot shares an inode, so a later in-place edit cannot
-  leak into another path.
+- `break-links` gives mutable snapshots their own inode. The 2026-10-22 audit
+  went further: every remaining hardlink (`.log`, `.png`, `.raw`, `.dll`,
+  `.ini`, `.txt`, `.json`) was detached, so no evidence path can be changed in
+  place by a rerun or deployment script that happens to reuse a path.
+- `dedupe` now defaults to archived, non-rewritable suffixes only: it skips
+  `.ini/.txt/.json/.csv/.yaml/.yml/.dll/.exe/.log/.png` and files newer than
+  seven days. Use `--allow-suffix` for an explicit exception; do not use it on
+  live or regenerated evidence.
 - `prune-cache` removes stale content-addressed entries under `build/cache/`
   (`cpu-tests/<key>` and `nr-gpu-*`), keeping the newest four CPU keys and two
   GPU fixture builds and never touching anything younger than 14 days.

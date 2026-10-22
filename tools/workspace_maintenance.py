@@ -40,6 +40,13 @@ DEFAULT_WORKSPACE = REPO.parent
 DEDUPE_ROOTS = ("testlogs", "backups")
 SKIP_DIR_NAMES = {".git", "node_modules", "__pycache__"}
 
+# Never hardlink files a tool may rewrite in place. Configs, manifests and
+# binaries are cheap compared with the risk of one edit changing two paths.
+DEDUPE_SKIP_SUFFIXES = {
+    ".ini", ".txt", ".json", ".csv", ".yaml", ".yml", ".dll", ".exe",
+    ".log", ".png",  # archived logs and analysis images may be rewritten by a rerun
+}
+
 # Build directories that are always retained by prune-builds.
 KEEP_BUILD_NAMES = {
     "toolchain",
@@ -90,15 +97,19 @@ def receipt(workspace: Path, command: str, payload: dict) -> Path:
     return path
 
 
-def duplicate_groups(workspace: Path, roots=DEDUPE_ROOTS):
+def duplicate_groups(workspace: Path, roots=DEDUPE_ROOTS, min_age_days: float = 0.0,
+                     skip_suffixes=None):
+    skip_suffixes = set(skip_suffixes or ())
+    cutoff = time.time() - min_age_days * 86400
     by_size = defaultdict(list)
     for root_name in roots:
         root = workspace / root_name
         if not root.is_dir():
             continue
         for path, st in walk_files(root):
-            if st.st_size >= 4096:
-                by_size[st.st_size].append(path)
+            if st.st_size < 4096 or path.suffix.lower() in skip_suffixes or st.st_mtime > cutoff:
+                continue
+            by_size[st.st_size].append(path)
     groups = []
     for size, paths in by_size.items():
         if len(paths) < 2:
@@ -134,7 +145,9 @@ def cmd_report(args) -> int:
         print(f"  {human(size):>10}  {name}")
 
     print("\nDuplicate groups (testlogs/backups, >=4 KiB):")
-    groups = duplicate_groups(workspace)
+    allowed = {s.lower() for s in args.allow_suffix}
+    groups = duplicate_groups(workspace, min_age_days=args.min_age_days,
+                              skip_suffixes=DEDUPE_SKIP_SUFFIXES - allowed)
     reclaim = sum(g["size"] * (len(g["paths"]) - 1) for g in groups)
     for g in groups[:12]:
         print(f"  {human(g['size']):>10} x{len(g['paths'])}  {g['paths'][0]}")
@@ -175,7 +188,9 @@ def cmd_report(args) -> int:
 
 def cmd_dedupe(args) -> int:
     workspace = args.workspace
-    groups = duplicate_groups(workspace)
+    allowed = {s.lower() for s in args.allow_suffix}
+    groups = duplicate_groups(workspace, min_age_days=args.min_age_days,
+                              skip_suffixes=DEDUPE_SKIP_SUFFIXES - allowed)
     reclaim = sum(g["size"] * (len(g["paths"]) - 1) for g in groups)
     print(f"{len(groups)} duplicate groups, {human(reclaim)} reclaimable")
     if not args.apply:
@@ -391,12 +406,17 @@ def main() -> int:
     p = sub.add_parser("report", help="print sizes and duplicate/cache candidates")
     p.set_defaults(func=cmd_report)
 
-    p = sub.add_parser("dedupe", help="hardlink byte-identical evidence files")
+    p = sub.add_parser("dedupe", help="hardlink byte-identical archived evidence")
     p.add_argument("--apply", action="store_true")
+    p.add_argument("--min-age-days", type=float, default=7.0,
+                   help="only files at least this old (default 7) are eligible")
+    p.add_argument("--allow-suffix", action="append", default=[],
+                   help="explicitly allow a normally skipped suffix, e.g. .log")
+
     p.set_defaults(func=cmd_dedupe)
 
     p = sub.add_parser("break-links", help="copy mutable snapshots so they no longer share an inode")
-    p.add_argument("--suffix", action="append", default=[".ini", ".txt", ".json"], help="file suffix to detach")
+    p.add_argument("--suffix", action="append", default=[".ini", ".txt", ".json", ".dll"], help="file suffix to detach")
     p.add_argument("--apply", action="store_true")
     p.set_defaults(func=cmd_break_links)
 
