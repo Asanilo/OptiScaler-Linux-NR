@@ -12,7 +12,7 @@ import subprocess
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
-OUTPUT = Path('/home/arinp/Code/nrbridge-dev/build/convergence/forwarder')
+OUTPUT = Path('/home/arinp/Code/nr-home/build/convergence/forwarder')
 READOBJ = Path('/usr/bin/llvm-readobj')
 
 

@@ -13,8 +13,8 @@ import shaders
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
-OUT = Path('/home/arinp/Code/nrbridge-dev/build/helper-runtime-model')
-PREPARE = Path('/home/arinp/Code/nrbridge-dev/build/convergence/runtime-model-prepare')
+OUT = Path('/home/arinp/Code/nr-home/build/helper-runtime-model')
+PREPARE = Path('/home/arinp/Code/nr-home/build/convergence/runtime-model-prepare')
 spec = importlib.util.spec_from_file_location('protocol_export', HERE / 'protocol/export.py')
 protocol = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(protocol)
@@ -24,8 +24,8 @@ def parser():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('--llvm-root', type=Path, default=Path('/home/arinp/Code/dlss5_linux/build/toolchain/llvm-mingw-20261006-ucrt-ubuntu-22.04-x86_64'))
     p.add_argument('--vulkan-include', type=Path, default=Path('/home/arinp/Code/bloodborne_pc/out/deps/root/usr/include'))
-    p.add_argument('--ngx-sdk-root', type=Path, default=Path('/home/arinp/Code/nrbridge-dev/inputs/workspace-return-20261020/ngx-sdk'))
-    p.add_argument('--json-root', type=Path, default=Path('/home/arinp/Code/nrbridge-dev/inputs/workspace-return-20261020/nlohmann'))
+    p.add_argument('--ngx-sdk-root', type=Path, default=Path('/home/arinp/Code/nr-home/inputs/workspace-return-20261020/ngx-sdk'))
+    p.add_argument('--json-root', type=Path, default=Path('/home/arinp/Code/nr-home/inputs/workspace-return-20261020/nlohmann'))
     p.add_argument('--check-only', action='store_true')
     return p
 
