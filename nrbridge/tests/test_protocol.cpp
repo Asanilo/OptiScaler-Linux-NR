@@ -7,6 +7,23 @@
 using J=nlohmann::json;using namespace NativeRuntimeModel;
 static void rejects(const std::function<void()>& fn){bool rejected=false;try{fn();}catch(const std::exception&){rejected=true;}assert(rejected);}
 int main(){
+ {
+  using namespace NativeRuntimeModel;
+  SerialHistory history;assert(history.Reset(10,1,1,1,2,false));history.Complete(10,1,1,1,2);
+  assert(!history.Reset(11,1,1,1,2,false));
+  assert(history.Reset(12,1,1,1,2,false)); // sparse gap: MV only reaches frame 11
+  assert(history.Reset(11,2,1,1,2,false));assert(history.Reset(11,1,2,1,2,false));
+  assert(history.Reset(11,1,1,2,2,false));assert(history.Reset(11,1,1,1,2,true));
+  assert(history.Reset(11,1,1,1,1,false)); // baseline always resets
+  Settings invalid;invalid.passes=3;assert(!Valid(invalid));
+  Commit c;c.revision=1;c.native_GPU_complete=true;c.shared_job_finalized=true;
+  auto baseline=Request<nlohmann::json>("serial",c);assert(!baseline.contains("passes"));
+  c.settings.passes=2;auto request=Request<nlohmann::json>("serial",c);
+  assert(Parse(request,"serial").settings.passes==2);
+  auto ack=Ack(request,2,2,1);ack["serial_feature_create_calls"]=1u;ack["serial_feature_release_calls"]=0u;CheckAck(ack,request,1);
+  bool rejected=false;ack["serial_feature_release_calls"]=1u;try{CheckAck(ack,request,1);}catch(...){rejected=true;}assert(rejected);
+ }
+
  Commit c;c.revision=7;c.previous_generation=0;c.generation=1;c.previous_params=1;c.params=3;c.settings={2,0.f};c.finalized_jobs=5;c.native_target_tick=200;c.native_observed_tick=200;c.packet_leases=0;c.shared_job_finalized=true;c.native_GPU_complete=true;
  auto req=J::parse(Request<J>("session-A",c).dump());auto parsed=Parse(req,"session-A");assert(parsed.settings.style==2&&parsed.settings.intensity==0.f&&parsed.params==3);
  auto ack=J::parse(Ack(req,301,2,1).dump());CheckAck(ack,req,300);

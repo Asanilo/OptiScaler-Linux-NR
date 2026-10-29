@@ -20,7 +20,7 @@ class BuildInputs(unittest.TestCase):
             first = build.protocol.export(out)
             self.assertEqual(first, build.protocol.export(out))
             self.assertEqual(first['exports']['pre_sr_spec.h'], '1e57fbf32d827bf0cb60876e23fbe9ecb52ac0b6160887778c04e13073eaab09')
-            self.assertEqual(first['exports']['native_runtime_model.h'], '92c16609685a651a405842126b6160fd02376c2be034d2142f365bda119a0205')
+            self.assertEqual(first['exports']['native_runtime_model.h'], '9333788b025f3a51b1a3d17cb541fe01eeafa1dc7b7ddbc0b0a870add6fafa48')
             changed = out / 'native_runtime_model.h'
             changed.write_bytes(b'preserved edited source')
             with self.assertRaises(ValueError):
