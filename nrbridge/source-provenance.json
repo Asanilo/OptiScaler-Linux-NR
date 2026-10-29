@@ -44,8 +44,8 @@
       "source_sha256": "6d7da59fd047b140a65014adc60692d0afc1df5d7bc4a476a2381d3aba8f747e",
       "target": "nrbridge/protocol/pre_sr_wire.h",
       "initial_sha256": "bc52ffa09da608b33652a955f00fe9bd3675b2251674cbd09ff8f9f97c0f7067",
-      "changes": "include relocation only",
-      "migrated_sha256": "50c9ed37cdfbf948d07ce153b7b146a966c616ddef864cdab709c792f8395d4f",
+      "changes": "include relocation only; isolated serial MultiPass: optional two-pass settings, independent Feature/history, one Encode/Resolve",
+      "migrated_sha256": "e2e546ae2520ebc7796954f9d0cad4df4728b79b8c28e0514624ee4ef88a0268",
       "initial_migrated_sha256": "bc52ffa09da608b33652a955f00fe9bd3675b2251674cbd09ff8f9f97c0f7067",
       "update": "Astra-reviewed daily ring64 v2; bounded consumed-file cleanup, uint64 counters; finite diagnostics retained"
     },
@@ -54,8 +54,8 @@
       "source_sha256": "523bab89aad76d54a1add31fba9c5d8eace1ccf01cb59e3072349afa9cef6db4",
       "target": "nrbridge/runtime/runtime_frame.h",
       "initial_sha256": "4aafe4cd982ef8fa35ec2b3b046ecb19d2f8c949705b9063b93995c16becd985",
-      "changes": "include relocation only",
-      "migrated_sha256": "03dff62923fc204421bb6d501bc346265e1123534a4a6d12ee39a1fe94eb68a6",
+      "changes": "include relocation only; isolated serial MultiPass: optional two-pass settings, independent Feature/history, one Encode/Resolve",
+      "migrated_sha256": "5e312eab626cf31e3bebcf4b946911b3c36b2456945298306c88f5717e5a27de",
       "initial_migrated_sha256": "4aafe4cd982ef8fa35ec2b3b046ecb19d2f8c949705b9063b93995c16becd985",
       "update": "Astra-reviewed daily ring64 v2; bounded consumed-file cleanup, uint64 counters; finite diagnostics retained"
     },
@@ -64,8 +64,8 @@
       "source_sha256": "039d865b53d0632c76919cecc13d1274bb72be6de9070d336c6d50e91cbbf6b1",
       "target": "nrbridge/runtime/wine_runtime_model.cpp",
       "initial_sha256": "dc35e80e0170cbc89942bbbc877823bf835ab33e92004720fd55f1dbfbff9dc3",
-      "changes": "include relocation and optional explicit runtime resource selection; NR algorithm, model settings and retirement unchanged",
-      "migrated_sha256": "c2d0ef16eab3b5086447b37972bd93c9ad1035cdc4b66d4bea8bee104d7ea67a",
+      "changes": "include relocation and optional explicit runtime resource selection; NR algorithm, model settings and retirement unchanged; isolated serial MultiPass: optional two-pass settings, independent Feature/history, one Encode/Resolve; retain explicit runtime preset v2 compatibility from Native 6f6230b",
+      "migrated_sha256": "d391cdc66066b05dbdb8cf105f40e90a668004e1df121de400781694a244edae",
       "initial_migrated_sha256": "0116284841d8d73098f305cff851972d7690aef35e580b724ee8889745d0476d",
       "update": "Astra-reviewed daily ring64 v2; bounded consumed-file cleanup, uint64 counters; finite diagnostics retained"
     },
@@ -74,8 +74,8 @@
       "source_sha256": "67fa656294fa38c6aca66f011a64211ae9fe79e44aad2f9a93fbe5cfcfcc732b",
       "target": "nrbridge/protocol/native_runtime_model.h",
       "initial_sha256": "67fa656294fa38c6aca66f011a64211ae9fe79e44aad2f9a93fbe5cfcfcc732b",
-      "changes": "byte-identical",
-      "migrated_sha256": "92c16609685a651a405842126b6160fd02376c2be034d2142f365bda119a0205",
+      "changes": "byte-identical; isolated serial MultiPass: optional two-pass settings, independent Feature/history, one Encode/Resolve",
+      "migrated_sha256": "9333788b025f3a51b1a3d17cb541fe01eeafa1dc7b7ddbc0b0a870add6fafa48",
       "initial_migrated_sha256": "67fa656294fa38c6aca66f011a64211ae9fe79e44aad2f9a93fbe5cfcfcc732b",
       "update": "Astra-reviewed daily ring64 v2; bounded consumed-file cleanup, uint64 counters; finite diagnostics retained"
     },
@@ -92,8 +92,8 @@
       "source_sha256": "5e16cdc29aed287be410556806b0087fc1cfbf614623f9f9c488f7324c53fb63",
       "target": "nrbridge/tests/test_protocol.cpp",
       "initial_sha256": "5e16cdc29aed287be410556806b0087fc1cfbf614623f9f9c488f7324c53fb63",
-      "changes": "byte-identical",
-      "migrated_sha256": "5e16cdc29aed287be410556806b0087fc1cfbf614623f9f9c488f7324c53fb63"
+      "changes": "byte-identical; isolated serial MultiPass: optional two-pass settings, independent Feature/history, one Encode/Resolve",
+      "migrated_sha256": "8bc24b916766c1bfd6ef800361fea443b5f75f077496a20af2c3f7fbdf6c5eca"
     },
     {
       "source": "/home/arinp/Code/nrbridge-dev/native/tools/nr_dev/helper_runtime/test_retirement.py",

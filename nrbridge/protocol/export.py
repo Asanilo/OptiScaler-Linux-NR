@@ -7,7 +7,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 SPEC_SHA = '671c7644c69de5f681b099fb4c3d402ba36f1e4538e65cd5538441e2bd47643b'
-MODEL_SHA = '92c16609685a651a405842126b6160fd02376c2be034d2142f365bda119a0205'
+MODEL_SHA = '9333788b025f3a51b1a3d17cb541fe01eeafa1dc7b7ddbc0b0a870add6fafa48'
 
 
 def digest(data):

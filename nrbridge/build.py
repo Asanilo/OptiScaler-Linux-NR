@@ -4,6 +4,7 @@ import argparse
 import fcntl
 import importlib.util
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -13,8 +14,8 @@ import shaders
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
-OUT = Path('/home/arinp/Code/nrbridge-dev/build/helper-runtime-model')
-PREPARE = Path('/home/arinp/Code/nrbridge-dev/build/convergence/runtime-model-prepare')
+OUT = Path(os.environ.get('NRBRIDGE_HOME', '/home/arinp/Code/nr-home')) / 'build/helper-runtime-model'
+PREPARE = OUT.parent / 'convergence/runtime-model-prepare'
 spec = importlib.util.spec_from_file_location('protocol_export', HERE / 'protocol/export.py')
 protocol = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(protocol)
@@ -24,8 +25,8 @@ def parser():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('--llvm-root', type=Path, default=Path('/home/arinp/Code/dlss5_linux/build/toolchain/llvm-mingw-20261006-ucrt-ubuntu-22.04-x86_64'))
     p.add_argument('--vulkan-include', type=Path, default=Path('/home/arinp/Code/bloodborne_pc/out/deps/root/usr/include'))
-    p.add_argument('--ngx-sdk-root', type=Path, default=Path('/home/arinp/Code/nrbridge-dev/inputs/workspace-return-20261020/ngx-sdk'))
-    p.add_argument('--json-root', type=Path, default=Path('/home/arinp/Code/nrbridge-dev/inputs/workspace-return-20261020/nlohmann'))
+    p.add_argument('--ngx-sdk-root', type=Path, default=Path('/home/arinp/Code/nr-home/inputs/workspace-return-20261020/ngx-sdk'))
+    p.add_argument('--json-root', type=Path, default=Path('/home/arinp/Code/nr-home/inputs/workspace-return-20261020/nlohmann'))
     p.add_argument('--check-only', action='store_true')
     return p
 
@@ -158,6 +159,8 @@ def main():
                 'artifact': str(binary), 'artifact_sha256': sha(binary),
                 'protocol': inputs['protocol'], 'runtime_defaults': inputs['runtime_defaults'],
                 'runtime_config_schema': 'nrbridge-helper-runtime-v1',
+                'runtime_config_schemas': ['nrbridge-helper-runtime-v1','nrbridge-helper-runtime-v2'],
+                'nr_presets': {'Default':0,'A':1,'B':2},
                 'runtime_config_keys': ['schema', 'model', 'forwarder', 'ngx_dir', 'ge_files'],
                 'shader_validation': inputs['shader'],
                 'CPU': 'PASS: wire, runtime model, runtime config, retirement',
