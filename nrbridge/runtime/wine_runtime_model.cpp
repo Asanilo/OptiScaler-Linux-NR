@@ -76,7 +76,7 @@ struct PreSrHelper:PreSrTransport {
   auto caps=get<decltype(&NVSDK_NGX_VULKAN_GetCapabilityParameters)>(core,"NVSDK_NGX_VULKAN_GetCapabilityParameters")(&params2);
   require(caps==NVSDK_NGX_Result_Success&&params2&&params2!=params,"independent secondary parameter allocation");
   begin();using Create=void*(*)(void*,void*,unsigned,unsigned,int,float,int,float,float,float,int,int);
-  feature2=get<Create>(fw,"dlssnr_vk_create")(cmd,params2,1280,720,0,settings.intensity,int(settings.style),1,1,1,1,0);
+  feature2=get<Create>(fw,"dlssnr_vk_create")(cmd,params2,1280,720,int(runtime_resources.preset),settings.intensity,int(settings.style),1,1,1,1,0);
   auto*last=reinterpret_cast<int*>(GetProcAddress(fw,"dlssnr_vk_last_create"));submit();
   require(feature2&&feature2!=feature&&last&&*last==1,"secondary creation submitted and GPU completed");
   ++secondary_created;nr->serial=serial;creation_serial=serial;
@@ -91,7 +91,7 @@ struct PreSrHelper:PreSrTransport {
    require(serial<NativeRuntimeModel::CounterLimit&&feature_create_calls<NativeRuntimeModel::CounterLimit&&feature_release_calls<NativeRuntimeModel::CounterLimit,"runtime model counters exhausted before release/create",3);
    release_secondary();get<void(*)(void*)>(fw,"dlssnr_vk_release")(feature);feature=nullptr;++feature_release_calls;
    begin();using Create=void*(*)(void*,void*,unsigned,unsigned,int,float,int,float,float,float,int,int);
-   require(feature_create_calls<NativeRuntimeModel::CounterLimit,"feature count exhausted",3);++feature_create_calls;feature=get<Create>(fw,"dlssnr_vk_create")(cmd,params,1280,720,0,commit.settings.intensity,int(commit.settings.style),1,1,1,1,0);
+   require(feature_create_calls<NativeRuntimeModel::CounterLimit,"feature count exhausted",3);++feature_create_calls;feature=get<Create>(fw,"dlssnr_vk_create")(cmd,params,1280,720,int(runtime_resources.preset),commit.settings.intensity,int(commit.settings.style),1,1,1,1,0);
    auto*last=reinterpret_cast<int*>(GetProcAddress(fw,"dlssnr_vk_last_create"));
    submit();require(feature&&last&&*last==1,"runtime feature creation real GPU completion",3);nr->serial=serial;creation_serial=serial;
    if(commit.settings.passes==2)create_secondary(commit.settings);
@@ -188,7 +188,7 @@ struct PreSrHelper:PreSrTransport {
   printf("MODEL_VK_INIT result=0x%08x\n",mr);require(mr==1,"model init");
   phase_tick("model_init");
   begin();using Create=void*(*)(void*,void*,unsigned,unsigned,int,float,int,float,float,float,int,int);
-  require(feature_create_calls<NativeRuntimeModel::CounterLimit,"feature count exhausted",3);++feature_create_calls;feature=get<Create>(fw,"dlssnr_vk_create")(cmd,params,1280,720,0,model_settings.intensity,int(model_settings.style),1,1,1,1,0);
+  require(feature_create_calls<NativeRuntimeModel::CounterLimit,"feature count exhausted",3);++feature_create_calls;feature=get<Create>(fw,"dlssnr_vk_create")(cmd,params,1280,720,int(runtime_resources.preset),model_settings.intensity,int(model_settings.style),1,1,1,1,0);
   auto*last=reinterpret_cast<int*>(GetProcAddress(fw,"dlssnr_vk_last_create"));printf("MODEL_VK_CREATE handle=%p result=0x%08x\n",feature,last?*last:0);
   submit();require(feature&&last&&*last==1,"model create result after real GPU completion");
   model_initialized=true;feature_created_ever=true;creation_serial=serial;
