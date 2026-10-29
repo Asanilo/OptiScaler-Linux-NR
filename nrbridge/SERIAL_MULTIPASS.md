@@ -1,4 +1,4 @@
-# Serial MultiPass candidate (not GPU accepted)
+# Serial MultiPass candidate (local GPU exercised; PR review pending)
 
 Base: daily Helper 713f8ac. Reference: OptiScaler `DlssNr_Dx12.cpp` chain at
 3290..3377 and final Resolve at 3507. This ports the topology into the existing
@@ -34,7 +34,7 @@ HLSL rebuild equivalence remains unverified.
 
 `NRBRIDGE_HOME` selects an isolated build output root for nrbridge/build.py.
 This candidate requires paired Native/Helper markers and the daily entry.
-GPU imagery, cost, switches and teardown acceptance are still required.
+Local imagery, scoped cost, switches and teardown were exercised below; objective image quality improvement is not claimed.
 
 2026-10-30 local GPU acceptance (Native 45ab4cb, Helper 6765901b):
 - One pass: 1510 jobs / 1510 Evaluate / 1510 Resolve, normal teardown.
