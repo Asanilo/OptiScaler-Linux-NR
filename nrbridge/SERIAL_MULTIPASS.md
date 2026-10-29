@@ -35,3 +35,23 @@ HLSL rebuild equivalence remains unverified.
 `NRBRIDGE_HOME` selects an isolated build output root for nrbridge/build.py.
 This candidate requires paired Native/Helper markers and the daily entry.
 GPU imagery, cost, switches and teardown acceptance are still required.
+
+2026-10-30 local GPU acceptance (Native 45ab4cb, Helper 6765901b):
+- One pass: 1510 jobs / 1510 Evaluate / 1510 Resolve, normal teardown.
+- Two passes: 1335 jobs / 2670 Evaluate / 1335 Resolve, normal teardown;
+  all 1335 binding records have pass1 output == pass2 input and the original
+  proxy as the final Resolve reference. Separate secondary create/release 1/1.
+- User-operated 2 -> 1 -> 2 and subsequent Style changes: 6946 jobs,
+  5254 two-pass jobs, 12200 Evaluate, 6946 Resolve, secondary lifetime 5/5;
+  independent params destroyed, Native/Helper GPU/FD retirement passed, exit0.
+- Same-scene static actual Present FPS 79.58 -> 76.74, scoped Helper job
+  median 10.336 -> 17.611ms; device sample peak 3864 -> 4098MiB. These are
+  one-order observations, not pure inference time or exclusive allocations.
+- User reports a visible benefit and requests PR evaluation. This is subjective
+  acceptance, not an objective quality metric. All measured sparse jobs reset;
+  continuous-source Reset=0 history remains untested on GPU.
+
+Native keeps its default native-mouse route. The engineer mistakenly selected
+joystick compatibility during the three measured sessions; a later restart
+confirmed native mouse installed, then closed normally at the user's request
+without further NR testing. No formal player files were changed.
