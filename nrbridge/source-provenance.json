@@ -65,7 +65,7 @@
       "target": "nrbridge/runtime/wine_runtime_model.cpp",
       "initial_sha256": "dc35e80e0170cbc89942bbbc877823bf835ab33e92004720fd55f1dbfbff9dc3",
       "changes": "include relocation and optional explicit runtime resource selection; NR algorithm, model settings and retirement unchanged; isolated serial MultiPass: optional two-pass settings, independent Feature/history, one Encode/Resolve; retain explicit runtime preset v2 compatibility from Native 6f6230b",
-      "migrated_sha256": "819bb4ed814043520cac0901b88cf78e574b20230e555050fa63c20696744a60",
+      "migrated_sha256": "d391cdc66066b05dbdb8cf105f40e90a668004e1df121de400781694a244edae",
       "initial_migrated_sha256": "0116284841d8d73098f305cff851972d7690aef35e580b724ee8889745d0476d",
       "update": "Astra-reviewed daily ring64 v2; bounded consumed-file cleanup, uint64 counters; finite diagnostics retained"
     },
